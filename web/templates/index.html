@@ -1,9 +1,39 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MuninnDB</title>
+
+  <style>
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.4; }
+      50% { opacity: 0.8; }
+    }
+    .hero-gradient {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(168, 85, 247, 0.1) 50%, rgba(6, 182, 212, 0.05) 100%);
+      background-size: 200% 200%;
+      animation: gradientShift 15s ease infinite;
+    }
+    .glass-card {
+      background: rgba(15, 17, 23, 0.6);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+    html.light .glass-card {
+      background: rgba(255, 255, 255, 0.7);
+      border: 1px solid rgba(0, 0, 0, 0.08);
+    }
+  </style>
 
   <!-- FOUC prevention: apply theme before paint -->
   <script>
@@ -51,7 +81,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
         </svg>
-        <span class="sidebar-label">Dashboard</span>
+        <span class="sidebar-label">概览</span>
       </button>
 
       <button class="sidebar-item" :class="{ active: currentView==='memories' }" @click="navigateTo('memories')">
@@ -59,7 +89,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
         </svg>
-        <span class="sidebar-label">Memories</span>
+        <span class="sidebar-label">记忆</span>
       </button>
 
       <button class="sidebar-item" :class="{ active: currentView==='graph' }" @click="navigateTo('graph')">
@@ -71,7 +101,7 @@
           <line x1="7" y1="11" x2="17" y2="6" stroke-width="2" stroke-linecap="round"/>
           <line x1="7" y1="13" x2="17" y2="18" stroke-width="2" stroke-linecap="round"/>
         </svg>
-        <span class="sidebar-label">Graph</span>
+        <span class="sidebar-label">图谱</span>
       </button>
 
       <button class="sidebar-item" :class="{ active: currentView==='session' }" @click="navigateTo('session')">
@@ -79,14 +109,14 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-        <span class="sidebar-label">Session</span>
+        <span class="sidebar-label">会话</span>
       </button>
 
       <button class="sidebar-item" :class="{ active: currentView==='observability' }" @click="navigateTo('observability')">
         <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
         </svg>
-        <span class="sidebar-label">Observability</span>
+        <span class="sidebar-label">监控</span>
       </button>
 
       <button class="sidebar-item" :class="{ active: currentView==='settings' }" @click="navigateTo('settings')">
@@ -95,7 +125,7 @@
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
         </svg>
-        <span class="sidebar-label">Settings</span>
+        <span class="sidebar-label">设置</span>
       </button>
 
       <button class="sidebar-item" :class="{ active: currentView==='cluster' }" @click="navigateTo('cluster')">
@@ -105,7 +135,7 @@
           <circle cx="17" cy="9" r="1" fill="currentColor" stroke="none"/>
           <circle cx="17" cy="17" r="1" fill="currentColor" stroke="none"/>
         </svg>
-        <span class="sidebar-label">Cluster</span>
+        <span class="sidebar-label">集群</span>
       </button>
 
       <button class="sidebar-item" :class="{ active: currentView==='logs' }" @click="navigateTo('logs')">
@@ -113,7 +143,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
-        <span class="sidebar-label">Logs</span>
+        <span class="sidebar-label">日志</span>
       </button>
     </nav>
 
@@ -128,7 +158,7 @@
       <!-- New Vault button (icon only when collapsed, full label when expanded) -->
       <button class="sidebar-newvault-btn" @click="createVault()" title="New Vault">
         <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        <span class="sidebar-newvault-label">New Vault</span>
+        <span class="sidebar-newvault-label">新建仓库</span>
       </button>
 
       <!-- Live dot + theme toggle (always visible) -->
@@ -147,7 +177,7 @@
         <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
         </svg>
-        <span class="sidebar-label">Sign out</span>
+        <span class="sidebar-label">退出登录</span>
       </button>
     </div>
 
@@ -178,7 +208,7 @@
       <div style="display:flex;flex-direction:column;height:calc(100vh - 3rem);min-height:600px;">
       <!-- Dashboard header -->
       <div style="display:flex;align-items:baseline;gap:0.875rem;margin-bottom:1.5rem;flex-wrap:wrap;">
-        <h2 style="margin:0;">Dashboard</h2>
+        <h2 style="margin:0;">概览</h2>
         <div class="vault-chip" @click="vaultModalOpen=true" style="cursor:pointer;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;opacity:0.7;"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0018 0V5"/><path d="M3 12a9 3 0 0018 0"/></svg>
           <span class="vault-chip-btn" x-text="vault"></span>
@@ -187,43 +217,44 @@
 
       <!-- Connect banner: shown only when no memories yet -->
       <div x-show="stats.engramCount === 0 && isAuthenticated"
-        style="background:linear-gradient(135deg,rgba(6,182,212,0.08),rgba(168,85,247,0.08));border:1px solid rgba(6,182,212,0.2);border-radius:0.75rem;padding:1rem 1.25rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem;flex-wrap:wrap;">
+        class="hero-gradient"
+        style="border:1px solid rgba(6,182,212,0.25);border-radius:1rem;padding:1.5rem 1.75rem;margin-bottom:2rem;display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;box-shadow:0 4px 24px rgba(6,182,212,0.1);">
         <div style="flex:1;min-width:0;">
-          <div style="font-weight:600;color:var(--text-primary);margin-bottom:0.25rem;">Start building memory</div>
-          <div style="font-size:0.8125rem;color:var(--text-secondary);">Connect an AI tool via MCP or write directly using the SDK — memories are stored and retrieved automatically.</div>
+          <div style="font-weight:600;color:var(--text-primary);margin-bottom:0.375rem;font-size:1.125rem;">开始构建记忆</div>
+          <div style="font-size:0.875rem;color:var(--text-secondary);line-height:1.6;">通过 MCP 连接 AI 工具，或直接通过 SDK 写入 — 记忆将被自动存储和检索。</div>
         </div>
         <button class="btn-primary" style="white-space:nowrap;" @click="navigateTo('settings')">
-          Get Started →
+          开始使用 →
         </button>
       </div>
 
       <!-- Stat cards -->
       <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2rem;align-items:start;">
-        <div class="stat-card" title="Total memories stored across all AI tool sessions in this vault">
+        <div class="stat-card" title="该仓库中存储的记忆总数">
           <div class="stat-value" data-testid="stat-engram-count" x-text="stats.engramCount.toLocaleString()">0</div>
-          <div class="stat-label">Engrams</div>
+          <div class="stat-label">记忆数</div>
         </div>
-        <div class="stat-card" title="Isolated memory namespaces — use separate vaults for different projects or contexts">
+        <div class="stat-card" title="独立的记忆命名空间 — 为不同项目或场景使用不同仓库">
           <div class="stat-value" x-text="stats.vaultCount">0</div>
-          <div class="stat-label">Vaults</div>
+          <div class="stat-label">仓库数</div>
         </div>
-        <div class="stat-card" :title="`Disk space used by the '${vault}' vault`">
+        <div class="stat-card" :title="`'${vault}' 仓库占用的磁盘空间`">
           <div class="stat-value" x-text="formatBytes(stats.storageBytes)">0 B</div>
-          <div class="stat-label">Vault Storage</div>
+          <div class="stat-label">存储空间</div>
         </div>
-        <div class="stat-card" title="Disk space used by the semantic similarity index (HNSW vector index)">
+        <div class="stat-card" title="语义相似度索引（HNSW 向量索引）占用的磁盘空间">
           <div class="stat-value" x-text="formatBytes(stats.indexSize)">0 B</div>
-          <div class="stat-label">Index Size</div>
+          <div class="stat-label">索引大小</div>
         </div>
         <!-- Cognitive Workers card -->
         <div class="stat-card" style="min-width:0;gap:0;">
           <!-- Header -->
           <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:0.625rem;border-bottom:1px solid var(--border);margin-bottom:0.5rem;">
-            <div class="stat-label" style="margin:0;">Cognitive Workers</div>
+            <div class="stat-label" style="margin:0;">认知工作进程</div>
             <div style="display:flex;align-items:center;gap:0.4375rem;">
               <span x-show="workerStats.some(w => w.state !== 2)" :style="workersOverallHealthStyle()" x-text="workersOverallHealthLabel()"></span>
               <button @click="cognitiveInfoModal = true"
-                title="Learn about cognitive workers"
+                title="了解认知工作进程"
                 style="background:none;border:1px solid var(--border);border-radius:9999px;width:1.375rem;height:1.375rem;font-size:0.75rem;cursor:pointer;color:var(--text-muted);display:flex;align-items:center;justify-content:center;padding:0;line-height:1;flex-shrink:0;">?</button>
             </div>
           </div>
@@ -258,17 +289,17 @@
           <!-- Last-run footer -->
           <div x-show="workerStats.length > 0"
             style="font-size:0.6875rem;color:var(--text-muted);padding-top:0.4375rem;text-align:right;">
-            Last run: <span x-text="workersLastRunSummary()"></span>
+            上次运行: <span x-text="workersLastRunSummary()"></span>
           </div>
         </div>
       </div>
 
       <!-- Activity chart + live feed -->
       <div style="display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;flex:1;min-height:320px;" class="activity-grid">
-        <div class="card-polished" style="display:flex;flex-direction:column;min-width:0;overflow:hidden;">
+        <div class="card-polished glass-card" style="display:flex;flex-direction:column;min-width:0;overflow:hidden;">
           <!-- Activity header with controls -->
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:0.5rem;">
-            <h3 style="margin:0;color:var(--text-secondary);font-size:0.875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Activity</h3>
+            <h3 style="margin:0;color:var(--text-secondary);font-size:0.875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">活动趋势</h3>
             <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
               <!-- Preset buttons -->
               <template x-for="p in activityPresets" :key="p.days">
@@ -280,39 +311,39 @@
                   x-text="p.label"></button>
               </template>
               <!-- Custom days input -->
-              <label class="sr-only" for="activityDaysInput">Days</label>
+              <label class="sr-only" for="activityDaysInput">天数</label>
               <input id="activityDaysInput" type="number" min="1" max="180" x-model.number="activityDays"
                 @change="if(activityDays<1)activityDays=1;if(activityDays>180)activityDays=180;_initChart()"
                 style="width:3rem;font-size:0.6875rem;padding:0.125rem 0.25rem;border-radius:0.25rem;border:1px solid var(--border);background:var(--bg-elevated);color:var(--text-primary);text-align:center;"
-                aria-label="Number of days (1-180)">
-              <span style="font-size:0.6875rem;color:var(--text-muted);">days</span>
+                aria-label="天数 (1-180)">
+              <span style="font-size:0.6875rem;color:var(--text-muted);">天</span>
               <!-- End date picker -->
-              <label class="sr-only" for="activityUntilInput">End date</label>
+              <label class="sr-only" for="activityUntilInput">结束日期</label>
               <input id="activityUntilInput" type="date" x-model="activityUntil"
                 @change="_initChart()"
                 style="font-size:0.6875rem;padding:0.125rem 0.25rem;border-radius:0.25rem;border:1px solid var(--border);background:var(--bg-elevated);color:var(--text-primary);"
-                aria-label="End date (default: today)">
+                aria-label="结束日期 (默认: 今天)">
               <!-- Toggle data table -->
               <button type="button" @click="activityShowTable = !activityShowTable"
                 :class="activityShowTable ? 'badge-info' : ''"
                 :aria-pressed="activityShowTable.toString()"
                 style="font-size:0.6875rem;padding:0.125rem 0.5rem;border-radius:9999px;cursor:pointer;border:1px solid var(--border);background:var(--bg-elevated);color:var(--text-secondary);"
-                aria-label="Toggle data table">📊 Table</button>
+                aria-label="切换数据表格">📊 表格</button>
             </div>
           </div>
           <!-- Loading indicator -->
-          <div x-show="activityLoading" style="text-align:center;padding:1rem;color:var(--text-muted);font-size:0.8125rem;">Loading activity data…</div>
+          <div x-show="activityLoading" style="text-align:center;padding:1rem;color:var(--text-muted);font-size:0.8125rem;">正在加载活动数据…</div>
           <!-- Error state with retry -->
           <div x-show="activityError && !activityLoading" style="text-align:center;padding:1rem;color:var(--danger,#ef4444);font-size:0.8125rem;">
             <span x-text="activityError"></span>
-            <button type="button" @click="_initChart()" style="margin-left:0.5rem;font-size:0.75rem;padding:0.125rem 0.5rem;border-radius:0.25rem;cursor:pointer;border:1px solid var(--border);background:var(--bg-elevated);color:var(--text-secondary);">Retry</button>
+            <button type="button" @click="_initChart()" style="margin-left:0.5rem;font-size:0.75rem;padding:0.125rem 0.5rem;border-radius:0.25rem;cursor:pointer;border:1px solid var(--border);background:var(--bg-elevated);color:var(--text-secondary);">重试</button>
           </div>
           <!-- Empty state -->
-          <div x-show="!activityLoading && !activityError && activityData.length > 0 && activityData.every(r => r.count === 0)" style="text-align:center;padding:1rem;color:var(--text-muted);font-size:0.8125rem;">No engrams written in this period.</div>
+          <div x-show="!activityLoading && !activityError && activityData.length > 0 && activityData.every(r => r.count === 0)" style="text-align:center;padding:1rem;color:var(--text-muted);font-size:0.8125rem;">该时段暂无记忆写入。</div>
           <div x-show="!activityLoading && !activityError" style="position:relative;width:100%;flex:1;min-height:200px;overflow:hidden;"><canvas id="activityChart" style="position:absolute;inset:0;width:100%;height:100%;"></canvas></div>
         </div>
-        <div class="card-polished" style="display:flex;flex-direction:column;min-width:0;">
-          <h3 style="margin:0 0 1rem;color:var(--text-secondary);font-size:0.875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Live Feed</h3>
+        <div class="card-polished glass-card" style="display:flex;flex-direction:column;min-width:0;">
+          <h3 style="margin:0 0 1rem;color:var(--text-secondary);font-size:0.875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">实时动态</h3>
           <div style="display:flex;flex-direction:column;gap:0.5rem;flex:1;overflow-y:auto;">
             <template x-for="item in liveFeed" :key="item.id">
               <div style="font-size:0.8125rem;padding:0.5rem;background:var(--bg-elevated);border-radius:0.375rem;">
@@ -322,8 +353,8 @@
               </div>
             </template>
             <div x-show="liveFeed.length === 0" style="color:var(--text-muted);font-size:0.875rem;padding:0.5rem;">
-              No events yet. Connect an AI tool or write via the SDK to start seeing memories here.<br>
-              <a href="#" style="color:var(--accent);font-size:0.75rem;" @click.prevent="navigateTo('settings')">→ Get started</a>
+              暂无事件。连接 AI 工具或通过 SDK 写入以开始查看记忆。<br>
+              <a href="#" style="color:var(--accent);font-size:0.75rem;" @click.prevent="navigateTo('settings')">→ 开始使用</a>
             </div>
           </div>
         </div>
@@ -333,22 +364,22 @@
       <div x-cloak x-show="activityShowTable" x-transition.opacity class="modal-backdrop" @click.self="activityShowTable = false" @keydown.escape.window="activityShowTable = false" style="z-index:70;">
         <div class="modal-box" style="max-width:480px;max-height:80vh;display:flex;flex-direction:column;" @click.stop>
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-            <h3 style="margin:0;font-size:0.9375rem;color:var(--text-primary);font-weight:600;">Activity Data</h3>
+            <h3 style="margin:0;font-size:0.9375rem;color:var(--text-primary);font-weight:600;">活动数据</h3>
             <div style="display:flex;align-items:center;gap:0.5rem;">
               <button type="button" @click="_copyActivityTable()"
                 style="font-size:0.6875rem;padding:0.25rem 0.625rem;border-radius:0.25rem;cursor:pointer;border:1px solid var(--border);background:var(--bg-elevated);color:var(--text-secondary);"
-                aria-label="Copy activity data as TSV">📋 Copy</button>
+                aria-label="复制活动数据为 TSV">📋 复制</button>
               <button type="button" @click="activityShowTable = false"
                 style="font-size:1rem;padding:0.125rem 0.5rem;cursor:pointer;border:none;background:none;color:var(--text-muted);"
-                aria-label="Close table">✕</button>
+                aria-label="关闭表格">✕</button>
             </div>
           </div>
           <div style="flex:1;overflow-y:auto;">
             <table style="width:100%;border-collapse:collapse;font-size:0.75rem;">
               <thead>
                 <tr style="border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg-surface);">
-                  <th scope="col" style="text-align:left;padding:0.375rem 0.5rem;color:var(--text-muted);">Date</th>
-                  <th scope="col" style="text-align:right;padding:0.375rem 0.5rem;color:var(--text-muted);">Count</th>
+                  <th scope="col" style="text-align:left;padding:0.375rem 0.5rem;color:var(--text-muted);">日期</th>
+                  <th scope="col" style="text-align:right;padding:0.375rem 0.5rem;color:var(--text-muted);">数量</th>
                 </tr>
               </thead>
               <tbody>
@@ -361,7 +392,7 @@
               </tbody>
               <tfoot>
                 <tr style="border-top:2px solid var(--border);">
-                  <td style="padding:0.375rem 0.5rem;color:var(--text-secondary);font-weight:600;">Total</td>
+                  <td style="padding:0.375rem 0.5rem;color:var(--text-secondary);font-weight:600;">总计</td>
                   <td style="text-align:right;padding:0.375rem 0.5rem;color:var(--text-secondary);font-weight:600;" x-text="activityData.reduce((s,r)=>s+r.count,0)"></td>
                 </tr>
               </tfoot>
@@ -377,7 +408,7 @@
     <div x-show="currentView==='memories'">
       <!-- Memories header -->
       <div style="display:flex;align-items:baseline;gap:0.875rem;margin-bottom:1.5rem;flex-wrap:wrap;">
-        <h2 style="margin:0;">Memories</h2>
+        <h2 style="margin:0;">记忆</h2>
         <div class="vault-chip" @click="vaultModalOpen=true" style="cursor:pointer;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;opacity:0.7;"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0018 0V5"/><path d="M3 12a9 3 0 0018 0"/></svg>
           <span class="vault-chip-btn" x-text="vault"></span>
@@ -388,11 +419,11 @@
       <div style="display:flex;gap:0.25rem;margin-bottom:1.25rem;border-bottom:1px solid var(--border);">
         <button @click="memoriesSubTab='list'"
           :style="memoriesSubTab==='list' ? 'border-bottom:2px solid var(--accent);font-weight:600;opacity:1;' : 'opacity:0.6;'"
-          style="padding:0.5rem 1rem;font-size:0.875rem;background:none;border:none;cursor:pointer;color:var(--text-primary);transition:opacity 0.15s;">Memories</button>
+          style="padding:0.5rem 1rem;font-size:0.875rem;background:none;border:none;cursor:pointer;color:var(--text-primary);transition:opacity 0.15s;">记忆列表</button>
         <button @click="memoriesSubTab='contradictions'; loadContradictions()"
           :style="memoriesSubTab==='contradictions' ? 'border-bottom:2px solid var(--accent);font-weight:600;opacity:1;' : 'opacity:0.6;'"
           style="padding:0.5rem 1rem;font-size:0.875rem;background:none;border:none;cursor:pointer;color:var(--text-primary);transition:opacity 0.15s;display:flex;align-items:center;gap:0.5rem;">
-          Contradictions
+          矛盾检测
           <span x-show="contradictions.length > 0"
             style="font-size:0.65rem;background:rgba(239,68,68,0.15);color:#ef4444;border-radius:9999px;padding:0.1rem 0.45rem;font-weight:700;"
             x-text="contradictions.length"></span>
@@ -402,81 +433,81 @@
       <!-- Memory list sub-tab -->
       <div x-show="memoriesSubTab==='list'">
       <p style="color:var(--text-muted);font-size:0.8125rem;margin:0 0 1rem;">
-        Memories are stored automatically by connected AI tools or any app using the SDK, and retrieved by semantic similarity.
-        Search using natural language — try <em>"decisions about authentication"</em> or <em>"recent bugs"</em>.
+        记忆由连接的 AI 工具或使用 SDK 的应用自动存储，并通过语义相似度检索。
+        使用自然语言搜索 — 尝试 <em>"关于认证的决策"</em> 或 <em>"最近的 bug"</em>。
       </p>
 
       <!-- Filter bar -->
       <div style="display:flex;gap:0.625rem;margin-bottom:1rem;align-items:center;flex-wrap:wrap;padding:0.625rem 0.75rem;background:var(--bg-elevated);border:1px solid var(--border);border-radius:0.5rem;">
-        <span style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);white-space:nowrap;">Browse filters</span>
+        <span style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);white-space:nowrap;">筛选条件</span>
         <!-- Sort -->
         <select x-model="memoryFilters.sort" style="font-size:0.8125rem;padding:0.25rem 0.5rem;background:var(--bg-card);border:1px solid var(--border);border-radius:0.375rem;color:var(--text-primary);" title="Sort order">
-          <option value="created">Newest Created</option>
-          <option value="accessed">Last Accessed</option>
+          <option value="created">最新创建</option>
+          <option value="accessed">最近访问</option>
         </select>
         <!-- State -->
         <select x-model="memoryFilters.state" style="font-size:0.8125rem;padding:0.25rem 0.5rem;background:var(--bg-card);border:1px solid var(--border);border-radius:0.375rem;color:var(--text-primary);" title="Lifecycle state">
-          <option value="">All States</option>
-          <option value="active">Active</option>
-          <option value="planning">Planning</option>
-          <option value="paused">Paused</option>
-          <option value="blocked">Blocked</option>
-          <option value="completed">Completed</option>
-          <option value="cancelled">Cancelled</option>
-          <option value="archived">Archived</option>
+          <option value="">全部状态</option>
+          <option value="active">活跃</option>
+          <option value="planning">规划中</option>
+          <option value="paused">已暂停</option>
+          <option value="blocked">已阻塞</option>
+          <option value="completed">已完成</option>
+          <option value="cancelled">已取消</option>
+          <option value="archived">已归档</option>
         </select>
         <!-- Tags -->
-        <input class="input-field" placeholder="Tags (comma-sep, AND)" x-model="memoryFilters.tags"
-          style="font-size:0.8125rem;padding:0.25rem 0.5rem;width:11rem;" title="Filter by tags (all must match)" />
+        <input class="input-field" placeholder="标签 (逗号分隔, 且)" x-model="memoryFilters.tags"
+          style="font-size:0.8125rem;padding:0.25rem 0.5rem;width:11rem;" title="按标签筛选 (需全部匹配)" />
         <!-- Confidence range -->
-        <span style="font-size:0.75rem;color:var(--text-secondary);white-space:nowrap;">Conf</span>
+        <span style="font-size:0.75rem;color:var(--text-secondary);white-space:nowrap;">置信度</span>
         <input type="number" min="0" max="1" step="0.05" x-model.number="memoryFilters.minConf"
           style="font-size:0.8125rem;padding:0.25rem 0.4rem;width:4.5rem;background:var(--bg-card);border:1px solid var(--border);border-radius:0.375rem;color:var(--text-primary);"
-          placeholder="min" title="Minimum confidence (0–1)" />
+          placeholder="最小" title="最小置信度 (0–1)" />
         <span style="font-size:0.75rem;color:var(--text-muted);">–</span>
         <input type="number" min="0" max="1" step="0.05" x-model.number="memoryFilters.maxConf"
           style="font-size:0.8125rem;padding:0.25rem 0.4rem;width:4.5rem;background:var(--bg-card);border:1px solid var(--border);border-radius:0.375rem;color:var(--text-primary);"
-          placeholder="max" title="Maximum confidence (0–1)" />
+          placeholder="最大" title="最大置信度 (0–1)" />
         <!-- Apply -->
         <button class="btn-primary" style="font-size:0.8125rem;padding:0.25rem 0.75rem;"
-          @click="page=0;loadMemories()">Apply</button>
+          @click="page=0;loadMemories()">应用</button>
         <!-- Reset -->
         <button class="btn-secondary" style="font-size:0.8125rem;padding:0.25rem 0.75rem;"
-          @click="memoryFilters={sort:'created',tags:'',state:'',minConf:0,maxConf:0};page=0;loadMemories()">Reset</button>
+          @click="memoryFilters={sort:'created',tags:'',state:'',minConf:0,maxConf:0};page=0;loadMemories()">重置</button>
       </div>
       <div style="display:flex;gap:1rem;margin-bottom:1.5rem;align-items:center;flex-wrap:wrap;">
-        <input id="memory-search-input" data-testid="input-search" class="input-field" placeholder="Search memories… (semantic, try natural language)" x-model="searchQuery"
+        <input id="memory-search-input" data-testid="input-search" class="input-field" placeholder="搜索记忆… (语义搜索，尝试自然语言)" x-model="searchQuery"
           @keydown.enter="searchMemories()" style="flex:1;min-width:200px;" />
         <!-- Recall mode segmented control (Item 3: tooltips) -->
         <div style="display:inline-flex;border:1px solid var(--border);border-radius:0.375rem;overflow:hidden;font-size:0.75rem;">
           <button @click="searchMode = 'balanced'"
             :style="searchMode === 'balanced' ? 'background:var(--accent);color:#fff;' : 'background:var(--bg-elevated);color:var(--text-secondary);'"
             style="padding:0.25rem 0.625rem;border:none;cursor:pointer;transition:all 0.15s;"
-            title="Blend keyword + semantic search with temporal decay (default)">Balanced</button>
+            title="混合关键词 + 语义搜索，带时间衰减 (默认)">平衡</button>
           <button @click="searchMode = 'semantic'"
             :style="searchMode === 'semantic' ? 'background:var(--accent);color:#fff;' : 'background:var(--bg-elevated);color:var(--text-secondary);'"
             style="padding:0.25rem 0.625rem;border:none;cursor:pointer;transition:all 0.15s;"
-            title="Pure vector similarity — best for concept matching">Semantic</button>
+            title="纯向量相似度 — 最适合概念匹配">语义</button>
           <button @click="searchMode = 'recent'"
             :style="searchMode === 'recent' ? 'background:var(--accent);color:#fff;' : 'background:var(--bg-elevated);color:var(--text-secondary);'"
             style="padding:0.25rem 0.625rem;border:none;cursor:pointer;transition:all 0.15s;"
-            title="Prioritize recently created memories">Recent</button>
+            title="优先显示最近创建的记忆">最近</button>
           <button @click="searchMode = 'deep'"
             :style="searchMode === 'deep' ? 'background:var(--accent);color:#fff;' : 'background:var(--bg-elevated);color:var(--text-secondary);'"
             style="padding:0.25rem 0.625rem;border:none;cursor:pointer;transition:all 0.15s;"
-            title="Exhaustive graph traversal — slower but finds distant connections">Deep</button>
+            title="穷举图遍历 — 较慢但能发现远距离关联">深度</button>
         </div>
-        <button class="btn-primary" @click="searchMemories()">Search</button>
-        <button class="btn-secondary" @click="page=0;searchQuery='';loadMemories()">Browse All</button>
-        <button class="btn-primary" data-testid="btn-new-memory" @click="showNewMemoryModal=true" title="New memory (n)">+ New Memory</button>
-        <button class="btn-secondary" @click="openDecideModal()" title="Record a decision">Record Decision</button>
+        <button class="btn-primary" @click="searchMemories()">搜索</button>
+        <button class="btn-secondary" @click="page=0;searchQuery='';loadMemories()">浏览全部</button>
+        <button class="btn-primary" data-testid="btn-new-memory" @click="showNewMemoryModal=true" title="新建记忆 (n)">+ 新建记忆</button>
+        <button class="btn-secondary" @click="openDecideModal()" title="记录决策">记录决策</button>
         <button class="btn-secondary"
           :style="multiSelectMode ? 'background:rgba(6,182,212,0.15);border-color:var(--accent);color:var(--accent);' : ''"
-          @click="toggleMultiSelect()" title="Select multiple memories to consolidate">Select</button>
+          @click="toggleMultiSelect()" title="选择多个记忆进行合并">选择</button>
         <button x-show="multiSelectMode && selectedMemoryIds.length >= 2"
           class="btn-primary" style="background:#a855f7;"
           @click="openConsolidate()"
-          x-text="'Consolidate (' + selectedMemoryIds.length + ')'"></button>
+          x-text="'合并 (' + selectedMemoryIds.length + ')'"></button>
       </div>
 
       <!-- Memory list -->
@@ -497,8 +528,8 @@
               <button x-show="searchQuery.trim() !== ''"
                 class="btn-ghost" style="padding:0.2rem 0.5rem;font-size:0.75rem;color:var(--accent);"
                 @click.stop="explainScore(m.id)"
-                title="Why did this memory score high?">Why?</button>
-              <button class="btn-danger" style="padding:0.25rem 0.5rem;font-size:0.75rem;" @click.stop="forgetMemory(m.id)">Forget</button>
+                title="为什么这个记忆得分高？">为何？</button>
+              <button class="btn-danger" style="padding:0.25rem 0.5rem;font-size:0.75rem;" @click.stop="forgetMemory(m.id)">遗忘</button>
             </div>
             <p style="color:var(--text-secondary);font-size:0.875rem;margin:0 0 0.5rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;" x-text="m.content"></p>
             <div style="display:flex;align-items:center;gap:0.5rem;">
@@ -507,7 +538,7 @@
               </div>
               <span :class="confLabelClass(m.confidence || 0)" style="font-size:0.6875rem;padding:0.1rem 0.4rem;border-radius:9999px;font-weight:600;" x-text="confLabel(m.confidence || 0)"></span>
               <!-- Embedding status dot -->
-              <span :title="m.embed_dim && m.embed_dim > 0 ? 'Embedded' : 'No embedding'"
+              <span :title="m.embed_dim && m.embed_dim > 0 ? '已嵌入' : '未嵌入'"
                 :style="'width:7px;height:7px;border-radius:50%;flex-shrink:0;background:' + (m.embed_dim && m.embed_dim > 0 ? '#22c55e' : '#9ca3af')"></span>
               <span style="font-size:0.75rem;color:var(--text-muted);" x-text="m.createdAt ? new Date(m.createdAt * 1000).toLocaleDateString() : ''"></span>
             </div>
@@ -515,23 +546,23 @@
         </template>
         <div x-show="memories.length === 0 && !memoriesLoading" style="color:var(--text-muted);text-align:center;padding:3rem;">
           <div x-show="searchQuery.trim() !== ''">
-            No memories match <em x-text="'&quot;' + searchQuery + '&quot;'"></em>.<br>
-            <span style="font-size:0.8125rem;">Try broader terms, synonyms, or <a href="#" style="color:var(--accent);" @click.prevent="searchQuery='';loadMemories()">browse all memories</a>.</span>
+            没有匹配 <em x-text="'&quot;' + searchQuery + '&quot;'"></em> 的记忆。<br>
+            <span style="font-size:0.8125rem;">尝试更宽泛的词汇、同义词，或 <a href="#" style="color:var(--accent);" @click.prevent="searchQuery='';loadMemories()">浏览全部记忆</a>。</span>
           </div>
           <div x-show="searchQuery.trim() === ''">
-            No memories yet in vault <strong x-text="vault"></strong>.<br>
-            <span style="font-size:0.8125rem;">Connect an AI tool or write to the vault via the SDK and memories appear here automatically.<br>
-            <a href="#" style="color:var(--accent);" @click.prevent="navigateTo('settings')">→ Get started</a></span>
+            仓库 <strong x-text="vault"></strong> 中还没有记忆。<br>
+            <span style="font-size:0.8125rem;">连接 AI 工具或通过 SDK 写入仓库，记忆将自动显示在这里。<br>
+            <a href="#" style="color:var(--accent);" @click.prevent="navigateTo('settings')">→ 开始使用</a></span>
           </div>
         </div>
-        <div x-show="memoriesLoading" style="color:var(--text-muted);text-align:center;padding:3rem;">Loading…</div>
+        <div x-show="memoriesLoading" style="color:var(--text-muted);text-align:center;padding:3rem;">加载中…</div>
       </div>
 
       <!-- Pagination -->
       <div style="display:flex;gap:0.5rem;justify-content:center;" x-show="totalMemories > 20">
-        <button class="btn-secondary" :disabled="page===0" @click="page--;loadMemories()">← Prev</button>
-        <span style="color:var(--text-secondary);padding:0.5rem 1rem;" x-text="'Page ' + (page+1) + ' of ' + Math.max(1, Math.ceil(totalMemories/20))"></span>
-        <button class="btn-secondary" :disabled="(page+1)*20>=totalMemories" @click="page++;loadMemories()">Next →</button>
+        <button class="btn-secondary" :disabled="page===0" @click="page--;loadMemories()">← 上一页</button>
+        <span style="color:var(--text-secondary);padding:0.5rem 1rem;" x-text="'第 ' + (page+1) + ' / ' + Math.max(1, Math.ceil(totalMemories/20)) + ' 页'"></span>
+        <button class="btn-secondary" :disabled="(page+1)*20>=totalMemories" @click="page++;loadMemories()">下一页 →</button>
       </div>
 
       </div><!-- /memoriesSubTab list -->
@@ -539,49 +570,49 @@
       <!-- Contradictions sub-tab (Item 1) -->
       <div x-show="memoriesSubTab==='contradictions'">
         <p style="color:var(--text-muted);font-size:0.8125rem;margin:0 0 1.25rem;">
-          Memory pairs flagged as potentially contradictory by the Contradiction Detection worker.
-          Click <strong>View</strong> to inspect each memory in detail.
+          矛盾检测工作进程标记的潜在矛盾记忆对。
+          点击 <strong>查看</strong> 详细检查每个记忆。
         </p>
-        <div x-show="!contradictionsLoaded" style="color:var(--text-muted);text-align:center;padding:3rem;">Loading…</div>
+        <div x-show="!contradictionsLoaded" style="color:var(--text-muted);text-align:center;padding:3rem;">加载中…</div>
         <div x-show="contradictionsLoaded && contradictions.length === 0" style="color:var(--text-muted);text-align:center;padding:3rem;">
-          No contradictions detected in vault <strong x-text="vault"></strong>.<br>
-          <span style="font-size:0.8125rem;">The contradiction worker will flag pairs that conflict with each other.</span>
+          仓库 <strong x-text="vault"></strong> 中未检测到矛盾。<br>
+          <span style="font-size:0.8125rem;">矛盾检测工作进程将标记相互冲突的记忆对。</span>
         </div>
         <div style="display:flex;flex-direction:column;gap:0.75rem;">
           <template x-for="(pair, idx) in contradictions" :key="idx">
             <div style="background:var(--bg-elevated);border:1px solid rgba(239,68,68,0.3);border-radius:0.5rem;padding:1rem;">
-              <div style="font-size:0.75rem;color:#ef4444;font-weight:600;margin-bottom:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Contradiction</div>
+              <div style="font-size:0.75rem;color:#ef4444;font-weight:600;margin-bottom:0.75rem;text-transform:uppercase;letter-spacing:0.05em;">矛盾</div>
               <div style="display:grid;grid-template-columns:1fr auto 1fr;gap:1rem;align-items:start;">
                 <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:0.375rem;padding:0.75rem;">
-                  <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.375rem;">Memory A</div>
+                  <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.375rem;">记忆 A</div>
                   <div style="font-weight:600;font-size:0.875rem;margin-bottom:0.5rem;" x-text="pair.concept_a || pair.id_a.slice(0,8)"></div>
                   <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.5rem;font-family:monospace;" x-text="pair.id_a.slice(0,12) + '…'"></div>
                   <button class="btn-secondary" style="font-size:0.75rem;padding:0.25rem 0.625rem;"
-                    @click="openMemory({id:pair.id_a, concept:pair.concept_a, content:'', vault:vault}); memoriesSubTab='list'">View</button>
+                    @click="openMemory({id:pair.id_a, concept:pair.concept_a, content:'', vault:vault}); memoriesSubTab='list'">查看</button>
                 </div>
                 <div style="color:rgba(239,68,68,0.7);font-size:1.25rem;font-weight:700;align-self:center;">⟷</div>
                 <div style="background:var(--bg-surface);border:1px solid var(--border);border-radius:0.375rem;padding:0.75rem;">
-                  <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.375rem;">Memory B</div>
+                  <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.375rem;">记忆 B</div>
                   <div style="font-weight:600;font-size:0.875rem;margin-bottom:0.5rem;" x-text="pair.concept_b || pair.id_b.slice(0,8)"></div>
                   <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.5rem;font-family:monospace;" x-text="pair.id_b.slice(0,12) + '…'"></div>
                   <button class="btn-secondary" style="font-size:0.75rem;padding:0.25rem 0.625rem;"
-                    @click="openMemory({id:pair.id_b, concept:pair.concept_b, content:'', vault:vault}); memoriesSubTab='list'">View</button>
+                    @click="openMemory({id:pair.id_b, concept:pair.concept_b, content:'', vault:vault}); memoriesSubTab='list'">查看</button>
                 </div>
               </div>
               <!-- Resolution actions -->
               <div style="display:flex;gap:0.5rem;margin-top:0.875rem;flex-wrap:wrap;align-items:center;">
-                <span style="font-size:0.75rem;color:var(--text-muted);margin-right:0.25rem;">Resolve:</span>
-                <button class="btn-secondary" style="font-size:0.75rem;padding:0.25rem 0.625rem;" title="Keep Memory A — archives B and marks A as superseding"
-                  @click="resolveContradiction(pair.id_a, pair.id_b, 'keep_a')">Keep A</button>
-                <button class="btn-secondary" style="font-size:0.75rem;padding:0.25rem 0.625rem;" title="Keep Memory B — archives A and marks B as superseding"
-                  @click="resolveContradiction(pair.id_a, pair.id_b, 'keep_b')">Keep B</button>
-                <button class="btn-secondary" style="font-size:0.75rem;padding:0.25rem 0.625rem;" title="Merge both memories into a single consolidated memory"
-                  @click="resolveContradiction(pair.id_a, pair.id_b, 'merge')">Merge</button>
-                <button class="btn-secondary" style="font-size:0.75rem;padding:0.25rem 0.625rem;opacity:0.7;" title="Dismiss this contradiction flag without archiving either memory"
-                  @click="resolveContradiction(pair.id_a, pair.id_b, 'dismiss')">Dismiss</button>
+                <span style="font-size:0.75rem;color:var(--text-muted);margin-right:0.25rem;">解决方式:</span>
+                <button class="btn-secondary" style="font-size:0.75rem;padding:0.25rem 0.625rem;" title="保留记忆 A — 归档 B 并标记 A 为替代"
+                  @click="resolveContradiction(pair.id_a, pair.id_b, 'keep_a')">保留 A</button>
+                <button class="btn-secondary" style="font-size:0.75rem;padding:0.25rem 0.625rem;" title="保留记忆 B — 归档 A 并标记 B 为替代"
+                  @click="resolveContradiction(pair.id_a, pair.id_b, 'keep_b')">保留 B</button>
+                <button class="btn-secondary" style="font-size:0.75rem;padding:0.25rem 0.625rem;" title="合并两个记忆为一个"
+                  @click="resolveContradiction(pair.id_a, pair.id_b, 'merge')">合并</button>
+                <button class="btn-secondary" style="font-size:0.75rem;padding:0.25rem 0.625rem;opacity:0.7;" title="忽略此矛盾标记，不归档任何记忆"
+                  @click="resolveContradiction(pair.id_a, pair.id_b, 'dismiss')">忽略</button>
               </div>
               <div x-show="pair.detected_at" style="font-size:0.75rem;color:var(--text-muted);margin-top:0.625rem;">
-                Detected: <span x-text="pair.detected_at ? new Date(pair.detected_at * 1000).toLocaleString() : ''"></span>
+                检测到: <span x-text="pair.detected_at ? new Date(pair.detected_at * 1000).toLocaleString() : ''"></span>
               </div>
             </div>
           </template>
@@ -604,26 +635,26 @@
               @click="navigateMemory(-1)"
               :disabled="selectedMemoryIndex() <= 0"
               :style="selectedMemoryIndex() <= 0 ? 'opacity:0.3;cursor:not-allowed;' : ''"
-              title="Previous memory">&lsaquo;</button>
+              title="上一个记忆">&lsaquo;</button>
             <h2 style="margin:0;font-size:1.125rem;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"
-              x-text="selectedMemory ? (selectedMemory.concept || 'Memory Detail') : ''"></h2>
+              x-text="selectedMemory ? (selectedMemory.concept || '记忆详情') : ''"></h2>
             <button class="btn-ghost" style="padding:0.2rem 0.45rem;font-size:0.9rem;"
               @click="navigateMemory(1)"
               :disabled="selectedMemoryIndex() >= memories.length - 1"
               :style="selectedMemoryIndex() >= memories.length - 1 ? 'opacity:0.3;cursor:not-allowed;' : ''"
-              title="Next memory">&rsaquo;</button>
+              title="下一个记忆">&rsaquo;</button>
           </div>
           <button class="btn-ghost" @click="selectedMemory=null" style="flex-shrink:0;">✕</button>
         </div>
         <!-- Action buttons row -->
         <div x-show="selectedMemory && !editingMemory" style="display:flex;gap:0.5rem;margin-bottom:1rem;">
-          <button class="btn-ghost" style="font-size:0.8125rem;padding:0.25rem 0.625rem;" @click="startEditMemory()">Edit</button>
-          <button class="btn-ghost" style="font-size:0.8125rem;padding:0.25rem 0.625rem;" @click="openLinkModal(selectedMemory.id)">Link</button>
+          <button class="btn-ghost" style="font-size:0.8125rem;padding:0.25rem 0.625rem;" @click="startEditMemory()">编辑</button>
+          <button class="btn-ghost" style="font-size:0.8125rem;padding:0.25rem 0.625rem;" @click="openLinkModal(selectedMemory.id)">链接</button>
         </div>
         <template x-if="selectedMemory">
           <div>
             <div class="form-group" style="margin-bottom:1rem;">
-              <label>Content</label>
+              <label>内容</label>
               <!-- Read-only view -->
               <p x-show="!editingMemory" style="color:var(--text-primary);line-height:1.6;white-space:pre-wrap;" x-text="selectedMemory.content"></p>
               <!-- Edit mode -->
@@ -631,54 +662,54 @@
                 <div>
                   <textarea class="input-field" style="width:100%;min-height:120px;margin-top:0.375rem;resize:vertical;"
                     x-model="editMemoryForm.content"></textarea>
-                  <label style="margin-top:0.625rem;display:block;">Reason for change *</label>
-                  <input class="input-field" style="margin-top:0.375rem;" type="text" placeholder="Why is this being updated?"
+                  <label style="margin-top:0.625rem;display:block;">修改原因 *</label>
+                  <input class="input-field" style="margin-top:0.375rem;" type="text" placeholder="为什么进行此更新？"
                     x-model="editMemoryForm.reason" />
                   <div style="display:flex;gap:0.5rem;margin-top:0.75rem;">
                     <button class="btn-primary" style="font-size:0.8125rem;"
                       :disabled="editMemorySaving"
                       @click="saveEditMemory()">
-                      <span x-show="!editMemorySaving">Save</span>
-                      <span x-show="editMemorySaving">Saving…</span>
+                      <span x-show="!editMemorySaving">保存</span>
+                      <span x-show="editMemorySaving">保存中…</span>
                     </button>
-                    <button class="btn-ghost" style="font-size:0.8125rem;" @click="cancelEditMemory()">Cancel</button>
+                    <button class="btn-ghost" style="font-size:0.8125rem;" @click="cancelEditMemory()">取消</button>
                   </div>
                 </div>
               </template>
             </div>
             <div class="form-group" style="margin-bottom:1rem;">
-              <label>Vault</label>
+              <label>仓库</label>
               <div><span class="badge-info" x-text="selectedMemory.vault"></span></div>
             </div>
             <div class="form-group" style="margin-bottom:1rem;">
-              <label>Confidence</label>
+              <label>置信度</label>
               <div class="confidence-bar"><div class="confidence-fill" :style="'width:' + Math.round((selectedMemory.confidence || 0) * 100) + '%'"></div></div>
             </div>
             <div class="form-group" style="margin-bottom:1rem;">
               <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.375rem;">
-                <label style="margin:0;">Tags</label>
-                <button x-show="!editingTags" class="btn-ghost" style="font-size:0.75rem;padding:0.1rem 0.4rem;" @click="startEditTags()">Edit</button>
+                <label style="margin:0;">标签</label>
+                <button x-show="!editingTags" class="btn-ghost" style="font-size:0.75rem;padding:0.1rem 0.4rem;" @click="startEditTags()">编辑</button>
               </div>
               <!-- Read-only tag chips -->
               <div x-show="!editingTags" style="display:flex;flex-wrap:wrap;gap:0.25rem;">
                 <template x-for="tag in (selectedMemory.tags || [])" :key="tag">
                   <span class="badge-warning" x-text="tag"></span>
                 </template>
-                <span x-show="!(selectedMemory.tags && selectedMemory.tags.length)" style="color:var(--text-muted);font-size:0.875rem;">none</span>
+                <span x-show="!(selectedMemory.tags && selectedMemory.tags.length)" style="color:var(--text-muted);font-size:0.875rem;">无</span>
               </div>
               <!-- Tag edit mode -->
               <div x-show="editingTags">
                 <input class="input-field" style="margin-top:0.25rem;" type="text"
-                  placeholder="tag1, tag2, tag3"
+                  placeholder="标签1, 标签2, 标签3"
                   x-model="editTagsValue"
                   @keydown.enter.prevent="saveTags()"
                   @keydown.escape.prevent="cancelEditTags()" />
                 <div style="display:flex;gap:0.375rem;margin-top:0.5rem;">
                   <button class="btn-primary" style="font-size:0.8125rem;" :disabled="editTagsSaving" @click="saveTags()">
-                    <span x-show="!editTagsSaving">Save</span>
-                    <span x-show="editTagsSaving">Saving…</span>
+                    <span x-show="!editTagsSaving">保存</span>
+                    <span x-show="editTagsSaving">保存中…</span>
                   </button>
-                  <button class="btn-ghost" style="font-size:0.8125rem;" @click="cancelEditTags()">Cancel</button>
+                  <button class="btn-ghost" style="font-size:0.8125rem;" @click="cancelEditTags()">取消</button>
                 </div>
               </div>
             </div>
@@ -725,7 +756,7 @@
     <div style="height:calc(100vh - 7rem);display:flex;flex-direction:column;">
       <!-- Graph header -->
       <div style="display:flex;align-items:baseline;gap:0.875rem;margin-bottom:1.5rem;flex-wrap:wrap;">
-        <h2 style="margin:0;">Graph</h2>
+        <h2 style="margin:0;">关系图</h2>
         <div class="vault-chip" @click="vaultModalOpen=true" style="cursor:pointer;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;opacity:0.7;"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0018 0V5"/><path d="M3 12a9 3 0 0018 0"/></svg>
           <span class="vault-chip-btn" x-text="vault"></span>
@@ -734,43 +765,43 @@
 
       <!-- Tabs -->
       <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:0;">
-        <button class="btn-secondary" :style="graphTab==='memory' ? 'border-bottom:2px solid #06b6d4;padding-bottom:0.625rem;' : 'padding-bottom:0.75rem;'" @click="graphTab='memory'">Memory Graph</button>
-        <button class="btn-secondary" :style="graphTab==='entity' ? 'border-bottom:2px solid #06b6d4;padding-bottom:0.625rem;' : 'padding-bottom:0.75rem;'" @click="graphTab='entity'">Entity Graph</button>
+        <button class="btn-secondary" :style="graphTab==='memory' ? 'border-bottom:2px solid #06b6d4;padding-bottom:0.625rem;' : 'padding-bottom:0.75rem;'" @click="graphTab='memory'">记忆图</button>
+        <button class="btn-secondary" :style="graphTab==='entity' ? 'border-bottom:2px solid #06b6d4;padding-bottom:0.625rem;' : 'padding-bottom:0.75rem;'" @click="graphTab='entity'">实体图</button>
       </div>
 
       <!-- Memory Graph Tab -->
       <template x-if="graphTab==='memory'">
         <div style="display:flex;flex-direction:column;flex:1;">
           <p style="color:var(--text-muted);font-size:0.8125rem;margin:0 0 0.75rem;">
-            The memory graph shows how your memories are connected. Each node is an engram (memory);
-            edges represent associations — <em>supports</em>, <em>contradicts</em>, <em>depends on</em>, etc.
-            Click a node to preview its content.
+            记忆图展示了你的记忆如何相连。每个节点是一条记忆；
+            边代表关联 — <em>支持</em>、<em>矛盾</em>、<em>依赖</em>等。
+            点击节点可预览其内容。
           </p>
           <div style="display:flex;gap:0.75rem;margin-bottom:1rem;align-items:center;flex-wrap:wrap;">
-            <button class="btn-primary" @click="loadGraph()">Load Graph</button>
-            <label style="display:flex;align-items:center;gap:0.375rem;font-size:0.8125rem;color:var(--text-muted);" title="Number of engrams to load">
-              Limit
+            <button class="btn-primary" @click="loadGraph()">加载图</button>
+            <label style="display:flex;align-items:center;gap:0.375rem;font-size:0.8125rem;color:var(--text-muted);" title="要加载的记忆数量">
+              限制
               <input type="number" x-model.number="graphLimit" min="1" max="200" step="10" style="width:4.5rem;padding:0.25rem 0.375rem;background:var(--bg-surface);border:1px solid var(--border);border-radius:0.375rem;color:var(--text-primary);font-size:0.8125rem;text-align:center;" />
             </label>
             <!-- Orphan toggle -->
-            <label style="display:flex;align-items:center;gap:0.375rem;font-size:0.8125rem;color:var(--text-muted);cursor:pointer;" title="Show engrams with no associations (orphan nodes)">
+            <label style="display:flex;align-items:center;gap:0.375rem;font-size:0.8125rem;color:var(--text-muted);cursor:pointer;" title="显示没有关联的记忆（孤立节点）">
               <input type="checkbox" x-model="graphShowOrphans" @change="graphLoaded && loadGraph()" />
-              Show orphans
+              显示孤立
             </label>
-            <span x-show="graphLoaded" class="badge-success">Loaded</span>
+            <span x-show="graphLoaded" class="badge-success">已加载</span>
             <!-- Zoom controls -->
             <div x-show="graphLoaded" style="display:flex;gap:0.375rem;margin-left:auto;align-items:center;">
-              <button class="btn-secondary" style="padding:0.25rem 0.625rem;font-size:0.8125rem;" title="Cycle label display: full → short → none" @click="graphCycleLabel()" x-text="graphLabelMode === 'full' ? 'Labels: Full' : graphLabelMode === 'short' ? 'Labels: Short' : 'Labels: Off'"></button>
-              <button class="btn-secondary" style="padding:0.25rem 0.625rem;font-size:0.875rem;" title="Zoom in" @click="graphZoomIn()">+</button>
-              <button class="btn-secondary" style="padding:0.25rem 0.625rem;font-size:0.875rem;" title="Zoom out" @click="graphZoomOut()">−</button>
-              <button class="btn-secondary" style="padding:0.25rem 0.75rem;font-size:0.8125rem;" title="Fit all nodes in view" @click="graphFit()">Fit</button>
+              <button class="btn-secondary" style="padding:0.25rem 0.625rem;font-size:0.8125rem;" title="循环标签显示：完整 → 简短 → 无" @click="graphCycleLabel()" x-text="graphLabelMode === 'full' ? '标签：完整' : graphLabelMode === 'short' ? '标签：简短' : '标签：无'"></button>
+              <button class="btn-secondary" style="padding:0.25rem 0.625rem;font-size:0.875rem;" title="放大" @click="graphZoomIn()">+</button>
+              <button class="btn-secondary" style="padding:0.25rem 0.625rem;font-size:0.875rem;" title="缩小" @click="graphZoomOut()">−</button>
+              <button class="btn-secondary" style="padding:0.25rem 0.75rem;font-size:0.8125rem;" title="适应所有节点到视图" @click="graphFit()">适应</button>
             </div>
           </div>
           <div x-show="!graphLoaded" style="flex:1;min-height:500px;border:1px solid var(--border);border-radius:0.75rem;display:flex;align-items:center;justify-content:center;color:var(--text-muted);">
             <div style="text-align:center;">
               <div style="font-size:2rem;margin-bottom:0.75rem;">⬡</div>
-              <div>Click <strong>Load Graph</strong> to visualize memory connections</div>
-              <div style="font-size:0.8125rem;margin-top:0.5rem;">Requires at least 2 memories with associations</div>
+              <div>点击 <strong>加载图</strong> 来可视化记忆连接</div>
+              <div style="font-size:0.8125rem;margin-top:0.5rem;">需要至少2条有关联的记忆</div>
             </div>
           </div>
           <div id="cy" x-show="graphLoaded" style="flex:1;min-height:500px;border:1px solid var(--border);border-radius:0.75rem;"></div>
@@ -781,26 +812,26 @@
       <template x-if="graphTab==='entity'">
         <div style="display:flex;flex-direction:column;flex:1;">
           <p style="color:var(--text-muted);font-size:0.8125rem;margin:0 0 0.75rem;">
-            The entity graph shows named entities (people, organizations, technologies, etc.) and their typed relationships.
-            Each node represents an entity; edges show relationship types extracted from memories.
+            实体图显示命名实体（人物、组织、技术等）及其类型化关系。
+            每个节点代表一个实体；边显示从记忆中提取的关系类型。
           </p>
           <div style="display:flex;gap:0.75rem;margin-bottom:1rem;align-items:center;flex-wrap:wrap;">
-            <button class="btn-primary" @click="loadEntityGraph()">Load Entity Graph</button>
-            <span style="color:var(--text-muted);font-size:0.875rem;" x-text="entityGraphStatus || 'Click Load to visualize entities'"></span>
-            <span x-show="entityGraphLoaded" class="badge-success">Loaded</span>
+            <button class="btn-primary" @click="loadEntityGraph()">加载实体图</button>
+            <span style="color:var(--text-muted);font-size:0.875rem;" x-text="entityGraphStatus || '点击加载来可视化实体'"></span>
+            <span x-show="entityGraphLoaded" class="badge-success">已加载</span>
             <!-- Zoom controls -->
             <div x-show="entityGraphLoaded" style="display:flex;gap:0.375rem;margin-left:auto;align-items:center;">
-              <button class="btn-secondary" style="padding:0.25rem 0.625rem;font-size:0.8125rem;" title="Cycle label display: full → short → none" @click="entityGraphCycleLabel()" x-text="entityGraphLabelMode === 'full' ? 'Labels: Full' : entityGraphLabelMode === 'short' ? 'Labels: Short' : 'Labels: Off'"></button>
-              <button class="btn-secondary" style="padding:0.25rem 0.625rem;font-size:0.875rem;" title="Zoom in" @click="entityGraphZoomIn()">+</button>
-              <button class="btn-secondary" style="padding:0.25rem 0.625rem;font-size:0.875rem;" title="Zoom out" @click="entityGraphZoomOut()">−</button>
-              <button class="btn-secondary" style="padding:0.25rem 0.75rem;font-size:0.8125rem;" title="Fit all nodes in view" @click="entityGraphFit()">Fit</button>
+              <button class="btn-secondary" style="padding:0.25rem 0.625rem;font-size:0.8125rem;" title="循环标签显示：完整 → 简短 → 无" @click="entityGraphCycleLabel()" x-text="entityGraphLabelMode === 'full' ? '标签：完整' : entityGraphLabelMode === 'short' ? '标签：简短' : '标签：无'"></button>
+              <button class="btn-secondary" style="padding:0.25rem 0.625rem;font-size:0.875rem;" title="放大" @click="entityGraphZoomIn()">+</button>
+              <button class="btn-secondary" style="padding:0.25rem 0.625rem;font-size:0.875rem;" title="缩小" @click="entityGraphZoomOut()">−</button>
+              <button class="btn-secondary" style="padding:0.25rem 0.75rem;font-size:0.8125rem;" title="适应所有节点到视图" @click="entityGraphFit()">适应</button>
             </div>
           </div>
           <div x-show="!entityGraphLoaded" style="flex:1;min-height:500px;border:1px solid var(--border);border-radius:0.75rem;display:flex;align-items:center;justify-content:center;color:var(--text-muted);">
             <div style="text-align:center;">
               <div style="font-size:2rem;margin-bottom:0.75rem;">⬡</div>
-              <div>Click <strong>Load Entity Graph</strong> to visualize entity relationships</div>
-              <div style="font-size:0.8125rem;margin-top:0.5rem;">Requires entities extracted from memories</div>
+              <div>点击 <strong>加载实体图</strong> 来可视化实体关系</div>
+              <div style="font-size:0.8125rem;margin-top:0.5rem;">需要从记忆中提取的实体</div>
             </div>
           </div>
           <div id="entity-cy" x-show="entityGraphLoaded" style="flex:1;min-height:500px;border:1px solid var(--border);border-radius:0.75rem;"></div>
@@ -810,48 +841,48 @@
 
     <!-- ── Observability View ─────────────────────────────────────── -->
     <div x-show="currentView==='observability'">
-      <h2 style="margin:0 0 1.5rem 0;">Observability</h2>
+      <h2 style="margin:0 0 1.5rem 0;">可观测性</h2>
 
       <template x-if="obs">
         <div>
           <!-- System Health -->
           <div class="settings-card" style="margin-bottom:1.25rem;">
-            <h3 style="margin:0 0 1rem 0;font-size:0.9375rem;">System Health</h3>
+            <h3 style="margin:0 0 1rem 0;font-size:0.9375rem;">系统健康状态</h3>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.75rem;">
               <div class="stat-card">
                 <div class="stat-value" x-text="obs.system.version"></div>
-                <div class="stat-label">Version</div>
+                <div class="stat-label">版本</div>
               </div>
               <div class="stat-card">
                 <div class="stat-value" x-text="formatUptime(obs.system.uptime_seconds)"></div>
-                <div class="stat-label">Uptime</div>
+                <div class="stat-label">运行时间</div>
               </div>
               <div class="stat-card">
                 <div class="stat-value" x-text="obs.system.go_routines"></div>
-                <div class="stat-label">Goroutines</div>
+                <div class="stat-label">协程</div>
               </div>
               <div class="stat-card">
                 <div class="stat-value" x-text="formatBytes(obs.system.go_mem_alloc_bytes)"></div>
-                <div class="stat-label">Heap Alloc</div>
+                <div class="stat-label">堆分配</div>
               </div>
               <div class="stat-card">
                 <div class="stat-value" x-text="formatBytes(obs.system.go_mem_sys_bytes)"></div>
-                <div class="stat-label">System Memory</div>
+                <div class="stat-label">系统内存</div>
               </div>
             </div>
           </div>
 
           <!-- Storage -->
           <div class="settings-card" style="margin-bottom:1.25rem;">
-            <h3 style="margin:0 0 1rem 0;font-size:0.9375rem;">Storage (Pebble)</h3>
+            <h3 style="margin:0 0 1rem 0;font-size:0.9375rem;">存储（Pebble）</h3>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0.75rem;">
               <div class="stat-card">
                 <div class="stat-value" x-text="formatBytes(obs.storage.disk_bytes)"></div>
-                <div class="stat-label">Disk Usage</div>
+                <div class="stat-label">磁盘使用</div>
               </div>
               <div class="stat-card">
                 <div class="stat-value" x-text="(obs.storage.pebble.cache_hit_rate * 100).toFixed(1) + '%'"></div>
-                <div class="stat-label">Cache Hit Rate</div>
+                <div class="stat-label">缓存命中率</div>
               </div>
               <div class="stat-card">
                 <div class="stat-value" x-text="obs.storage.pebble.num_sstables"></div>
@@ -859,7 +890,7 @@
               </div>
               <div class="stat-card">
                 <div class="stat-value" x-text="obs.storage.pebble.read_amp"></div>
-                <div class="stat-label" title="Ratio of disk reads to logical reads — lower is better">Read Amp</div>
+                <div class="stat-label" title="磁盘读取与逻辑读取的比率 — 越低越好">读取放大</div>
               </div>
               <div class="stat-card">
                 <div class="stat-value" x-text="formatBytes(obs.storage.pebble.mem_table_bytes)"></div>
@@ -871,18 +902,18 @@
               </div>
               <div class="stat-card">
                 <div class="stat-value" x-text="obs.storage.pebble.compaction_count"></div>
-                <div class="stat-label">Compactions</div>
+                <div class="stat-label">合并操作</div>
               </div>
               <div class="stat-card">
                 <div class="stat-value" x-text="formatBytes(obs.storage.pebble.compaction_debt_bytes)"></div>
-                <div class="stat-label">Compaction Debt</div>
+                <div class="stat-label">合并债务</div>
               </div>
             </div>
           </div>
 
           <!-- Embedding Pipeline -->
           <div class="settings-card" style="margin-bottom:1.25rem;">
-            <h3 style="margin:0 0 1rem 0;font-size:0.9375rem;">Processors</h3>
+            <h3 style="margin:0 0 1rem 0;font-size:0.9375rem;">处理器</h3>
             <template x-if="obs.processors && obs.processors.length > 0">
               <div style="display:flex;flex-direction:column;gap:0.75rem;">
                 <template x-for="proc in obs.processors" :key="proc.name">
@@ -898,10 +929,10 @@
                           <div style="background:var(--accent);height:100%;border-radius:4px;transition:width 0.3s;" :style="'width:' + Math.min(100, (proc.processed / proc.total * 100)) + '%'"></div>
                         </div>
                         <div style="display:flex;justify-content:space-between;font-size:0.6875rem;color:var(--text-muted);margin-top:0.25rem;">
-                          <span x-text="proc.processed + ' / ' + proc.total + ' processed'"></span>
-                          <span x-show="proc.rate_per_sec > 0" x-text="proc.rate_per_sec.toFixed(1) + '/s'"></span>
-                          <span x-show="proc.eta_seconds > 0" x-text="'ETA ' + proc.eta_seconds + 's'"></span>
-                          <span x-show="proc.errors > 0" style="color:rgb(239,68,68);" x-text="proc.errors + ' errors'"></span>
+                          <span x-text="proc.processed + ' / ' + proc.total + ' 已处理'"></span>
+                          <span x-show="proc.rate_per_sec > 0" x-text="proc.rate_per_sec.toFixed(1) + '/秒'"></span>
+                          <span x-show="proc.eta_seconds > 0" x-text="'ETA ' + proc.eta_seconds + '秒'"></span>
+                          <span x-show="proc.errors > 0" style="color:rgb(239,68,68);" x-text="proc.errors + ' 错误'"></span>
                         </div>
                       </div>
                     </template>
@@ -910,31 +941,31 @@
               </div>
             </template>
             <template x-if="!obs.processors || obs.processors.length === 0">
-              <div style="font-size:0.8125rem;color:var(--text-muted);">No processors configured</div>
+              <div style="font-size:0.8125rem;color:var(--text-muted);">没有配置处理器</div>
             </template>
           </div>
 
           <!-- LLM Calls -->
           <div class="settings-card" style="margin-bottom:1.25rem;">
-            <h3 style="margin:0 0 1rem 0;font-size:0.9375rem;">LLM Calls</h3>
+            <h3 style="margin:0 0 1rem 0;font-size:0.9375rem;">LLM 调用</h3>
             <template x-if="obs.llm">
               <div style="display:flex;flex-direction:column;gap:0.75rem;">
                 <!-- Enrich -->
                 <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:0.5rem;padding:0.75rem 1rem;">
                   <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
-                    <span style="font-weight:600;font-size:0.8125rem;">enrich</span>
+                    <span style="font-weight:600;font-size:0.8125rem;">丰富</span>
                   </div>
                   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;font-size:0.75rem;">
                     <div>
-                      <div style="color:var(--text-muted);">Calls</div>
+                      <div style="color:var(--text-muted);">调用</div>
                       <div style="font-weight:600;" x-text="obs.llm.enrich_calls"></div>
                     </div>
                     <div>
-                      <div style="color:var(--text-muted);">Errors</div>
+                      <div style="color:var(--text-muted);">错误</div>
                       <div style="font-weight:600;" x-text="obs.llm.enrich_calls > 0 ? obs.llm.enrich_errors + ' (' + (obs.llm.enrich_errors / obs.llm.enrich_calls * 100).toFixed(1) + '%)' : obs.llm.enrich_errors"></div>
                     </div>
                     <div>
-                      <div style="color:var(--text-muted);">Avg Latency</div>
+                      <div style="color:var(--text-muted);">平均延迟</div>
                       <div style="font-weight:600;" x-text="obs.llm.enrich_avg_latency_ms.toFixed(0) + 'ms'"></div>
                     </div>
                   </div>
@@ -942,19 +973,19 @@
                 <!-- Embed -->
                 <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:0.5rem;padding:0.75rem 1rem;">
                   <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
-                    <span style="font-weight:600;font-size:0.8125rem;">embed</span>
+                    <span style="font-weight:600;font-size:0.8125rem;">嵌入</span>
                   </div>
                   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;font-size:0.75rem;">
                     <div>
-                      <div style="color:var(--text-muted);">Calls</div>
+                      <div style="color:var(--text-muted);">调用</div>
                       <div style="font-weight:600;" x-text="obs.llm.embed_calls"></div>
                     </div>
                     <div>
-                      <div style="color:var(--text-muted);">Errors</div>
+                      <div style="color:var(--text-muted);">错误</div>
                       <div style="font-weight:600;" x-text="obs.llm.embed_calls > 0 ? obs.llm.embed_errors + ' (' + (obs.llm.embed_errors / obs.llm.embed_calls * 100).toFixed(1) + '%)' : obs.llm.embed_errors"></div>
                     </div>
                     <div>
-                      <div style="color:var(--text-muted);">Avg Latency</div>
+                      <div style="color:var(--text-muted);">平均延迟</div>
                       <div style="font-weight:600;" x-text="obs.llm.embed_avg_latency_ms.toFixed(0) + 'ms'"></div>
                     </div>
                   </div>
@@ -962,25 +993,25 @@
               </div>
             </template>
             <template x-if="!obs.llm">
-              <div style="font-size:0.8125rem;color:var(--text-muted);">No LLM plugins configured</div>
+              <div style="font-size:0.8125rem;color:var(--text-muted);">没有配置LLM插件</div>
             </template>
           </div>
 
           <!-- Cognitive Workers -->
           <div class="settings-card" style="margin-bottom:1.25rem;">
-            <h3 style="margin:0 0 1rem 0;font-size:0.9375rem;">Cognitive Workers</h3>
+            <h3 style="margin:0 0 1rem 0;font-size:0.9375rem;">认知工作者</h3>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.75rem;">
               <template x-for="[name, w] in [['Hebbian', obs.cognitive_workers.hebbian], ['Contradiction', obs.cognitive_workers.contradiction], ['Confidence', obs.cognitive_workers.confidence]]" :key="name">
                 <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:0.5rem;padding:0.75rem 1rem;">
                   <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
                     <span style="font-weight:600;font-size:0.8125rem;" x-text="name"></span>
-                    <span :style="'margin-left:auto;font-size:0.6875rem;padding:0.125rem 0.5rem;border-radius:9999px;font-weight:600;' + (w.state===0 ? 'background:rgba(34,197,94,0.15);color:rgb(34,197,94);' : w.state===1 ? 'background:rgba(234,179,8,0.15);color:rgb(234,179,8);' : 'background:rgba(148,163,184,0.15);color:rgb(148,163,184);')" x-text="w.state===0 ? 'Active' : w.state===1 ? 'Idle' : 'Dormant'"></span>
+                    <span :style="'margin-left:auto;font-size:0.6875rem;padding:0.125rem 0.5rem;border-radius:9999px;font-weight:600;' + (w.state===0 ? 'background:rgba(34,197,94,0.15);color:rgb(34,197,94);' : w.state===1 ? 'background:rgba(234,179,8,0.15);color:rgb(234,179,8);' : 'background:rgba(148,163,184,0.15);color:rgb(148,163,184);')" x-text="w.state===0 ? '活跃' : w.state===1 ? '空闲' : '休眠'"></span>
                   </div>
                   <div style="font-size:0.75rem;color:var(--text-secondary);display:flex;flex-direction:column;gap:0.25rem;">
-                    <span x-text="'Processed: ' + w.processed"></span>
-                    <span x-text="'Batches: ' + w.batches"></span>
-                    <span x-show="w.errors > 0" style="color:rgb(239,68,68);" x-text="'Errors: ' + w.errors"></span>
-                    <span x-show="w.dropped > 0" style="color:rgb(234,179,8);" x-text="'Dropped: ' + w.dropped"></span>
+                    <span x-text="'已处理：' + w.processed"></span>
+                    <span x-text="'批次：' + w.batches"></span>
+                    <span x-show="w.errors > 0" style="color:rgb(239,68,68);" x-text="'错误：' + w.errors"></span>
+                    <span x-show="w.dropped > 0" style="color:rgb(234,179,8);" x-text="'已丢弃：' + w.dropped"></span>
                   </div>
                 </div>
               </template>
@@ -989,43 +1020,43 @@
 
           <!-- Per-Vault Breakdown -->
           <div class="settings-card">
-            <h3 style="margin:0 0 1rem 0;font-size:0.9375rem;">Per-Vault Breakdown</h3>
+            <h3 style="margin:0 0 1rem 0;font-size:0.9375rem;">每个仓库的细分</h3>
             <template x-for="[vaultName, v] in Object.entries(obs.vaults)" :key="vaultName">
               <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:0.5rem;padding:0.75rem 1rem;margin-bottom:0.75rem;">
                 <div style="font-weight:600;font-size:0.875rem;margin-bottom:0.75rem;" x-text="vaultName"></div>
                 <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:0.5rem;margin-bottom:0.75rem;">
                   <div>
                     <div style="font-size:1rem;font-weight:600;color:var(--text-primary);" x-text="v.engram_count.toLocaleString()"></div>
-                    <div style="font-size:0.6875rem;color:var(--text-muted);">Engrams</div>
+                    <div style="font-size:0.6875rem;color:var(--text-muted);">记忆</div>
                   </div>
                   <div>
                     <div style="font-size:1rem;font-weight:600;color:var(--text-primary);" x-text="v.hnsw_vectors.toLocaleString()"></div>
-                    <div style="font-size:0.6875rem;color:var(--text-muted);">HNSW Vectors</div>
+                    <div style="font-size:0.6875rem;color:var(--text-muted);">HNSW 向量</div>
                   </div>
                   <div>
                     <div style="font-size:1rem;font-weight:600;color:var(--text-primary);" x-text="formatBytes(v.hnsw_bytes)"></div>
-                    <div style="font-size:0.6875rem;color:var(--text-muted);">HNSW Memory</div>
+                    <div style="font-size:0.6875rem;color:var(--text-muted);">HNSW 内存</div>
                   </div>
                   <template x-if="v.coherence">
                     <div>
                       <div style="font-size:1rem;font-weight:600;color:var(--text-primary);" x-text="(v.coherence.score * 100).toFixed(0) + '%'"></div>
-                      <div style="font-size:0.6875rem;color:var(--text-muted);" title="0-1 measure of memory graph health (orphans, contradictions, duplication)">Coherence</div>
+                      <div style="font-size:0.6875rem;color:var(--text-muted);" title="0-1 记忆图健康度（孤立、矛盾、重复）">连贯性</div>
                     </div>
                   </template>
                 </div>
                 <!-- Latency table -->
                 <template x-if="v.latency && Object.keys(v.latency).length > 0">
                   <div>
-                    <div style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);margin-bottom:0.375rem;">Latency (ms)</div>
+                    <div style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);margin-bottom:0.375rem;">延迟 (毫秒)</div>
                     <table style="width:100%;font-size:0.75rem;border-collapse:collapse;">
                       <thead>
                         <tr style="color:var(--text-muted);border-bottom:1px solid var(--border);">
-                          <th style="text-align:left;padding:0.25rem 0.5rem;">Op</th>
+                          <th style="text-align:left;padding:0.25rem 0.5rem;">操作</th>
                           <th style="text-align:right;padding:0.25rem 0.5rem;">p50</th>
                           <th style="text-align:right;padding:0.25rem 0.5rem;">p95</th>
                           <th style="text-align:right;padding:0.25rem 0.5rem;">p99</th>
-                          <th style="text-align:right;padding:0.25rem 0.5rem;">avg</th>
-                          <th style="text-align:right;padding:0.25rem 0.5rem;">count</th>
+                          <th style="text-align:right;padding:0.25rem 0.5rem;">平均</th>
+                          <th style="text-align:right;padding:0.25rem 0.5rem;">计数</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1050,61 +1081,61 @@
       </template>
 
       <template x-if="!obs">
-        <div style="color:var(--text-muted);font-size:0.875rem;">Loading observability data...</div>
+        <div style="color:var(--text-muted);font-size:0.875rem;">加载可观测性数据...</div>
       </template>
     </div>
 
     <!-- ── Settings View ────────────────────────────────────────────── -->
     <div x-show="currentView==='settings'">
       <div style="display:flex;align-items:baseline;gap:1rem;margin-bottom:0;">
-        <h2 style="margin:0;">Settings</h2>
+        <h2 style="margin:0;">设置</h2>
       </div>
 
       <!-- Sub-navigation tabs -->
       <div class="tab-bar">
-        <button class="tab-btn" :class="{ active: settingsTab==='connect' }" @click="settingsTab='connect'; loadMCPInfo(); navigateTo('settings/connect')">Connect AI Tools</button>
-        <button class="tab-btn" :class="{ active: settingsTab==='vault' }" @click="settingsTab='vault'; loadEmbedStatus(); loadWorkers(); loadPlasticity(); navigateTo('settings/vault')">Vault</button>
-        <button class="tab-btn" data-testid="tab-plugins" :class="{ active: settingsTab==='plugins' }" @click="settingsTab='plugins'; loadPlugins(); loadEmbedStatus(); navigateTo('settings/plugins')">Plugins</button>
-        <button class="tab-btn" :class="{ active: settingsTab==='keys' }" @click="settingsTab='keys'; loadApiKeys(); loadVaults(); navigateTo('settings/keys')">API Keys</button>
-        <button class="tab-btn" :class="{ active: settingsTab==='admin' }" @click="settingsTab='admin'; navigateTo('settings/admin')">Admin</button>
+        <button class="tab-btn" :class="{ active: settingsTab==='connect' }" @click="settingsTab='connect'; loadMCPInfo(); navigateTo('settings/connect')">连接 AI 工具</button>
+        <button class="tab-btn" :class="{ active: settingsTab==='vault' }" @click="settingsTab='vault'; loadEmbedStatus(); loadWorkers(); loadPlasticity(); navigateTo('settings/vault')">仓库</button>
+        <button class="tab-btn" data-testid="tab-plugins" :class="{ active: settingsTab==='plugins' }" @click="settingsTab='plugins'; loadPlugins(); loadEmbedStatus(); navigateTo('settings/plugins')">插件</button>
+        <button class="tab-btn" :class="{ active: settingsTab==='keys' }" @click="settingsTab='keys'; loadApiKeys(); loadVaults(); navigateTo('settings/keys')">API 密钥</button>
+        <button class="tab-btn" :class="{ active: settingsTab==='admin' }" @click="settingsTab='admin'; navigateTo('settings/admin')">管理员</button>
       </div>
 
       <!-- ── Admin tab ─────────────────────────────────────────────── -->
       <div x-show="settingsTab==='admin'">
         <p style="color:var(--text-muted);font-size:0.8125rem;margin:0 0 1.25rem;">
-          Manage admin credentials. The default credentials (<strong>root / password</strong>) should be changed after first login.
+          管理管理员凭证。默认凭证（<strong>root / password</strong>）应在首次登录后更改。
         </p>
         <div class="card-polished" style="max-width:480px;">
-          <h3 style="margin:0 0 1.25rem;font-size:1rem;">Change Admin Password</h3>
+          <h3 style="margin:0 0 1.25rem;font-size:1rem;">更改管理员密码</h3>
           <form @submit.prevent="changePassword()">
             <div class="form-group" style="margin-bottom:1rem;">
-              <label>Username</label>
+              <label>用户名</label>
               <input class="input-field" x-model="changePassForm.username" autocomplete="username" required placeholder="root" />
             </div>
             <div class="form-group" style="margin-bottom:1rem;">
-              <label>New Password</label>
+              <label>新密码</label>
               <input class="input-field" type="password" x-model="changePassForm.newPassword" autocomplete="new-password" required />
             </div>
             <div class="form-group" style="margin-bottom:1.5rem;">
-              <label>Confirm New Password</label>
+              <label>确认新密码</label>
               <input class="input-field" type="password" x-model="changePassForm.confirmPassword" autocomplete="new-password" required />
             </div>
             <p x-show="changePassError" style="color:var(--danger);font-size:0.875rem;margin-bottom:1rem;" x-text="changePassError"></p>
-            <p x-show="changePassSuccess" style="color:var(--success);font-size:0.875rem;margin-bottom:1rem;">Password updated successfully.</p>
-            <button type="submit" class="btn-primary">Update Password</button>
+            <p x-show="changePassSuccess" style="color:var(--success);font-size:0.875rem;margin-bottom:1rem;">密码更新成功。</p>
+            <button type="submit" class="btn-primary">更新密码</button>
           </form>
         </div>
 
         <!-- Backup card (Item 5) -->
         <div class="card-polished" style="max-width:480px;margin-top:1.25rem;">
-          <h3 style="margin:0 0 0.75rem;font-size:1rem;">Database Backup</h3>
+          <h3 style="margin:0 0 0.75rem;font-size:1rem;">数据库备份</h3>
           <p style="color:var(--text-muted);font-size:0.8125rem;margin:0 0 1rem;">
-            Create a point-in-time backup of the database using Pebble's checkpoint.
-            Safe to run on a live server. The backup is written to <code>./backups/</code> relative to the server working directory.
+            使用 Pebble 的检查点创建数据库的时间点备份。
+            可安全地在实时服务器上运行。备份写入到服务器工作目录相对的 <code>./backups/</code>。
           </p>
           <button class="btn-primary" @click="triggerBackup()" :disabled="backupLoading"
             :style="backupLoading ? 'opacity:0.6;cursor:not-allowed;' : ''">
-            <span x-text="backupLoading ? 'Backing up…' : 'Backup Now'"></span>
+            <span x-text="backupLoading ? '正在备份…' : '立即备份'"></span>
           </button>
         </div>
       </div>
@@ -1112,16 +1143,16 @@
       <!-- ── API Keys tab ───────────────────────────────────────────── -->
       <div x-show="settingsTab==='keys'">
         <p style="color:var(--text-muted);font-size:0.8125rem;margin:0 0 1.25rem;">
-          API keys let AI agents access MuninnDB without admin credentials.
-          Keys are scoped to a vault and a mode (full, observe, or write).
+          API 密钥让 AI 代理可以在不使用管理员凭证的情况下访问 MuninnDB。
+          密钥的作用域是仓库和模式（完全、观察或写入）。
         </p>
 
         <!-- Create key form -->
         <div class="card-polished" style="max-width:560px;margin-bottom:1.25rem;">
-          <h4 style="font-size:0.9375rem;margin:0 0 1rem;">Create New Key</h4>
+          <h4 style="font-size:0.9375rem;margin:0 0 1rem;">创建新密钥</h4>
           <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:0.75rem;align-items:end;">
             <div class="form-group">
-              <label>Vault</label>
+              <label>仓库</label>
               <select class="input-field" x-model="apiKeyForm.vault">
                 <template x-for="v in vaults" :key="v">
                   <option :value="v" x-text="v"></option>
@@ -1129,18 +1160,18 @@
               </select>
             </div>
             <div class="form-group">
-              <label>Label</label>
+              <label>标签</label>
               <input class="input-field" x-model="apiKeyForm.label" placeholder="my-agent" />
             </div>
             <div class="form-group">
-              <label title="full: read + write · observe: read-only (cognitive mutations suppressed) · write: ingest-only, no read access (REST API only)">Mode</label>
+              <label title="full: read + write · observe: read-only (cognitive mutations suppressed) · write: ingest-only, no read access (REST API only)">模式</label>
               <select class="input-field" x-model="apiKeyForm.mode">
-                <option value="full">full</option>
-                <option value="observe">observe</option>
-                <option value="write">write (ingest-only)</option>
+                <option value="full">完全</option>
+                <option value="observe">观察</option>
+                <option value="write">写入（仅摄入）</option>
               </select>
             </div>
-            <button class="btn-primary" @click="createApiKey()" :disabled="apiKeyLoading">Create</button>
+            <button class="btn-primary" @click="createApiKey()" :disabled="apiKeyLoading">创建</button>
           </div>
           <p x-show="apiKeyError" style="color:var(--danger);font-size:0.875rem;margin-top:0.75rem;" x-text="apiKeyError"></p>
         </div>
@@ -1148,11 +1179,11 @@
         <!-- Token shown once after creation -->
         <template x-if="apiKeyToken">
           <div style="background:rgba(6,182,212,0.08);border:1px solid rgba(6,182,212,0.3);border-radius:0.5rem;padding:0.875rem 1rem;max-width:560px;margin-bottom:1.25rem;">
-            <p style="font-size:0.8125rem;font-weight:600;margin:0 0 0.5rem;color:var(--primary);">Token (shown once — copy it now)</p>
+            <p style="font-size:0.8125rem;font-weight:600;margin:0 0 0.5rem;color:var(--primary);">令牌（仅显示一次 — 现在复制）</p>
             <code style="font-family:monospace;font-size:0.8125rem;word-break:break-all;" x-text="apiKeyToken"></code>
             <div style="margin-top:0.75rem;display:flex;gap:0.5rem;">
-              <button class="btn-secondary" style="font-size:0.8125rem;" @click="copyToClipboard(apiKeyToken)">Copy</button>
-              <button class="btn-ghost" style="font-size:0.8125rem;" @click="apiKeyToken=null">Dismiss</button>
+              <button class="btn-secondary" style="font-size:0.8125rem;" @click="copyToClipboard(apiKeyToken)">复制</button>
+              <button class="btn-ghost" style="font-size:0.8125rem;" @click="apiKeyToken=null">关闭</button>
             </div>
           </div>
         </template>
@@ -1160,17 +1191,17 @@
         <!-- Keys list -->
         <div class="card-polished" style="max-width:560px;">
           <template x-if="apiKeys.length === 0">
-            <p style="color:var(--text-muted);font-size:0.875rem;margin:0;">No API keys yet. Create one above.</p>
+            <p style="color:var(--text-muted);font-size:0.875rem;margin:0;">还没有 API 密钥。请在上方创建一个。</p>
           </template>
           <template x-if="apiKeys.length > 0">
             <table style="width:100%;border-collapse:collapse;font-size:0.8125rem;">
               <thead>
                 <tr style="border-bottom:1px solid var(--border);text-align:left;">
-                  <th style="padding:0.5rem 0.75rem 0.5rem 0;color:var(--text-muted);font-weight:500;">Label</th>
-                  <th style="padding:0.5rem 0.75rem;color:var(--text-muted);font-weight:500;">Vault</th>
-                  <th style="padding:0.5rem 0.75rem;color:var(--text-muted);font-weight:500;">Mode</th>
-                  <th style="padding:0.5rem 0.75rem;color:var(--text-muted);font-weight:500;" title="Expiry date for this API key">Expires</th>
-                  <th style="padding:0.5rem 0;color:var(--text-muted);font-weight:500;text-align:right;">Action</th>
+                  <th style="padding:0.5rem 0.75rem 0.5rem 0;color:var(--text-muted);font-weight:500;">标签</th>
+                  <th style="padding:0.5rem 0.75rem;color:var(--text-muted);font-weight:500;">仓库</th>
+                  <th style="padding:0.5rem 0.75rem;color:var(--text-muted);font-weight:500;">模式</th>
+                  <th style="padding:0.5rem 0.75rem;color:var(--text-muted);font-weight:500;" title="Expiry date for this API key">过期</th>
+                  <th style="padding:0.5rem 0;color:var(--text-muted);font-weight:500;text-align:right;">操作</th>
                 </tr>
               </thead>
               <tbody>
@@ -1185,7 +1216,7 @@
                       :title="key.expires_at ? 'Expires: ' + new Date(key.expires_at).toLocaleString() : 'This key never expires'"
                       x-text="formatKeyExpiry(key.expires_at)"></td>
                     <td style="padding:0.625rem 0;text-align:right;">
-                      <button class="btn-danger" style="font-size:0.75rem;padding:0.25rem 0.625rem;" @click="revokeApiKey(key.id)">Revoke</button>
+                      <button class="btn-danger" style="font-size:0.75rem;padding:0.25rem 0.625rem;" @click="revokeApiKey(key.id)">撤销</button>
                     </td>
                   </tr>
                 </template>
@@ -1198,7 +1229,7 @@
       <!-- ── Vault tab ─────────────────────────────────────────────── -->
       <div x-show="settingsTab==='vault'">
         <p style="color:var(--text-muted);font-size:0.8125rem;margin:0 0 1.25rem;">
-          Configuration and cognitive engine status for vault: <strong style="color:var(--text-secondary);" x-text="vault"></strong>
+          仓库的配置和认知引擎状态：<strong style="color:var(--text-secondary);" x-text="vault"></strong>
         </p>
 
         <!-- Top row: Vault config + Semantic Search + Cognitive workers -->
@@ -1206,24 +1237,24 @@
 
           <!-- Vault config card -->
           <div class="card-polished">
-            <h3 style="margin:0 0 1rem;font-size:1rem;">Vault Configuration</h3>
+            <h3 style="margin:0 0 1rem;font-size:1rem;">仓库配置</h3>
             <div class="form-group">
-              <label>Vault Name</label>
+              <label>仓库名称</label>
               <input class="input-field" :value="vault" readonly style="opacity:0.6;cursor:not-allowed;" />
             </div>
-            <button class="btn-ghost" style="font-size:0.8125rem;margin-top:0.75rem;width:100%;" @click="createVault()">+ New Vault</button>
+            <button class="btn-ghost" style="font-size:0.8125rem;margin-top:0.75rem;width:100%;" @click="createVault()">+ 新仓库</button>
           </div>
 
           <!-- Semantic Search card -->
           <div class="card-polished">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.875rem;">
-              <h3 style="margin:0;font-size:1rem;">Semantic Search</h3>
+              <h3 style="margin:0;font-size:1rem;">语义搜索</h3>
               <span x-show="embedStatus && embedStatus.enabled"
                     class="badge-active"
-                    style="border-radius:9999px;padding:0.125rem 0.625rem;font-size:0.75rem;font-weight:600;">Active</span>
+                    style="border-radius:9999px;padding:0.125rem 0.625rem;font-size:0.75rem;font-weight:600;">激活</span>
               <span x-show="!embedStatus || !embedStatus.enabled"
                     class="badge-dormant"
-                    style="border-radius:9999px;padding:0.125rem 0.625rem;font-size:0.75rem;font-weight:600;">Inactive</span>
+                    style="border-radius:9999px;padding:0.125rem 0.625rem;font-size:0.75rem;font-weight:600;">未激活</span>
             </div>
             <template x-if="embedStatus && embedStatus.enabled">
               <div>
@@ -1231,33 +1262,33 @@
                   <span style="font-size:0.8125rem;font-weight:500;text-transform:capitalize;" x-text="embedStatus.provider"></span>
                   <span style="font-size:0.75rem;color:var(--text-muted);" x-text="embedStatus.model ? '· ' + embedStatus.model : ''"></span>
                 </div>
-                <p style="font-size:0.75rem;color:var(--text-muted);margin:0 0 0.875rem;">Finds memories by meaning, not just keywords.</p>
+                <p style="font-size:0.75rem;color:var(--text-muted);margin:0 0 0.875rem;">按含义而不是关键词查找记忆。</p>
                 <a href="#" @click.prevent="settingsTab='plugins'; loadPlugins(); loadEmbedStatus(); navigateTo('settings/plugins')"
-                   style="font-size:0.75rem;color:var(--primary);text-decoration:none;">Upgrade provider →</a>
+                   style="font-size:0.75rem;color:var(--primary);text-decoration:none;">升级提供商 →</a>
               </div>
             </template>
             <template x-if="!embedStatus || !embedStatus.enabled">
               <div>
-                <p style="font-size:0.75rem;color:var(--text-muted);margin:0 0 0.875rem;">Semantic search is disabled. Memories are found by keyword only.</p>
+                <p style="font-size:0.75rem;color:var(--text-muted);margin:0 0 0.875rem;">语义搜索已禁用。记忆仅按关键词查找。</p>
                 <a href="#" @click.prevent="settingsTab='plugins'; loadPlugins(); loadEmbedStatus(); navigateTo('settings/plugins')"
-                   style="font-size:0.75rem;color:var(--primary);text-decoration:none;">Configure embedder →</a>
+                   style="font-size:0.75rem;color:var(--primary);text-decoration:none;">配置嵌入器 →</a>
               </div>
             </template>
           </div>
 
           <!-- Cognitive workers card -->
           <div class="card-polished">
-            <h3 style="margin:0 0 0.25rem;font-size:1rem;">Cognitive Engine Workers</h3>
+            <h3 style="margin:0 0 0.25rem;font-size:1rem;">认知引擎工作线程</h3>
             <p style="color:var(--text-muted);font-size:0.8125rem;margin:0 0 1.25rem;">
-              Background workers that apply Hebbian learning, temporal scoring, contradiction detection, and confidence updates.
-              Configured via server startup flags.
+              应用赫布学习、时间评分、矛盾检测和置信度更新的后台工作线程。
+              通过服务器启动标志配置。
             </p>
             <table style="width:100%;border-collapse:collapse;font-size:0.8125rem;">
               <thead>
                 <tr style="border-bottom:1px solid var(--border);text-align:left;">
-                  <th style="padding:0.5rem 0.75rem 0.5rem 0;color:var(--text-muted);font-weight:500;">Worker</th>
-                  <th style="padding:0.5rem 0.75rem;color:var(--text-muted);font-weight:500;">Status</th>
-                  <th style="padding:0.5rem 0;color:var(--text-muted);font-weight:500;">Processed</th>
+                  <th style="padding:0.5rem 0.75rem 0.5rem 0;color:var(--text-muted);font-weight:500;">工作线程</th>
+                  <th style="padding:0.5rem 0.75rem;color:var(--text-muted);font-weight:500;">状态</th>
+                  <th style="padding:0.5rem 0;color:var(--text-muted);font-weight:500;">已处理</th>
                 </tr>
               </thead>
               <tbody>
@@ -1267,7 +1298,7 @@
                     <td style="padding:0.625rem 0.75rem;">
                       <span :class="w.active ? 'badge-active' : 'badge-dormant'"
                             style="border-radius:9999px;padding:0.125rem 0.625rem;font-size:0.75rem;font-weight:600;"
-                            x-text="w.active ? 'Active' : 'Inactive'"></span>
+                            x-text="w.active ? '激活' : '未激活'"></span>
                     </td>
                     <td style="padding:0.625rem 0;color:var(--text-secondary);" x-text="w.processed"></td>
                   </tr>
@@ -1275,11 +1306,11 @@
               </tbody>
             </table>
             <div style="margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);">
-              <p style="font-size:0.8125rem;color:var(--text-muted);margin:0 0 0.5rem;font-weight:500;">Write-time Processing</p>
+              <p style="font-size:0.8125rem;color:var(--text-muted);margin:0 0 0.5rem;font-weight:500;">写入时处理</p>
               <div style="display:flex;align-items:center;gap:0.75rem;">
-                <span style="font-size:0.8125rem;font-weight:500;">Auto-Associations</span>
-                <span class="badge-active" style="border-radius:9999px;padding:0.125rem 0.625rem;font-size:0.75rem;font-weight:600;">Active</span>
-                <span style="font-size:0.8125rem;color:var(--text-muted);">Tags linked automatically at write time</span>
+                <span style="font-size:0.8125rem;font-weight:500;">自动关联</span>
+                <span class="badge-active" style="border-radius:9999px;padding:0.125rem 0.625rem;font-size:0.75rem;font-weight:600;">激活</span>
+                <span style="font-size:0.8125rem;color:var(--text-muted);">标签在写入时自动链接</span>
               </div>
             </div>
           </div>
@@ -1287,28 +1318,28 @@
 
         <!-- ── Plasticity Configuration — full width ── -->
         <div class="card-polished" x-init="$nextTick(() => initPlasticityChart())">
-          <h3 style="margin:0 0 0.25rem;font-size:1rem;">Plasticity</h3>
+          <h3 style="margin:0 0 0.25rem;font-size:1rem;">可塑性</h3>
           <p style="color:var(--text-muted);font-size:0.8125rem;margin:0 0 1.5rem;">
-            Controls how memories behave in this vault — temporal scoring, associative learning, and retrieval weights.
+            控制此仓库中记忆的行为 — 时间评分、关联学习和检索权重。
           </p>
 
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:2.5rem;align-items:start;">
 
             <!-- Left: preset selector + save -->
             <div>
-              <p style="font-size:0.8125rem;font-weight:600;color:var(--text-secondary);margin:0 0 0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Choose a Preset</p>
+              <p style="font-size:0.8125rem;font-weight:600;color:var(--text-secondary);margin:0 0 0.75rem;text-transform:uppercase;letter-spacing:0.05em;">选择预设</p>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.625rem;margin-bottom:1.25rem;">
 
                 <!-- Default -->
                 <div @click="plasticityForm.showAdvanced=false; plasticityForm.preset='default'; onPlasticityPresetChange()"
                      :style="plasticityForm.preset==='default' && !plasticityForm.showAdvanced ? 'border:2px solid #6366f1;background:rgba(99,102,241,0.12);' : 'border:1px solid var(--border);background:var(--bg-elevated);'"
                      style="border-radius:0.625rem;padding:0.875rem;cursor:pointer;transition:all 0.15s;">
-                  <div style="font-weight:600;font-size:0.875rem;margin-bottom:0.25rem;">Default</div>
-                  <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.5rem;">General use</div>
+                  <div style="font-weight:600;font-size:0.875rem;margin-bottom:0.25rem;">默认</div>
+                  <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.5rem;">常规使用</div>
                   <div style="display:flex;gap:0.3rem;flex-wrap:wrap;">
-                    <span style="font-size:0.65rem;background:rgba(99,102,241,0.2);color:#a5b4fc;border-radius:9999px;padding:0.1rem 0.4rem;">2-hop</span>
-                    <span style="font-size:0.65rem;background:rgba(99,102,241,0.2);color:#a5b4fc;border-radius:9999px;padding:0.1rem 0.4rem;">Hebbian</span>
-                    <span style="font-size:0.65rem;background:rgba(99,102,241,0.2);color:#a5b4fc;border-radius:9999px;padding:0.1rem 0.4rem;">Temporal</span>
+                    <span style="font-size:0.65rem;background:rgba(99,102,241,0.2);color:#a5b4fc;border-radius:9999px;padding:0.1rem 0.4rem;">2-跳</span>
+                    <span style="font-size:0.65rem;background:rgba(99,102,241,0.2);color:#a5b4fc;border-radius:9999px;padding:0.1rem 0.4rem;">赫布</span>
+                    <span style="font-size:0.65rem;background:rgba(99,102,241,0.2);color:#a5b4fc;border-radius:9999px;padding:0.1rem 0.4rem;">时间</span>
                   </div>
                 </div>
 
@@ -1316,11 +1347,11 @@
                 <div @click="plasticityForm.showAdvanced=false; plasticityForm.preset='reference'; onPlasticityPresetChange()"
                      :style="plasticityForm.preset==='reference' && !plasticityForm.showAdvanced ? 'border:2px solid #10b981;background:rgba(16,185,129,0.12);' : 'border:1px solid var(--border);background:var(--bg-elevated);'"
                      style="border-radius:0.625rem;padding:0.875rem;cursor:pointer;transition:all 0.15s;">
-                  <div style="font-weight:600;font-size:0.875rem;margin-bottom:0.25rem;">Reference</div>
-                  <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.5rem;">Docs &amp; facts</div>
+                  <div style="font-weight:600;font-size:0.875rem;margin-bottom:0.25rem;">参考</div>
+                  <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.5rem;">文档和事实</div>
                   <div style="display:flex;gap:0.3rem;flex-wrap:wrap;">
-                    <span style="font-size:0.65rem;background:rgba(16,185,129,0.2);color:#6ee7b7;border-radius:9999px;padding:0.1rem 0.4rem;">3-hop</span>
-                    <span style="font-size:0.65rem;background:rgba(16,185,129,0.2);color:#6ee7b7;border-radius:9999px;padding:0.1rem 0.4rem;">No fading</span>
+                    <span style="font-size:0.65rem;background:rgba(16,185,129,0.2);color:#6ee7b7;border-radius:9999px;padding:0.1rem 0.4rem;">3-跳</span>
+                    <span style="font-size:0.65rem;background:rgba(16,185,129,0.2);color:#6ee7b7;border-radius:9999px;padding:0.1rem 0.4rem;">无衰退</span>
                   </div>
                 </div>
 
@@ -1328,11 +1359,11 @@
                 <div @click="plasticityForm.showAdvanced=false; plasticityForm.preset='scratchpad'; onPlasticityPresetChange()"
                      :style="plasticityForm.preset==='scratchpad' && !plasticityForm.showAdvanced ? 'border:2px solid #f59e0b;background:rgba(245,158,11,0.12);' : 'border:1px solid var(--border);background:var(--bg-elevated);'"
                      style="border-radius:0.625rem;padding:0.875rem;cursor:pointer;transition:all 0.15s;">
-                  <div style="font-weight:600;font-size:0.875rem;margin-bottom:0.25rem;">Scratchpad</div>
-                  <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.5rem;">Short-lived drafts</div>
+                  <div style="font-weight:600;font-size:0.875rem;margin-bottom:0.25rem;">记事本</div>
+                  <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.5rem;">短期草稿</div>
                   <div style="display:flex;gap:0.3rem;flex-wrap:wrap;">
-                    <span style="font-size:0.65rem;background:rgba(245,158,11,0.2);color:#fcd34d;border-radius:9999px;padding:0.1rem 0.4rem;">Fast fading</span>
-                    <span style="font-size:0.65rem;background:rgba(245,158,11,0.2);color:#fcd34d;border-radius:9999px;padding:0.1rem 0.4rem;">No assoc.</span>
+                    <span style="font-size:0.65rem;background:rgba(245,158,11,0.2);color:#fcd34d;border-radius:9999px;padding:0.1rem 0.4rem;">快速衰退</span>
+                    <span style="font-size:0.65rem;background:rgba(245,158,11,0.2);color:#fcd34d;border-radius:9999px;padding:0.1rem 0.4rem;">无关联</span>
                   </div>
                 </div>
 
@@ -1340,24 +1371,24 @@
                 <div @click="plasticityForm.showAdvanced=false; plasticityForm.preset='knowledge-graph'; onPlasticityPresetChange()"
                      :style="plasticityForm.preset==='knowledge-graph' && !plasticityForm.showAdvanced ? 'border:2px solid #ec4899;background:rgba(236,72,153,0.12);' : 'border:1px solid var(--border);background:var(--bg-elevated);'"
                      style="border-radius:0.625rem;padding:0.875rem;cursor:pointer;transition:all 0.15s;">
-                  <div style="font-weight:600;font-size:0.875rem;margin-bottom:0.25rem;">Knowledge Graph</div>
-                  <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.5rem;">Dense concepts</div>
+                  <div style="font-weight:600;font-size:0.875rem;margin-bottom:0.25rem;">知识图谱</div>
+                  <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.5rem;">密集概念</div>
                   <div style="display:flex;gap:0.3rem;flex-wrap:wrap;">
-                    <span style="font-size:0.65rem;background:rgba(236,72,153,0.2);color:#f9a8d4;border-radius:9999px;padding:0.1rem 0.4rem;">4-hop</span>
-                    <span style="font-size:0.65rem;background:rgba(236,72,153,0.2);color:#f9a8d4;border-radius:9999px;padding:0.1rem 0.4rem;">Strong assoc.</span>
-                    <span style="font-size:0.65rem;background:rgba(236,72,153,0.2);color:#f9a8d4;border-radius:9999px;padding:0.1rem 0.4rem;">Slow fading</span>
+                    <span style="font-size:0.65rem;background:rgba(236,72,153,0.2);color:#f9a8d4;border-radius:9999px;padding:0.1rem 0.4rem;">4-跳</span>
+                    <span style="font-size:0.65rem;background:rgba(236,72,153,0.2);color:#f9a8d4;border-radius:9999px;padding:0.1rem 0.4rem;">强关联</span>
+                    <span style="font-size:0.65rem;background:rgba(236,72,153,0.2);color:#f9a8d4;border-radius:9999px;padding:0.1rem 0.4rem;">缓慢衰退</span>
                   </div>
                 </div>
               </div>
 
               <!-- Default Recall Mode -->
-              <p style="font-size:0.8125rem;font-weight:600;color:var(--text-secondary);margin:0 0 0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Default Recall Mode</p>
+              <p style="font-size:0.8125rem;font-weight:600;color:var(--text-secondary);margin:0 0 0.75rem;text-transform:uppercase;letter-spacing:0.05em;">默认回忆模式</p>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.625rem;margin-bottom:1.25rem;">
                 <template x-for="rm in [
-                  {id:'balanced',  label:'Balanced',  desc:'Engine default'},
-                  {id:'semantic',  label:'Semantic',  desc:'Pure vector match'},
-                  {id:'recent',    label:'Recent',    desc:'Recency-biased'},
-                  {id:'deep',      label:'Deep',      desc:'4-hop graph'}
+                  {id:'balanced',  label:'平衡',  desc:'引擎默认'},
+                  {id:'semantic',  label:'语义',  desc:'纯向量匹配'},
+                  {id:'recent',    label:'最近',    desc:'偏向近期'},
+                  {id:'deep',      label:'深度',      desc:'4-跳图'}
                 ]" :key="rm.id">
                   <div @click="plasticityForm.recallMode = rm.id"
                        :style="plasticityForm.recallMode === rm.id ? 'border:2px solid var(--accent);background:rgba(99,102,241,0.12);' : 'border:1px solid var(--border);background:var(--bg-elevated);'"
@@ -1372,43 +1403,43 @@
               <div style="margin-bottom:1.25rem;">
                 <label style="font-size:0.8125rem;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:0.5rem;">
                   <input type="checkbox" x-model="plasticityForm.showAdvanced" @change="_updatePlasticityChart()" />
-                  Advanced overrides
+                  高级覆盖
                 </label>
               </div>
 
               <div x-show="plasticityForm.showAdvanced" style="border:1px solid var(--border);border-radius:0.5rem;padding:1rem;margin-bottom:1.25rem;">
                 <p style="font-size:0.75rem;color:var(--text-muted);margin:0 0 1rem;">
-                  Override individual preset values. Leave blank to use preset default.
+                  覆盖单个预设值。留空以使用预设默认值。
                 </p>
                 <div style="display:flex;gap:1.5rem;margin-bottom:1rem;flex-wrap:wrap;">
                   <label style="font-size:0.8125rem;display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
                     <input type="checkbox" x-model="plasticityForm.hebbianEnabled" @change="_updatePlasticityChart()" />
-                    Hebbian learning
+                    赫布学习
                   </label>
                   <label style="font-size:0.8125rem;display:flex;align-items:center;gap:0.5rem;cursor:pointer;">
                     <input type="checkbox" x-model="plasticityForm.temporalEnabled" @change="_updatePlasticityChart()" />
-                    Temporal scoring
+                    时间评分
                   </label>
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
                   <div class="form-group">
-                    <label style="font-size:0.75rem;" title="How many association edges to traverse during recall (0-8)">BFS Hop Depth (0–8)</label>
+                    <label style="font-size:0.75rem;" title="How many association edges to traverse during recall (0-8)">BFS 跳数深度 (0–8)</label>
                     <input class="input-field" type="number" min="0" max="8" x-model.number="plasticityForm.hopDepth" placeholder="preset" @input="$nextTick(() => _updatePlasticityChart())" />
                   </div>
                   <div class="form-group">
-                    <label style="font-size:0.75rem;" title="Influence of vector similarity in scoring (0-1)">Semantic Weight (0–1)</label>
+                    <label style="font-size:0.75rem;" title="Influence of vector similarity in scoring (0-1)">语义权重 (0–1)</label>
                     <input class="input-field" type="number" step="0.01" min="0" max="1" x-model.number="plasticityForm.semanticWeight" placeholder="preset" @input="$nextTick(() => _updatePlasticityChart())" />
                   </div>
                   <div class="form-group">
-                    <label style="font-size:0.75rem;" title="Influence of keyword matching in scoring (0-1)">FTS Weight (0–1)</label>
+                    <label style="font-size:0.75rem;" title="Influence of keyword matching in scoring (0-1)">全文搜索权重 (0–1)</label>
                     <input class="input-field" type="number" step="0.01" min="0" max="1" x-model.number="plasticityForm.ftsWeight" placeholder="preset" @input="$nextTick(() => _updatePlasticityChart())" />
                   </div>
                   <div class="form-group">
-                    <label style="font-size:0.75rem;" title="Minimum score threshold to include a memory in results">Relevance Floor (0–1)</label>
+                    <label style="font-size:0.75rem;" title="Minimum score threshold to include a memory in results">相关性下限 (0–1)</label>
                     <input class="input-field" type="number" step="0.01" min="0" max="1" x-model.number="plasticityForm.relevanceFloor" placeholder="preset" @input="$nextTick(() => _updatePlasticityChart())" />
                   </div>
                   <div class="form-group">
-                    <label style="font-size:0.75rem;" title="Days until memory relevance decays to 50%">Temporal Halflife (days)</label>
+                    <label style="font-size:0.75rem;" title="Days until memory relevance decays to 50%">时间半衰期（天）</label>
                     <input class="input-field" type="number" step="1" min="1" x-model.number="plasticityForm.temporalHalflife" placeholder="preset" @input="$nextTick(() => _updatePlasticityChart())" />
                   </div>
                 </div>
