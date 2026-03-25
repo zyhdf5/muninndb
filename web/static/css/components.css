@@ -1,5 +1,24 @@
 /* components.css — reusable UI components */
 
+/* Titles */
+.page-title {
+  margin: 0;
+  font-size: 1.65rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.modal-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
 /* Cards */
 .card-polished {
   background: var(--card-bg);
@@ -450,7 +469,7 @@ html.light .vault-picker-search { background: rgba(255,255,255,0.5); }
 .sidebar-footer-row {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   width: 100%;
   padding: 0 0.75rem;
 }
