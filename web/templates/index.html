@@ -133,10 +133,9 @@
 
       <!-- Live dot + theme toggle (always visible) -->
       <div class="sidebar-footer-row">
-        <span class="ws-dot" :class="liveConnected ? 'connected' : 'disconnected'"
-          :title="liveConnected ? 'Live connected' : 'Reconnecting...'"></span>
-        <button class="btn-ghost" style="font-size:1.125rem;padding:0.25rem 0.375rem;line-height:1;" @click="toggleTheme()" title="Toggle theme">◐</button>
-        <button class="btn-ghost" style="font-size:0.8125rem;padding:0.25rem 0.375rem;line-height:1;opacity:0.6;" @click="showShortcutsHelp=true" title="Keyboard shortcuts (?)">?</button>
+        <span class="ws-dot mx-3" :class="liveConnected ? 'connected' : 'disconnected'" :title="liveConnected ? '在线中' : '正在连接...'"></span>
+        <button class="btn-ghost" style="font-size:1.125rem;padding:0.25rem 0.375rem;line-height:1;" @click="toggleTheme()" title="切换风格">◐</button>
+        <button x-show="sidebarExpanded" class="btn-ghost" style="font-size:0.8125rem;padding:0.25rem 0.375rem;line-height:1;opacity:0.6;" @click="showShortcutsHelp=true" title="快捷键说明">?</button>
       </div>
 
       <!-- Version label -->
@@ -178,7 +177,7 @@
       <div style="display:flex;flex-direction:column;height:calc(100vh - 7rem);min-height:600px;">
       <!-- Dashboard header -->
       <div style="display:flex;align-items:baseline;gap:0.875rem;margin-bottom:1.5rem;flex-wrap:wrap;">
-        <h2 style="margin:0;">概览</h2>
+        <h2 style="margin:0;font-size:1.65rem;font-weight:800;">概览</h2>
         <div class="vault-chip" @click="vaultModalOpen=true" style="cursor:pointer;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;opacity:0.7;"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0018 0V5"/><path d="M3 12a9 3 0 0018 0"/></svg>
           <span class="vault-chip-btn" x-text="vault"></span>
@@ -379,7 +378,7 @@
     <div x-show="currentView==='memories'">
       <!-- Memories header -->
       <div style="display:flex;align-items:baseline;gap:0.875rem;margin-bottom:1.5rem;flex-wrap:wrap;">
-        <h2 style="margin:0;">记忆</h2>
+        <h2 style="margin:0;font-size:1.65rem;font-weight:800;">记忆</h2>
         <div class="vault-chip" @click="vaultModalOpen=true" style="cursor:pointer;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;opacity:0.7;"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0018 0V5"/><path d="M3 12a9 3 0 0018 0"/></svg>
           <span class="vault-chip-btn" x-text="vault"></span>
@@ -432,12 +431,10 @@
           style="font-size:0.8125rem;padding:0.25rem 0.5rem;width:11rem;" title="按标签筛选 (需全部匹配)" />
         <!-- Confidence range -->
         <span style="font-size:0.75rem;color:var(--text-secondary);white-space:nowrap;">置信度</span>
-        <input type="number" min="0" max="1" step="0.05" x-model.number="memoryFilters.minConf"
-          style="font-size:0.8125rem;padding:0.25rem 0.4rem;width:4.5rem;background:var(--bg-card);border:1px solid var(--border);border-radius:0.375rem;color:var(--text-primary);"
+        <input type="number" min="0" max="1" step="0.05" x-model.number="memoryFilters.minConf" class="input-field" style="padding:0.25rem 0.4rem;width:4.5rem;"
           placeholder="最小" title="最小置信度 (0–1)" />
         <span style="font-size:0.75rem;color:var(--text-muted);">–</span>
-        <input type="number" min="0" max="1" step="0.05" x-model.number="memoryFilters.maxConf"
-          style="font-size:0.8125rem;padding:0.25rem 0.4rem;width:4.5rem;background:var(--bg-card);border:1px solid var(--border);border-radius:0.375rem;color:var(--text-primary);"
+        <input type="number" min="0" max="1" step="0.05" x-model.number="memoryFilters.maxConf" class="input-field" style="padding:0.25rem 0.4rem;width:4.5rem;"
           placeholder="最大" title="最大置信度 (0–1)" />
         <!-- Apply -->
         <button class="btn-primary" style="font-size:0.8125rem;padding:0.25rem 0.75rem;"
@@ -723,7 +720,7 @@
     <div style="height:calc(100vh - 7rem);display:flex;flex-direction:column;">
       <!-- Graph header -->
       <div style="display:flex;align-items:baseline;gap:0.875rem;margin-bottom:1.5rem;flex-wrap:wrap;">
-        <h2 style="margin:0;">关系图</h2>
+        <h2 style="margin:0;font-size:1.65rem;font-weight:800;">关系图</h2>
         <div class="vault-chip" @click="vaultModalOpen=true" style="cursor:pointer;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;opacity:0.7;"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0018 0V5"/><path d="M3 12a9 3 0 0018 0"/></svg>
           <span class="vault-chip-btn" x-text="vault"></span>
@@ -752,7 +749,7 @@
             <button class="btn-primary" @click="loadGraph()">加载图</button>
             <label style="display:flex;align-items:center;gap:0.375rem;font-size:0.8125rem;color:var(--text-muted);" title="要加载的记忆数量">
               限制
-              <input type="number" x-model.number="graphLimit" min="1" max="200" step="10" style="width:4.5rem;padding:0.25rem 0.375rem;background:var(--bg-surface);border:1px solid var(--border);border-radius:0.375rem;color:var(--text-primary);font-size:0.8125rem;text-align:center;" />
+              <input type="number" x-model.number="graphLimit" min="1" max="200" step="10" class="input-field"  style="width:4.5rem;padding:0.25rem 0.375rem;text-align:center;" />
             </label>
             <!-- Orphan toggle -->
             <label style="display:flex;align-items:center;gap:0.375rem;font-size:0.8125rem;color:var(--text-muted);cursor:pointer;" title="显示没有关联的记忆（孤立节点）">
@@ -821,7 +818,7 @@
     <!-- ── Observability View ─────────────────────────────────────── -->
     <div x-show="currentView==='observability'">
       <div style="display:flex;align-items:baseline;gap:0.875rem;margin-bottom:1.5rem;flex-wrap:wrap;">
-        <h2 style="margin:0;">可观测性</h2>
+        <h2 style="margin:0;font-size:1.65rem;font-weight:800;">可观测性</h2>
       </div>
       <template x-if="obs">
         <div>
@@ -1068,7 +1065,7 @@
     <!-- ── Settings View ────────────────────────────────────────────── -->
     <div x-show="currentView==='settings'">
       <div style="display:flex;align-items:baseline;gap:0.875rem;margin-bottom:1.5rem;flex-wrap:wrap;">
-        <h2 style="margin:0;">设置</h2>
+        <h2 style="margin:0;font-size:1.65rem;font-weight:800;">设置</h2>
       </div>
 
       <!-- Sub-navigation tabs -->
@@ -2183,7 +2180,7 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
     <!-- ── Session View ─────────────────────────────────────────────── -->
     <div x-show="currentView==='session'">
       <div style="display:flex;align-items:baseline;gap:0.875rem;margin-bottom:1.5rem;flex-wrap:wrap;">
-        <h2 style="margin:0;">会话时间线</h2>
+        <h2 style="margin:0;font-size:1.65rem;font-weight:800;">会话时间线</h2>
         <div class="vault-chip" @click="vaultModalOpen=true" style="cursor:pointer;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;opacity:0.7;"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0018 0V5"/><path d="M3 12a9 3 0 0018 0"/></svg>
           <span class="vault-chip-btn" x-text="vault"></span>
@@ -2220,8 +2217,8 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
     <div x-show="currentView==='logs'" x-data="logsTab()" x-init="init()"
          style="display:flex;flex-direction:column;height:calc(100vh - 7rem);">
       <!-- Toolbar -->
-      <div style="display:flex;align-items:center;gap:0.625rem;margin-bottom:0.625rem;flex-shrink:0;">
-        <h2 style="margin:0;">服务器日志</h2>
+      <div style="display:flex;align-items:baseline;gap:0.875rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+        <h2 style="margin:0;font-size:1.65rem;font-weight: 800;">服务器日志</h2>
         <select x-model="levelFilter" style="background:var(--bg-elevated);color:var(--text-secondary);font-size:0.75rem;padding:0.25rem 0.5rem;border-radius:0.25rem;border:1px solid var(--border);">
           <option value="">全部级别</option>
           <option value="DEBUG">DEBUG</option>
@@ -2261,7 +2258,7 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
     <div x-show="currentView==='cluster'" x-init="loadClusterEvents()">
       <!-- Cluster header -->
       <div style="display:flex;align-items:baseline;gap:0.875rem;margin-bottom:1.5rem;flex-wrap:wrap;">
-        <h2 style="margin:0;">集群</h2>
+        <h2 style="margin:0;font-size:1.65rem;font-weight: 800;">集群</h2>
       </div>
       <!-- Cluster disabled state: Enable Cluster card -->
       <div x-show="clusterEnabled === false">
@@ -2287,7 +2284,7 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
            <div style="display:flex;flex-direction:column;gap:1rem;">
             <div>
               <label style="display:block;font-size:0.75rem;font-weight:500;margin-bottom:0.375rem;color:var(--text-muted);">角色</label>
-              <select x-model="clusterEnableForm.role" style="width:100%;font-size:0.875rem;border-radius:0.375rem;padding:0.5rem 0.75rem;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-primary);">
+              <select x-model="clusterEnableForm.role" class="input-field w-full" >
                 <option value="primary">主节点 (Cortex)</option>
                 <option value="replica">副本节点 (Lobe)</option>
                 <option value="sentinel">哨兵</option>
@@ -2296,8 +2293,7 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
             </div>
             <div>
               <label style="display:block;font-size:0.75rem;font-weight:500;margin-bottom:0.375rem;color:var(--text-muted);">绑定地址</label>
-              <input x-model="clusterEnableForm.bindAddr" type="text" placeholder="10.0.0.1:7777"
-                style="width:100%;font-size:0.875rem;border-radius:0.375rem;padding:0.5rem 0.75rem;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-primary);box-sizing:border-box;">
+              <input x-model="clusterEnableForm.bindAddr" class="input-field w-full" type="text" placeholder="10.0.0.1:7777" >
             </div>
             <div x-show="clusterEnableForm.role !== 'primary'">
               <label style="display:block;font-size:0.75rem;font-weight:500;margin-bottom:0.375rem;color:var(--text-muted);">主节点地址</label>
@@ -2308,8 +2304,7 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
               <label style="display:block;font-size:0.75rem;font-weight:500;margin-bottom:0.375rem;color:var(--text-muted);">
                 集群密钥 <span style="font-weight:400;color:var(--text-muted);">（推荐）</span>
               </label>
-              <input x-model="clusterEnableForm.clusterSecret" type="password" placeholder="留空表示开放集群"
-                style="width:100%;font-size:0.875rem;border-radius:0.375rem;padding:0.5rem 0.75rem;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-primary);box-sizing:border-box;">
+              <input x-model="clusterEnableForm.clusterSecret" type="password" placeholder="留空表示开放集群" class="input-field w-full">
               <p x-show="!clusterEnableForm.clusterSecret" style="margin:0.25rem 0 0;font-size:0.75rem;color:#eab308;">
                 &#9888; 无密钥时，任意节点都可加入此集群
               </p>
@@ -2757,8 +2752,6 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
           </div>
          </div>
         </div>
-
-      </div>
 
       <!-- Unknown state (still loading) -->
       <div x-show="clusterEnabled === null" style="color:var(--text-muted);font-size:0.875rem;padding:1rem;">

@@ -5,11 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="dfb344c8-3376-40fd-999c-3f2268f759ae" name="更改" comment="">
-      <change beforePath="$PROJECT_DIR$/static/css/app.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/app.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/static/css/base.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/base.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/static/css/components.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/components.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/css/theme.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/theme.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/js/app.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/app.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -108,7 +105,7 @@
       <option name="presentableId" value="Default" />
       <updated>1774350430609</updated>
       <workItem from="1774350431677" duration="2137000" />
-      <workItem from="1774352631393" duration="9399000" />
+      <workItem from="1774352631393" duration="13102000" />
     </task>
     <servers />
   </component>

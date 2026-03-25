@@ -31,3 +31,6 @@ a:hover { text-decoration: underline; }
   border: 3px solid transparent;
   background-clip: padding-box;
 }
+
+::-webkit-calendar-picker-indicator { filter: invert(0.8); }
+html.light ::-webkit-calendar-picker-indicator { filter: none; }
