@@ -5,36 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>MuninnDB</title>
 
-  <style>
-    @keyframes gradientShift {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
-    }
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
-    }
-    @keyframes pulse-glow {
-      0%, 100% { opacity: 0.4; }
-      50% { opacity: 0.8; }
-    }
-    .hero-gradient {
-      background: linear-gradient(135deg, rgba(6, 182, 212, 0.1) 0%, rgba(168, 85, 247, 0.1) 50%, rgba(6, 182, 212, 0.05) 100%);
-      background-size: 200% 200%;
-      animation: gradientShift 15s ease infinite;
-    }
-    .glass-card {
-      background: rgba(15, 17, 23, 0.6);
-      backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.08);
-    }
-    html.light .glass-card {
-      background: rgba(255, 255, 255, 0.7);
-      border: 1px solid rgba(0, 0, 0, 0.08);
-    }
-  </style>
-
   <!-- FOUC prevention: apply theme before paint -->
   <script>
     (function() {
@@ -205,7 +175,7 @@
 
     <!-- ── Dashboard View ───────────────────────────────────────────── -->
     <div x-show="currentView==='dashboard'">
-      <div style="display:flex;flex-direction:column;height:calc(100vh - 3rem);min-height:600px;">
+      <div style="display:flex;flex-direction:column;height:calc(100vh - 7rem);min-height:600px;">
       <!-- Dashboard header -->
       <div style="display:flex;align-items:baseline;gap:0.875rem;margin-bottom:1.5rem;flex-wrap:wrap;">
         <h2 style="margin:0;">概览</h2>
@@ -216,9 +186,9 @@
       </div>
 
       <!-- Connect banner: shown only when no memories yet -->
-      <div x-show="stats.engramCount === 0 && isAuthenticated"
-        class="hero-gradient"
-        style="border:1px solid rgba(6,182,212,0.25);border-radius:1rem;padding:1.5rem 1.75rem;margin-bottom:2rem;display:flex;align-items:center;gap:1.25rem;flex-wrap:wrap;box-shadow:0 4px 24px rgba(6,182,212,0.1);">
+      <div x-show="stats.engramCount === 0 && isAuthenticated">
+       <div class="hero-gradient"
+        style="border:1px solid rgba(6,182,212,0.25);border-radius:1rem;padding:1.5rem 1.75rem;margin-bottom:1.5rem;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;box-shadow:0 4px 24px rgba(6,182,212,0.1);">
         <div style="flex:1;min-width:0;">
           <div style="font-weight:600;color:var(--text-primary);margin-bottom:0.375rem;font-size:1.125rem;">开始构建记忆</div>
           <div style="font-size:0.875rem;color:var(--text-secondary);line-height:1.6;">通过 MCP 连接 AI 工具，或直接通过 SDK 写入 — 记忆将被自动存储和检索。</div>
@@ -226,10 +196,11 @@
         <button class="btn-primary" style="white-space:nowrap;" @click="navigateTo('settings')">
           开始使用 →
         </button>
+       </div>
       </div>
 
       <!-- Stat cards -->
-      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:2rem;align-items:start;">
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:1.5rem;align-items:start;">
         <div class="stat-card" title="该仓库中存储的记忆总数">
           <div class="stat-value" data-testid="stat-engram-count" x-text="stats.engramCount.toLocaleString()">0</div>
           <div class="stat-label">记忆数</div>
@@ -249,9 +220,9 @@
         <!-- Cognitive Workers card -->
         <div class="stat-card" style="min-width:0;gap:0;">
           <!-- Header -->
-          <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:0.625rem;border-bottom:1px solid var(--border);margin-bottom:0.5rem;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding-bottom:0.25rem;border-bottom:1px solid var(--border);">
             <div class="stat-label" style="margin:0;">认知工作进程</div>
-            <div style="display:flex;align-items:center;gap:0.4375rem;">
+            <div style="display:flex;align-items:center;gap:0.25rem;">
               <span x-show="workerStats.some(w => w.state !== 2)" :style="workersOverallHealthStyle()" x-text="workersOverallHealthLabel()"></span>
               <button @click="cognitiveInfoModal = true"
                 title="了解认知工作进程"
@@ -288,7 +259,7 @@
           </div>
           <!-- Last-run footer -->
           <div x-show="workerStats.length > 0"
-            style="font-size:0.6875rem;color:var(--text-muted);padding-top:0.4375rem;text-align:right;">
+            style="font-size:0.6875rem;color:var(--text-muted);padding-top:0.25rem;text-align:right;">
             上次运行: <span x-text="workersLastRunSummary()"></span>
           </div>
         </div>
@@ -416,7 +387,7 @@
       </div>
 
       <!-- Memories sub-tab bar (Item 1) -->
-      <div style="display:flex;gap:0.25rem;margin-bottom:1.25rem;border-bottom:1px solid var(--border);">
+      <div style="display:flex;gap:0.5rem;margin-bottom:1.25rem;border-bottom:1px solid var(--border);">
         <button @click="memoriesSubTab='list'"
           :style="memoriesSubTab==='list' ? 'border-bottom:2px solid var(--accent);font-weight:600;opacity:1;' : 'opacity:0.6;'"
           style="padding:0.5rem 1rem;font-size:0.875rem;background:none;border:none;cursor:pointer;color:var(--text-primary);transition:opacity 0.15s;">记忆列表</button>
@@ -457,7 +428,7 @@
           <option value="archived">已归档</option>
         </select>
         <!-- Tags -->
-        <input class="input-field" placeholder="标签 (逗号分隔, 且)" x-model="memoryFilters.tags"
+        <input class="input-field" placeholder="标签 (多选:逗号分隔)" x-model="memoryFilters.tags"
           style="font-size:0.8125rem;padding:0.25rem 0.5rem;width:11rem;" title="按标签筛选 (需全部匹配)" />
         <!-- Confidence range -->
         <span style="font-size:0.75rem;color:var(--text-secondary);white-space:nowrap;">置信度</span>
@@ -479,22 +450,14 @@
         <input id="memory-search-input" data-testid="input-search" class="input-field" placeholder="搜索记忆… (语义搜索，尝试自然语言)" x-model="searchQuery"
           @keydown.enter="searchMemories()" style="flex:1;min-width:200px;" />
         <!-- Recall mode segmented control (Item 3: tooltips) -->
-        <div style="display:inline-flex;border:1px solid var(--border);border-radius:0.375rem;overflow:hidden;font-size:0.75rem;">
-          <button @click="searchMode = 'balanced'"
-            :style="searchMode === 'balanced' ? 'background:var(--accent);color:#fff;' : 'background:var(--bg-elevated);color:var(--text-secondary);'"
-            style="padding:0.25rem 0.625rem;border:none;cursor:pointer;transition:all 0.15s;"
+        <div class="segmented-control">
+          <button class="seg-btn" :class="{ active: searchMode === 'balanced' }" @click="searchMode = 'balanced'"
             title="混合关键词 + 语义搜索，带时间衰减 (默认)">平衡</button>
-          <button @click="searchMode = 'semantic'"
-            :style="searchMode === 'semantic' ? 'background:var(--accent);color:#fff;' : 'background:var(--bg-elevated);color:var(--text-secondary);'"
-            style="padding:0.25rem 0.625rem;border:none;cursor:pointer;transition:all 0.15s;"
+          <button class="seg-btn" :class="{ active: searchMode === 'semantic' }" @click="searchMode = 'semantic'"
             title="纯向量相似度 — 最适合概念匹配">语义</button>
-          <button @click="searchMode = 'recent'"
-            :style="searchMode === 'recent' ? 'background:var(--accent);color:#fff;' : 'background:var(--bg-elevated);color:var(--text-secondary);'"
-            style="padding:0.25rem 0.625rem;border:none;cursor:pointer;transition:all 0.15s;"
+          <button class="seg-btn" :class="{ active: searchMode === 'recent' }" @click="searchMode = 'recent'"
             title="优先显示最近创建的记忆">最近</button>
-          <button @click="searchMode = 'deep'"
-            :style="searchMode === 'deep' ? 'background:var(--accent);color:#fff;' : 'background:var(--bg-elevated);color:var(--text-secondary);'"
-            style="padding:0.25rem 0.625rem;border:none;cursor:pointer;transition:all 0.15s;"
+          <button class="seg-btn" :class="{ active: searchMode === 'deep' }" @click="searchMode = 'deep'"
             title="穷举图遍历 — 较慢但能发现远距离关联">深度</button>
         </div>
         <button class="btn-primary" @click="searchMemories()">搜索</button>
@@ -647,9 +610,11 @@
           <button class="btn-ghost" @click="selectedMemory=null" style="flex-shrink:0;">✕</button>
         </div>
         <!-- Action buttons row -->
-        <div x-show="selectedMemory && !editingMemory" style="display:flex;gap:0.5rem;margin-bottom:1rem;">
+        <div x-show="selectedMemory && !editingMemory">
+         <div style="display:flex;gap:0.5rem;margin-bottom:1rem;">
           <button class="btn-ghost" style="font-size:0.8125rem;padding:0.25rem 0.625rem;" @click="startEditMemory()">编辑</button>
-          <button class="btn-ghost" style="font-size:0.8125rem;padding:0.25rem 0.625rem;" @click="openLinkModal(selectedMemory.id)">链接</button>
+           <button class="btn-ghost" style="font-size:0.8125rem;padding:0.25rem 0.625rem;" @click="openLinkModal(selectedMemory.id)">链接</button>
+         </div>
         </div>
         <template x-if="selectedMemory">
           <div>
@@ -691,11 +656,13 @@
                 <button x-show="!editingTags" class="btn-ghost" style="font-size:0.75rem;padding:0.1rem 0.4rem;" @click="startEditTags()">编辑</button>
               </div>
               <!-- Read-only tag chips -->
-              <div x-show="!editingTags" style="display:flex;flex-wrap:wrap;gap:0.25rem;">
+              <div x-show="!editingTags">
+               <div style="display:flex;flex-wrap:wrap;gap:0.25rem;">
                 <template x-for="tag in (selectedMemory.tags || [])" :key="tag">
                   <span class="badge-warning" x-text="tag"></span>
                 </template>
                 <span x-show="!(selectedMemory.tags && selectedMemory.tags.length)" style="color:var(--text-muted);font-size:0.875rem;">无</span>
+               </div>
               </div>
               <!-- Tag edit mode -->
               <div x-show="editingTags">
@@ -765,8 +732,12 @@
 
       <!-- Tabs -->
       <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border);padding-bottom:0;">
-        <button class="btn-secondary" :style="graphTab==='memory' ? 'border-bottom:2px solid #06b6d4;padding-bottom:0.625rem;' : 'padding-bottom:0.75rem;'" @click="graphTab='memory'">记忆图</button>
-        <button class="btn-secondary" :style="graphTab==='entity' ? 'border-bottom:2px solid #06b6d4;padding-bottom:0.625rem;' : 'padding-bottom:0.75rem;'" @click="graphTab='entity'">实体图</button>
+        <button :style="graphTab==='memory' ? 'border-bottom:2px solid var(--accent);font-weight:600;opacity:1;' : 'opacity:0.6;'"
+                style="padding:0.5rem 1rem;font-size:0.875rem;background:none;border:none;cursor:pointer;color:var(--text-primary);transition:opacity 0.15s;"
+                @click="graphTab='memory'">记忆图</button>
+        <button :style="graphTab==='entity' ? 'border-bottom:2px solid var(--accent);font-weight:600;opacity:1;' : 'opacity:0.6;'"
+                style="padding:0.5rem 1rem;font-size:0.875rem;background:none;border:none;cursor:pointer;color:var(--text-primary);transition:opacity 0.15s;"
+                @click="graphTab='entity'">实体图</button>
       </div>
 
       <!-- Memory Graph Tab -->
@@ -790,19 +761,23 @@
             </label>
             <span x-show="graphLoaded" class="badge-success">已加载</span>
             <!-- Zoom controls -->
-            <div x-show="graphLoaded" style="display:flex;gap:0.375rem;margin-left:auto;align-items:center;">
+            <div x-show="graphLoaded">
+             <div style="display:flex;gap:0.375rem;margin-left:auto;align-items:center;">
               <button class="btn-secondary" style="padding:0.25rem 0.625rem;font-size:0.8125rem;" title="循环标签显示：完整 → 简短 → 无" @click="graphCycleLabel()" x-text="graphLabelMode === 'full' ? '标签：完整' : graphLabelMode === 'short' ? '标签：简短' : '标签：无'"></button>
               <button class="btn-secondary" style="padding:0.25rem 0.625rem;font-size:0.875rem;" title="放大" @click="graphZoomIn()">+</button>
               <button class="btn-secondary" style="padding:0.25rem 0.625rem;font-size:0.875rem;" title="缩小" @click="graphZoomOut()">−</button>
               <button class="btn-secondary" style="padding:0.25rem 0.75rem;font-size:0.8125rem;" title="适应所有节点到视图" @click="graphFit()">适应</button>
+             </div>
             </div>
           </div>
-          <div x-show="!graphLoaded" style="flex:1;min-height:500px;border:1px solid var(--border);border-radius:0.75rem;display:flex;align-items:center;justify-content:center;color:var(--text-muted);">
+          <div x-show="!graphLoaded">
+           <div style="flex:1;min-height:500px;border:1px solid var(--border);border-radius:0.75rem;display:flex;align-items:center;justify-content:center;color:var(--text-muted);">
             <div style="text-align:center;">
               <div style="font-size:2rem;margin-bottom:0.75rem;">⬡</div>
               <div>点击 <strong>加载图</strong> 来可视化记忆连接</div>
               <div style="font-size:0.8125rem;margin-top:0.5rem;">需要至少2条有关联的记忆</div>
             </div>
+           </div>
           </div>
           <div id="cy" x-show="graphLoaded" style="flex:1;min-height:500px;border:1px solid var(--border);border-radius:0.75rem;"></div>
         </div>
@@ -820,19 +795,23 @@
             <span style="color:var(--text-muted);font-size:0.875rem;" x-text="entityGraphStatus || '点击加载来可视化实体'"></span>
             <span x-show="entityGraphLoaded" class="badge-success">已加载</span>
             <!-- Zoom controls -->
-            <div x-show="entityGraphLoaded" style="display:flex;gap:0.375rem;margin-left:auto;align-items:center;">
+            <div x-show="entityGraphLoaded">
+             <div style="display:flex;gap:0.375rem;margin-left:auto;align-items:center;">
               <button class="btn-secondary" style="padding:0.25rem 0.625rem;font-size:0.8125rem;" title="循环标签显示：完整 → 简短 → 无" @click="entityGraphCycleLabel()" x-text="entityGraphLabelMode === 'full' ? '标签：完整' : entityGraphLabelMode === 'short' ? '标签：简短' : '标签：无'"></button>
               <button class="btn-secondary" style="padding:0.25rem 0.625rem;font-size:0.875rem;" title="放大" @click="entityGraphZoomIn()">+</button>
               <button class="btn-secondary" style="padding:0.25rem 0.625rem;font-size:0.875rem;" title="缩小" @click="entityGraphZoomOut()">−</button>
               <button class="btn-secondary" style="padding:0.25rem 0.75rem;font-size:0.8125rem;" title="适应所有节点到视图" @click="entityGraphFit()">适应</button>
+             </div>
             </div>
           </div>
-          <div x-show="!entityGraphLoaded" style="flex:1;min-height:500px;border:1px solid var(--border);border-radius:0.75rem;display:flex;align-items:center;justify-content:center;color:var(--text-muted);">
+          <div x-show="!entityGraphLoaded">
+           <div style="flex:1;min-height:500px;border:1px solid var(--border);border-radius:0.75rem;display:flex;align-items:center;justify-content:center;color:var(--text-muted);">
             <div style="text-align:center;">
               <div style="font-size:2rem;margin-bottom:0.75rem;">⬡</div>
               <div>点击 <strong>加载实体图</strong> 来可视化实体关系</div>
               <div style="font-size:0.8125rem;margin-top:0.5rem;">需要从记忆中提取的实体</div>
             </div>
+           </div>
           </div>
           <div id="entity-cy" x-show="entityGraphLoaded" style="flex:1;min-height:500px;border:1px solid var(--border);border-radius:0.75rem;"></div>
         </div>
@@ -841,8 +820,9 @@
 
     <!-- ── Observability View ─────────────────────────────────────── -->
     <div x-show="currentView==='observability'">
-      <h2 style="margin:0 0 1.5rem 0;">可观测性</h2>
-
+      <div style="display:flex;align-items:baseline;gap:0.875rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+        <h2 style="margin:0;">可观测性</h2>
+      </div>
       <template x-if="obs">
         <div>
           <!-- System Health -->
@@ -929,10 +909,10 @@
                           <div style="background:var(--accent);height:100%;border-radius:4px;transition:width 0.3s;" :style="'width:' + Math.min(100, (proc.processed / proc.total * 100)) + '%'"></div>
                         </div>
                         <div style="display:flex;justify-content:space-between;font-size:0.6875rem;color:var(--text-muted);margin-top:0.25rem;">
-                          <span x-text="proc.processed + ' / ' + proc.total + ' 已处理'"></span>
-                          <span x-show="proc.rate_per_sec > 0" x-text="proc.rate_per_sec.toFixed(1) + '/秒'"></span>
-                          <span x-show="proc.eta_seconds > 0" x-text="'ETA ' + proc.eta_seconds + '秒'"></span>
-                          <span x-show="proc.errors > 0" style="color:rgb(239,68,68);" x-text="proc.errors + ' 错误'"></span>
+                          <span x-text="proc.processed + ' / ' + proc.total + ' processed'"></span>
+                          <span x-show="proc.rate_per_sec > 0" x-text="proc.rate_per_sec.toFixed(1) + '/s'"></span>
+                          <span x-show="proc.eta_seconds > 0" x-text="'ETA ' + proc.eta_seconds + 's'"></span>
+                          <span x-show="proc.errors > 0" style="color:rgb(239,68,68);" x-text="proc.errors + ' errors'"></span>
                         </div>
                       </div>
                     </template>
@@ -1001,7 +981,7 @@
           <div class="settings-card" style="margin-bottom:1.25rem;">
             <h3 style="margin:0 0 1rem 0;font-size:0.9375rem;">认知工作者</h3>
             <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:0.75rem;">
-              <template x-for="[name, w] in [['Hebbian', obs.cognitive_workers.hebbian], ['Contradiction', obs.cognitive_workers.contradiction], ['Confidence', obs.cognitive_workers.confidence]]" :key="name">
+              <template x-for="[name, w] in [['Hebbian(赫布学习)', obs.cognitive_workers.hebbian], ['Contradiction(矛盾检测)', obs.cognitive_workers.contradiction], ['Confidence(置信度)', obs.cognitive_workers.confidence]]" :key="name">
                 <div style="background:var(--card-bg);border:1px solid var(--border);border-radius:0.5rem;padding:0.75rem 1rem;">
                   <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.5rem;">
                     <span style="font-weight:600;font-size:0.8125rem;" x-text="name"></span>
@@ -1055,8 +1035,8 @@
                           <th style="text-align:right;padding:0.25rem 0.5rem;">p50</th>
                           <th style="text-align:right;padding:0.25rem 0.5rem;">p95</th>
                           <th style="text-align:right;padding:0.25rem 0.5rem;">p99</th>
-                          <th style="text-align:right;padding:0.25rem 0.5rem;">平均</th>
-                          <th style="text-align:right;padding:0.25rem 0.5rem;">计数</th>
+                          <th style="text-align:right;padding:0.25rem 0.5rem;">avg</th>
+                          <th style="text-align:right;padding:0.25rem 0.5rem;">count</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -1087,7 +1067,7 @@
 
     <!-- ── Settings View ────────────────────────────────────────────── -->
     <div x-show="currentView==='settings'">
-      <div style="display:flex;align-items:baseline;gap:1rem;margin-bottom:0;">
+      <div style="display:flex;align-items:baseline;gap:0.875rem;margin-bottom:1.5rem;flex-wrap:wrap;">
         <h2 style="margin:0;">设置</h2>
       </div>
 
@@ -1332,8 +1312,7 @@
 
                 <!-- Default -->
                 <div @click="plasticityForm.showAdvanced=false; plasticityForm.preset='default'; onPlasticityPresetChange()"
-                     :style="plasticityForm.preset==='default' && !plasticityForm.showAdvanced ? 'border:2px solid #6366f1;background:rgba(99,102,241,0.12);' : 'border:1px solid var(--border);background:var(--bg-elevated);'"
-                     style="border-radius:0.625rem;padding:0.875rem;cursor:pointer;transition:all 0.15s;">
+                     :style="(plasticityForm.preset==='default' && !plasticityForm.showAdvanced ? 'border:2px solid #6366f1;background:rgba(99,102,241,0.12);' : 'border:1px solid var(--border);background:var(--bg-elevated);') + 'border-radius:0.625rem;padding:0.875rem;cursor:pointer;transition:all 0.15s;'">
                   <div style="font-weight:600;font-size:0.875rem;margin-bottom:0.25rem;">默认</div>
                   <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.5rem;">常规使用</div>
                   <div style="display:flex;gap:0.3rem;flex-wrap:wrap;">
@@ -1345,8 +1324,7 @@
 
                 <!-- Reference -->
                 <div @click="plasticityForm.showAdvanced=false; plasticityForm.preset='reference'; onPlasticityPresetChange()"
-                     :style="plasticityForm.preset==='reference' && !plasticityForm.showAdvanced ? 'border:2px solid #10b981;background:rgba(16,185,129,0.12);' : 'border:1px solid var(--border);background:var(--bg-elevated);'"
-                     style="border-radius:0.625rem;padding:0.875rem;cursor:pointer;transition:all 0.15s;">
+                     :style="(plasticityForm.preset==='reference' && !plasticityForm.showAdvanced ? 'border:2px solid #10b981;background:rgba(16,185,129,0.12);' : 'border:1px solid var(--border);background:var(--bg-elevated);') + 'border-radius:0.625rem;padding:0.875rem;cursor:pointer;transition:all 0.15s;'">
                   <div style="font-weight:600;font-size:0.875rem;margin-bottom:0.25rem;">参考</div>
                   <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.5rem;">文档和事实</div>
                   <div style="display:flex;gap:0.3rem;flex-wrap:wrap;">
@@ -1357,8 +1335,7 @@
 
                 <!-- Scratchpad -->
                 <div @click="plasticityForm.showAdvanced=false; plasticityForm.preset='scratchpad'; onPlasticityPresetChange()"
-                     :style="plasticityForm.preset==='scratchpad' && !plasticityForm.showAdvanced ? 'border:2px solid #f59e0b;background:rgba(245,158,11,0.12);' : 'border:1px solid var(--border);background:var(--bg-elevated);'"
-                     style="border-radius:0.625rem;padding:0.875rem;cursor:pointer;transition:all 0.15s;">
+                     :style="(plasticityForm.preset==='scratchpad' && !plasticityForm.showAdvanced ? 'border:2px solid #f59e0b;background:rgba(245,158,11,0.12);' : 'border:1px solid var(--border);background:var(--bg-elevated);') + 'border-radius:0.625rem;padding:0.875rem;cursor:pointer;transition:all 0.15s;'">
                   <div style="font-weight:600;font-size:0.875rem;margin-bottom:0.25rem;">记事本</div>
                   <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.5rem;">短期草稿</div>
                   <div style="display:flex;gap:0.3rem;flex-wrap:wrap;">
@@ -1369,8 +1346,7 @@
 
                 <!-- Knowledge Graph -->
                 <div @click="plasticityForm.showAdvanced=false; plasticityForm.preset='knowledge-graph'; onPlasticityPresetChange()"
-                     :style="plasticityForm.preset==='knowledge-graph' && !plasticityForm.showAdvanced ? 'border:2px solid #ec4899;background:rgba(236,72,153,0.12);' : 'border:1px solid var(--border);background:var(--bg-elevated);'"
-                     style="border-radius:0.625rem;padding:0.875rem;cursor:pointer;transition:all 0.15s;">
+                     :style="(plasticityForm.preset==='knowledge-graph' && !plasticityForm.showAdvanced ? 'border:2px solid #ec4899;background:rgba(236,72,153,0.12);' : 'border:1px solid var(--border);background:var(--bg-elevated);') + 'border-radius:0.625rem;padding:0.875rem;cursor:pointer;transition:all 0.15s;'">
                   <div style="font-weight:600;font-size:0.875rem;margin-bottom:0.25rem;">知识图谱</div>
                   <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.5rem;">密集概念</div>
                   <div style="display:flex;gap:0.3rem;flex-wrap:wrap;">
@@ -1385,16 +1361,20 @@
               <p style="font-size:0.8125rem;font-weight:600;color:var(--text-secondary);margin:0 0 0.75rem;text-transform:uppercase;letter-spacing:0.05em;">默认回忆模式</p>
               <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.625rem;margin-bottom:1.25rem;">
                 <template x-for="rm in [
-                  {id:'balanced',  label:'平衡',  desc:'引擎默认'},
-                  {id:'semantic',  label:'语义',  desc:'纯向量匹配'},
-                  {id:'recent',    label:'最近',    desc:'偏向近期'},
-                  {id:'deep',      label:'深度',      desc:'4-跳图'}
+                  {id:'balanced', label:'平衡',  desc:'引擎默认',    icon:'⚖', color:'#6366f1', bg:'rgba(99,102,241,0.12)',  border:'#6366f1'},
+                  {id:'semantic', label:'语义',  desc:'纯向量匹配',  icon:'✦', color:'#06b6d4', bg:'rgba(6,182,212,0.12)',   border:'#06b6d4'},
+                  {id:'recent',   label:'最近',  desc:'偏向近期',    icon:'◷', color:'#f59e0b', bg:'rgba(245,158,11,0.12)',  border:'#f59e0b'},
+                  {id:'deep',     label:'深度',  desc:'4-跳图遍历',  icon:'⬡', color:'#a855f7', bg:'rgba(168,85,247,0.12)',  border:'#a855f7'}
                 ]" :key="rm.id">
                   <div @click="plasticityForm.recallMode = rm.id"
-                       :style="plasticityForm.recallMode === rm.id ? 'border:2px solid var(--accent);background:rgba(99,102,241,0.12);' : 'border:1px solid var(--border);background:var(--bg-elevated);'"
-                       style="border-radius:0.625rem;padding:0.75rem;cursor:pointer;transition:all 0.15s;">
-                    <div style="font-weight:600;font-size:0.875rem;margin-bottom:0.125rem;" x-text="rm.label"></div>
-                    <div style="font-size:0.75rem;color:var(--text-muted);" x-text="rm.desc"></div>
+                       :style="(plasticityForm.recallMode === rm.id
+                         ? 'border:2px solid ' + rm.border + ';background:' + rm.bg + ';box-shadow:0 0 0 3px ' + rm.bg + ';'
+                         : 'border:1px solid var(--border);background:var(--bg-elevated);') + 'border-radius:0.75rem;padding:0.875rem 0.75rem;cursor:pointer;transition:all 0.18s ease;'">
+                    <div style="display:flex;align-items:center;gap:0.4rem;margin-bottom:0.3rem;">
+                      <span :style="'font-size:0.9rem;line-height:1;color:' + rm.color" x-text="rm.icon"></span>
+                      <div style="font-weight:600;font-size:0.8125rem;" :style="plasticityForm.recallMode === rm.id ? 'color:' + rm.color : ''" x-text="rm.label"></div>
+                    </div>
+                    <div style="font-size:0.7rem;color:var(--text-muted);line-height:1.35;" x-text="rm.desc"></div>
                   </div>
                 </template>
               </div>
@@ -1447,69 +1427,69 @@
 
               <div style="display:flex;align-items:center;gap:1rem;">
                 <button class="btn-primary" @click="savePlasticity()" :disabled="plasticitySaving">
-                  <span x-text="plasticitySaving ? 'Saving…' : 'Save Plasticity'"></span>
+                  <span x-text="plasticitySaving ? '保存中…' : '保存可塑性'"></span>
                 </button>
-                <span x-show="plasticitySaveOk" style="color:var(--success);font-size:0.8125rem;">Saved</span>
+                <span x-show="plasticitySaveOk" style="color:var(--success);font-size:0.8125rem;">已保存</span>
                 <span x-show="plasticitySaveErr" style="color:var(--danger);font-size:0.8125rem;" x-text="plasticitySaveErr"></span>
               </div>
             </div>
 
             <!-- Right: radar chart -->
             <div>
-              <p style="font-size:0.8125rem;font-weight:600;color:var(--text-secondary);margin:0 0 0.75rem;text-transform:uppercase;letter-spacing:0.05em;">Preset Comparison</p>
+              <p style="font-size:0.8125rem;font-weight:600;color:var(--text-secondary);margin:0 0 0.75rem;text-transform:uppercase;letter-spacing:0.05em;">预设对比</p>
               <canvas id="plasticityChart" style="max-height:320px;"></canvas>
             </div>
           </div>
         </div>
 
         <!-- Vault Actions -->
-        <div class="card-polished" style="max-width:560px;margin-top:1.5rem;">
-          <h3 style="margin:0 0 0.75rem;font-size:1rem;">Vault Actions</h3>
+        <div class="card-polished" style="margin-top:1.5rem;">
+          <h3 style="margin:0 0 0.75rem;font-size:1rem;">仓库操作</h3>
           <p style="color:var(--text-muted);font-size:0.8125rem;margin:0 0 1rem;">
-            Destructive operations on vault <strong style="color:var(--text-secondary);" x-text="vault"></strong>. These cannot be undone.
+            对仓库 <strong style="color:var(--text-secondary);" x-text="vault"></strong> 的破坏性操作。执行后无法撤销。
           </p>
           <div style="display:flex;gap:0.75rem;flex-wrap:wrap;">
             <button @click="openVaultAction('clear')"
                     style="padding:0.5rem 1rem;font-size:0.875rem;font-weight:500;border-radius:0.5rem;border:1px solid #f59e0b;color:#d97706;background:transparent;cursor:pointer;transition:background 0.15s;"
                     onmouseover="this.style.background='rgba(245,158,11,0.08)'" onmouseout="this.style.background='transparent'">
-              Clear Memories
+              清除记忆
             </button>
             <button @click="openVaultAction('delete')"
                     style="padding:0.5rem 1rem;font-size:0.875rem;font-weight:500;border-radius:0.5rem;border:1px solid #f87171;color:#ef4444;background:transparent;cursor:pointer;transition:background 0.15s;"
                     onmouseover="this.style.background='rgba(248,113,113,0.08)'" onmouseout="this.style.background='transparent'">
-              Delete Vault
+              删除仓库
             </button>
             <button @click="openVaultRename()"
                     style="padding:0.5rem 1rem;font-size:0.875rem;font-weight:500;border-radius:0.5rem;border:1px solid #38bdf8;color:#0ea5e9;background:transparent;cursor:pointer;transition:background 0.15s;"
                     onmouseover="this.style.background='rgba(14,165,233,0.08)'" onmouseout="this.style.background='transparent'">
-              Rename Vault
+              重命名仓库
             </button>
             <button @click="openVaultClone()"
                     style="padding:0.5rem 1rem;font-size:0.875rem;font-weight:500;border-radius:0.5rem;border:1px solid #818cf8;color:#6366f1;background:transparent;cursor:pointer;transition:background 0.15s;"
                     onmouseover="this.style.background='rgba(99,102,241,0.08)'" onmouseout="this.style.background='transparent'">
-              Clone Vault
+              克隆仓库
             </button>
             <button @click="openVaultMerge()"
                     style="padding:0.5rem 1rem;font-size:0.875rem;font-weight:500;border-radius:0.5rem;border:1px solid #c084fc;color:#a855f7;background:transparent;cursor:pointer;transition:background 0.15s;"
                     onmouseover="this.style.background='rgba(168,85,247,0.08)'" onmouseout="this.style.background='transparent'">
-              Merge Into…
+              合并到…
             </button>
             <button @click="exportVault()" :disabled="vaultExporting"
                     style="padding:0.5rem 1rem;font-size:0.875rem;font-weight:500;border-radius:0.5rem;border:1px solid #34d399;color:#10b981;background:transparent;cursor:pointer;transition:background 0.15s;"
                     onmouseover="this.style.background='rgba(52,211,153,0.08)'" onmouseout="this.style.background='transparent'"
                     :style="vaultExporting ? 'opacity:0.55;cursor:not-allowed;' : ''">
-              <span x-text="vaultExporting ? 'Exporting…' : 'Export Vault'"></span>
+              <span x-text="vaultExporting ? '导出中…' : '导出仓库'"></span>
             </button>
             <button @click="openImportModal()"
                     style="padding:0.5rem 1rem;font-size:0.875rem;font-weight:500;border-radius:0.5rem;border:1px solid #f59e0b;color:#d97706;background:transparent;cursor:pointer;transition:background 0.15s;"
                     onmouseover="this.style.background='rgba(245,158,11,0.08)'" onmouseout="this.style.background='transparent'">
-              Import Vault…
+              导入仓库…
             </button>
             <button @click="reindexFTS()" :disabled="reindexing"
                     style="padding:0.5rem 1rem;font-size:0.875rem;font-weight:500;border-radius:0.5rem;border:1px solid #60a5fa;color:#3b82f6;background:transparent;cursor:pointer;transition:background 0.15s;"
                     onmouseover="this.style.background='rgba(96,165,250,0.08)'" onmouseout="this.style.background='transparent'"
                     :style="reindexing ? 'opacity:0.55;cursor:not-allowed;' : ''">
-              <span x-text="reindexing ? 'Reindexing…' : 'Reindex FTS'"></span>
+              <span x-text="reindexing ? '重建索引中…' : '重建 FTS 索引'"></span>
             </button>
           </div>
         </div>
@@ -1518,7 +1498,7 @@
       <!-- ── Plugins tab ────────────────────────────────────────────── -->
       <div x-show="settingsTab==='plugins'">
         <p style="color:var(--text-muted);font-size:0.8125rem;margin:0 0 1.5rem;">
-          Semantic search uses the built-in model by default. Upgrade to a cloud provider for higher-quality embeddings, or add LLM enrichment to auto-extract concepts from stored memories. Changes require a server restart.
+          语义搜索默认使用内置模型。可升级到云提供商以获得更高质量的嵌入，或启用 LLM 增强从已存储记忆中自动提取概念。更改后需要重启服务器。
         </p>
 
         <!-- ── Plugin cards — side by side ── -->
@@ -1529,18 +1509,18 @@
           <!-- Card header -->
           <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1rem;">
             <div>
-              <div style="font-weight:700;font-size:1rem;margin-bottom:0.25rem;">Semantic Embedder</div>
-              <div style="font-size:0.8125rem;color:var(--text-muted);">Upgrade from the built-in model to a cloud provider for higher accuracy embeddings.</div>
+              <div style="font-weight:700;font-size:1rem;margin-bottom:0.25rem;">语义嵌入器</div>
+              <div style="font-size:0.8125rem;color:var(--text-muted);">从内置模型升级到云提供商，以获得更高精度的嵌入。</div>
             </div>
             <template x-if="(plugins.some(p => p.tier === 2) || (embedStatus && embedStatus.enabled)) && !pluginCfg.embedShowForm">
               <div style="display:flex;align-items:center;gap:0.625rem;flex-shrink:0;margin-left:1rem;">
                 <span class="badge-active" style="border-radius:9999px;padding:0.2rem 0.75rem;font-size:0.75rem;font-weight:600;">
-                  Active &mdash; <span x-text="(plugins.find(p => p.tier === 2) || {}).provider || (embedStatus && embedStatus.provider) || ''"></span>
+                  已激活 &mdash; <span x-text="(plugins.find(p => p.tier === 2) || {}).provider || (embedStatus && embedStatus.provider) || ''"></span>
                 </span>
               </div>
             </template>
             <template x-if="!plugins.some(p => p.tier === 2) && !(embedStatus && embedStatus.enabled) && !pluginCfg.embedShowForm">
-              <span class="badge-dormant" style="border-radius:9999px;padding:0.2rem 0.75rem;font-size:0.75rem;font-weight:600;flex-shrink:0;margin-left:1rem;">Not configured</span>
+              <span class="badge-dormant" style="border-radius:9999px;padding:0.2rem 0.75rem;font-size:0.75rem;font-weight:600;flex-shrink:0;margin-left:1rem;">未配置</span>
             </template>
           </div>
 
@@ -1551,15 +1531,15 @@
                 <div style="background:var(--bg-elevated);border-radius:0.5rem;padding:0.75rem 1rem;margin-bottom:0.875rem;font-size:0.8125rem;">
                   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;">
                     <div style="display:flex;gap:1.25rem;">
-                      <span style="color:var(--text-muted);">Provider: <strong style="color:var(--text-primary);" x-text="p.provider || '—'"></strong></span>
-                      <template x-if="p.model"><span style="color:var(--text-muted);">Model: <strong style="color:var(--text-primary);" x-text="p.model"></strong></span></template>
+                      <span style="color:var(--text-muted);">提供商：<strong style="color:var(--text-primary);" x-text="p.provider || '—'"></strong></span>
+                      <template x-if="p.model"><span style="color:var(--text-muted);">模型：<strong style="color:var(--text-primary);" x-text="p.model"></strong></span></template>
                     </div>
                     <span :class="p.healthy ? 'badge-active' : 'badge-danger'"
                           style="border-radius:9999px;padding:0.15rem 0.625rem;font-size:0.7rem;font-weight:600;"
-                          x-text="p.healthy ? 'Healthy' : 'Unhealthy'"></span>
+                          x-text="p.healthy ? '健康' : '不健康'"></span>
                   </div>
                   <template x-if="p.error">
-                    <div style="color:var(--danger);margin-top:0.5rem;" x-text="'Error: ' + p.error"></div>
+                    <div style="color:var(--danger);margin-top:0.5rem;" x-text="'错误：' + p.error"></div>
                   </template>
                   <!-- Embed progress bar -->
                   <template x-if="embedStatus !== null && embedStatus.indexing">
@@ -1568,12 +1548,12 @@
                         <div class="embed-progress-fill" :style="'width:' + embedProgressPct() + '%'"></div>
                       </div>
                       <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;"
-                           x-text="embedStatus.embedded_count + ' / ' + embedStatus.total_count + ' engrams indexed'"></div>
+                           x-text="embedStatus.embedded_count + ' / ' + embedStatus.total_count + ' 条记忆已索引'"></div>
                       <!-- Hardware badge (shown when Ollama — hardware_accelerated is non-null) -->
                       <div style="margin-top:0.4rem;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
                         <span x-show="pluginCfg.embedHardwareGPU !== null"
                               :style="pluginCfg.embedHardwareGPU ? 'background:#14532d;color:#22c55e;border-radius:9999px;padding:0.1rem 0.5rem;font-size:0.7rem;font-weight:600;' : 'background:#451a03;color:#f59e0b;border-radius:9999px;padding:0.1rem 0.5rem;font-size:0.7rem;font-weight:600;'">
-                          <span x-text="pluginCfg.embedHardwareGPU ? '⚡ GPU mode' : '⚠ CPU mode'"></span>
+                          <span x-text="pluginCfg.embedHardwareGPU ? '⚡ GPU 模式' : '⚠ CPU 模式'"></span>
                         </span>
                         <!-- Rate readout (show only when indexing AND rate > 0) -->
                         <span x-show="embedStatus.indexing && pluginCfg.embedRatePerSec > 0"
@@ -1582,16 +1562,16 @@
                         <!-- ETA display (show only when indexing AND ETA > 0) -->
                         <span x-show="embedStatus.indexing && pluginCfg.embedETASecs > 0"
                               style="font-size:0.7rem;color:var(--text-muted);">
-                          ⏱ <span x-text="embedETADisplay()"></span> remaining
+                          ⏱ <span x-text="embedETADisplay()"></span> 剩余
                         </span>
                       </div>
                       <!-- CPU advisory tip (show only when CPU Ollama AND indexing) -->
                       <div x-show="embedIsCPU && embedStatus.indexing" style="margin-top:0.5rem;font-size:0.75rem;color:#a8a29e;background:#1c1917;border-radius:6px;padding:0.5rem 0.75rem;">
-                        💡 CPU-only Ollama is 20–100× slower than GPU. Switch to a cloud provider (Voyage AI, OpenAI) for near-instant re-embedding.
+                        💡 仅 CPU 的 Ollama 比 GPU 慢 20–100×。切换到云提供商（Voyage AI、OpenAI）可实现近乎即时的重新嵌入。
                         <div style="margin-top:0.4rem;display:flex;gap:0.5rem;flex-wrap:wrap;">
-                          <span style="font-size:0.7rem;padding:0.2rem 0.5rem;border-radius:4px;background:#0c1a2e;color:#22c55e;">⚡ Cloud: &lt;5s total</span>
-                          <span style="font-size:0.7rem;padding:0.2rem 0.5rem;border-radius:4px;background:#1c1917;color:#f59e0b;">🎮 GPU Ollama: ~2–5 min</span>
-                          <span style="font-size:0.7rem;padding:0.2rem 0.5rem;border-radius:4px;background:#1c1917;color:#a8a29e;">🐢 CPU Ollama: 30 min–2h</span>
+                          <span style="font-size:0.7rem;padding:0.2rem 0.5rem;border-radius:4px;background:#0c1a2e;color:#22c55e;">⚡ 云端：总计 &lt;5 秒</span>
+                          <span style="font-size:0.7rem;padding:0.2rem 0.5rem;border-radius:4px;background:#1c1917;color:#f59e0b;">🎮 GPU Ollama：约 2–5 分钟</span>
+                          <span style="font-size:0.7rem;padding:0.2rem 0.5rem;border-radius:4px;background:#1c1917;color:#a8a29e;">🐢 CPU Ollama：30 分钟–2 小时</span>
                         </div>
                       </div>
                     </div>
@@ -1599,8 +1579,8 @@
                 </div>
               </template>
               <div style="display:flex;gap:0.5rem;margin-top:0.5rem;">
-                <button class="btn-secondary" style="font-size:0.8125rem;" @click="pluginCfg.embedShowForm=true;pluginCfg.embedCmd='';loadSavedPluginConfig()">Reconfigure</button>
-                <button class="btn-secondary" style="font-size:0.8125rem;" @click="reembedVault()">Re-embed vault</button>
+                <button class="btn-secondary" style="font-size:0.8125rem;" @click="pluginCfg.embedShowForm=true;pluginCfg.embedCmd='';loadSavedPluginConfig()">重新配置</button>
+                <button class="btn-secondary" style="font-size:0.8125rem;" @click="reembedVault()">重新嵌入仓库</button>
               </div>
             </div>
           </template>
@@ -1610,21 +1590,21 @@
             <div>
               <!-- Provider selector pills -->
               <div style="margin-bottom:1rem;">
-                <div style="font-size:0.8125rem;font-weight:600;color:var(--text-primary);margin-bottom:0.625rem;">Select provider</div>
+                <div style="font-size:0.8125rem;font-weight:600;color:var(--text-primary);margin-bottom:0.625rem;">选择提供商</div>
                 <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
                   <button
                     @click="pluginCfg.embedProvider='voyage';pluginCfg.embedCmd=''"
                     :class="pluginCfg.embedProvider==='voyage' ? 'tab-btn active' : 'tab-btn'"
                     style="display:flex;flex-direction:column;align-items:center;">
                     Voyage AI
-                    <div style="font-size:0.62rem;margin-top:0.15rem;color:#22c55e;">⚡ Near-instant</div>
+                    <div style="font-size:0.62rem;margin-top:0.15rem;color:#22c55e;">⚡ 近乎即时</div>
                   </button>
                   <button
                     @click="pluginCfg.embedProvider='openai';pluginCfg.embedCmd=''"
                     :class="pluginCfg.embedProvider==='openai' ? 'tab-btn active' : 'tab-btn'"
                     style="display:flex;flex-direction:column;align-items:center;">
                     OpenAI
-                    <div style="font-size:0.62rem;margin-top:0.15rem;color:#22c55e;">⚡ Near-instant</div>
+                    <div style="font-size:0.62rem;margin-top:0.15rem;color:#22c55e;">⚡ 近乎即时</div>
                   </button>
 
                   <button
@@ -1638,8 +1618,8 @@
                     @click="pluginCfg.embedProvider='local';pluginCfg.embedCmd=''"
                     :class="pluginCfg.embedProvider==='local' ? 'tab-btn active' : 'tab-btn'"
                     style="display:flex;flex-direction:column;align-items:center;">
-                    Built-in
-                    <div style="font-size:0.62rem;margin-top:0.15rem;color:#60a5fa;">🔧 Fast, local</div>
+                    内置
+                    <div style="font-size:0.62rem;margin-top:0.15rem;color:#60a5fa;">🔧 快速，本地</div>
                   </button>
                 </div>
 
@@ -1647,37 +1627,43 @@
                 <div style="margin-top:0.75rem;">
 
                   <!-- Voyage AI -->
-                  <div x-show="pluginCfg.embedProvider === 'voyage'" style="background:#0f1f3b;border:1px solid #1d4ed8;border-radius:8px;padding:0.65rem 0.9rem;display:flex;gap:2rem;flex-wrap:wrap;">
-                    <div style="font-size:0.75rem;"><div style="color:#64748b;margin-bottom:0.2rem;">Speed</div><div style="color:#22c55e;">⚡ &lt;5s for any vault size</div></div>
-                    <div style="font-size:0.75rem;"><div style="color:#64748b;margin-bottom:0.2rem;">Data</div><div style="color:#f8fafc;">Text sent to Voyage API</div></div>
-                    <div style="font-size:0.75rem;"><div style="color:#64748b;margin-bottom:0.2rem;">Requires</div><div style="color:#f8fafc;">API key</div></div>
+                  <div x-show="pluginCfg.embedProvider === 'voyage'">
+                   <div style="background:#0f1f3b;border:1px solid #1d4ed8;border-radius:8px;padding:0.65rem 0.9rem;display:flex;gap:2rem;flex-wrap:wrap;">
+                    <div style="font-size:0.75rem;"><div style="color:#64748b;margin-bottom:0.2rem;">速度</div><div style="color:#22c55e;">⚡ 任意仓库规模均 &lt;5 秒</div></div>
+                    <div style="font-size:0.75rem;"><div style="color:#64748b;margin-bottom:0.2rem;">数据</div><div style="color:#f8fafc;">文本会发送到 Voyage API</div></div>
+                    <div style="font-size:0.75rem;"><div style="color:#64748b;margin-bottom:0.2rem;">要求</div><div style="color:#f8fafc;">API 密钥</div></div>
+                   </div>
                   </div>
 
                   <!-- OpenAI -->
-                  <div x-show="pluginCfg.embedProvider === 'openai'" style="background:#0f1f3b;border:1px solid #1d4ed8;border-radius:8px;padding:0.65rem 0.9rem;display:flex;gap:2rem;flex-wrap:wrap;">
-                    <div style="font-size:0.75rem;"><div style="color:#64748b;margin-bottom:0.2rem;">Speed</div><div style="color:#22c55e;">⚡ &lt;5s for any vault size</div></div>
-                    <div style="font-size:0.75rem;"><div style="color:#64748b;margin-bottom:0.2rem;">Data</div><div style="color:#f8fafc;">Text sent to OpenAI API</div></div>
-                    <div style="font-size:0.75rem;"><div style="color:#64748b;margin-bottom:0.2rem;">Requires</div><div style="color:#f8fafc;">API key</div></div>
+                  <div x-show="pluginCfg.embedProvider === 'openai'">
+                   <div style="background:#0f1f3b;border:1px solid #1d4ed8;border-radius:8px;padding:0.65rem 0.9rem;display:flex;gap:2rem;flex-wrap:wrap;">
+                    <div style="font-size:0.75rem;"><div style="color:#64748b;margin-bottom:0.2rem;">速度</div><div style="color:#22c55e;">⚡ 任意仓库规模均 &lt;5 秒</div></div>
+                    <div style="font-size:0.75rem;"><div style="color:#64748b;margin-bottom:0.2rem;">数据</div><div style="color:#f8fafc;">文本会发送到 OpenAI API</div></div>
+                    <div style="font-size:0.75rem;"><div style="color:#64748b;margin-bottom:0.2rem;">要求</div><div style="color:#f8fafc;">API 密钥</div></div>
+                   </div>
                   </div>
 
 
                   <!-- Ollama -->
                   <div x-show="pluginCfg.embedProvider === 'ollama'" style="background:#1c1403;border:1px solid #78350f;border-radius:8px;padding:0.65rem 0.9rem;">
                     <div style="display:flex;gap:2rem;flex-wrap:wrap;margin-bottom:0.5rem;">
-                      <div style="font-size:0.75rem;"><div style="color:#64748b;margin-bottom:0.2rem;">Speed</div><div style="color:#f59e0b;">GPU: ~2–5 min &nbsp;·&nbsp; CPU: 30 min–2h+</div></div>
-                      <div style="font-size:0.75rem;"><div style="color:#64748b;margin-bottom:0.2rem;">Data</div><div style="color:#22c55e;">Stays on your machine</div></div>
-                      <div style="font-size:0.75rem;"><div style="color:#64748b;margin-bottom:0.2rem;">Requires</div><div style="color:#f8fafc;">Ollama running locally</div></div>
+                      <div style="font-size:0.75rem;"><div style="color:#64748b;margin-bottom:0.2rem;">速度</div><div style="color:#f59e0b;">GPU：约 2–5 分钟 &nbsp;·&nbsp; CPU：30 分钟–2 小时+</div></div>
+                      <div style="font-size:0.75rem;"><div style="color:#64748b;margin-bottom:0.2rem;">数据</div><div style="color:#22c55e;">保留在你的机器上</div></div>
+                      <div style="font-size:0.75rem;"><div style="color:#64748b;margin-bottom:0.2rem;">要求</div><div style="color:#f8fafc;">本地运行 Ollama</div></div>
                     </div>
                     <div style="font-size:0.72rem;color:#a8a29e;background:#1c1917;border-radius:6px;padding:0.4rem 0.65rem;">
-                      💡 Re-embed speed depends on your hardware. GPU-accelerated Ollama is fastest. CPU-only is significantly slower.
+                      💡 重新嵌入速度取决于你的硬件。GPU 加速的 Ollama 最快，纯 CPU 会明显更慢。
                     </div>
                   </div>
 
                   <!-- Built-in -->
-                  <div x-show="pluginCfg.embedProvider === 'local'" style="background:#0c1a2e;border:1px solid #1e40af;border-radius:8px;padding:0.65rem 0.9rem;display:flex;gap:2rem;flex-wrap:wrap;">
-                    <div style="font-size:0.75rem;"><div style="color:#64748b;margin-bottom:0.2rem;">Speed</div><div style="color:#60a5fa;">~1–3 min for any vault</div></div>
-                    <div style="font-size:0.75rem;"><div style="color:#64748b;margin-bottom:0.2rem;">Data</div><div style="color:#22c55e;">Fully local, no API</div></div>
-                    <div style="font-size:0.75rem;"><div style="color:#64748b;margin-bottom:0.2rem;">Requires</div><div style="color:#f8fafc;">Nothing extra</div></div>
+                  <div x-show="pluginCfg.embedProvider === 'local'">
+                   <div style="background:#0c1a2e;border:1px solid #1e40af;border-radius:8px;padding:0.65rem 0.9rem;display:flex;gap:2rem;flex-wrap:wrap;">
+                    <div style="font-size:0.75rem;"><div style="color:#64748b;margin-bottom:0.2rem;">速度</div><div style="color:#60a5fa;">任意仓库约 1–3 分钟</div></div>
+                    <div style="font-size:0.75rem;"><div style="color:#64748b;margin-bottom:0.2rem;">数据</div><div style="color:#22c55e;">完全本地，无 API</div></div>
+                    <div style="font-size:0.75rem;"><div style="color:#64748b;margin-bottom:0.2rem;">要求</div><div style="color:#f8fafc;">无需额外组件</div></div>
+                   </div>
                   </div>
 
                 </div>
@@ -1688,28 +1674,28 @@
                 <!-- Ollama status indicator -->
                 <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;">
                   <template x-if="pluginCfg.ollamaChecking">
-                    <span style="font-size:0.75rem;color:var(--text-muted);">Detecting Ollama…</span>
+                    <span style="font-size:0.75rem;color:var(--text-muted);">正在检测 Ollama…</span>
                   </template>
                   <template x-if="!pluginCfg.ollamaChecking && pluginCfg.ollamaDetected === true">
                     <span style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.75rem;font-weight:600;color:var(--success);">
                       <span style="width:7px;height:7px;border-radius:50%;background:var(--success);flex-shrink:0;"></span>
-                      Ollama detected — <span x-text="pluginCfg.ollamaModels.length + ' model' + (pluginCfg.ollamaModels.length !== 1 ? 's' : '') + ' available'"></span>
+                      已检测到 Ollama — <span x-text="pluginCfg.ollamaModels.length + ' 个可用模型'"></span>
                     </span>
                   </template>
                   <template x-if="!pluginCfg.ollamaChecking && pluginCfg.ollamaDetected === false">
                     <span style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.75rem;font-weight:600;color:var(--warning);">
                       <span style="width:7px;height:7px;border-radius:50%;background:var(--warning);flex-shrink:0;"></span>
-                      Ollama not found at localhost:11434
+                      在 localhost:11434 未找到 Ollama
                     </span>
                   </template>
                   <template x-if="!pluginCfg.ollamaChecking && pluginCfg.ollamaDetected !== false">
-                    <button class="btn-ghost" style="font-size:0.75rem;padding:0.15rem 0.5rem;margin-left:auto;" @click="probeOllama()">Refresh</button>
+                    <button class="btn-ghost" style="font-size:0.75rem;padding:0.15rem 0.5rem;margin-left:auto;" @click="probeOllama()">刷新</button>
                   </template>
                 </div>
                 <!-- Model dropdown (when detected) or text input (fallback) -->
                 <template x-if="pluginCfg.ollamaDetected === true && (pluginCfg.ollamaEmbedModels.length || pluginCfg.ollamaModels.length)">
                   <div class="form-group">
-                    <label>Embedding model</label>
+                    <label>嵌入模型</label>
                     <select class="input-field" x-model="pluginCfg.embedOllamaModel">
                       <template x-if="pluginCfg.ollamaEmbedModels.length">
                         <template x-for="m in pluginCfg.ollamaEmbedModels" :key="m">
@@ -1722,14 +1708,14 @@
                         </template>
                       </template>
                     </select>
-                    <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;" x-show="!pluginCfg.ollamaEmbedModels.length">No embed-specific models found. Any model listed above can be used, but nomic-embed-text is recommended.</div>
+                    <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;" x-show="!pluginCfg.ollamaEmbedModels.length">未找到专用嵌入模型。可使用上方任意模型，但推荐 nomic-embed-text。</div>
                   </div>
                 </template>
                 <template x-if="pluginCfg.ollamaDetected !== true">
                   <div class="form-group">
-                    <label>Model name</label>
+                    <label>模型名称</label>
                     <input class="input-field" x-model="pluginCfg.embedOllamaModel" placeholder="nomic-embed-text" />
-                    <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Start Ollama and pull an embedding model (e.g. <code style="color:var(--accent);">ollama pull nomic-embed-text</code>), then click Refresh above.</div>
+                    <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">启动 Ollama 并拉取一个嵌入模型（例如 <code style="color:var(--accent);">ollama pull nomic-embed-text</code>），然后点击上方“刷新”。</div>
                   </div>
                 </template>
               </div>
@@ -1737,29 +1723,29 @@
               <!-- OpenAI key + base URL fields -->
               <div x-show="pluginCfg.embedProvider==='openai'" style="margin-bottom:1rem;">
                 <div class="form-group">
-                  <label>OpenAI API Key</label>
+                  <label>OpenAI API 密钥</label>
                   <input class="input-field" type="password" x-model="pluginCfg.embedApiKey" placeholder="sk-..." autocomplete="off" />
                 </div>
                 <div class="form-group" style="margin-top:0.75rem;">
-                  <label>Base URL <span style="font-weight:400;color:var(--text-muted);">(optional)</span></label>
+                  <label>基础 URL <span style="font-weight:400;color:var(--text-muted);">（可选）</span></label>
                   <input class="input-field" type="text" x-model="pluginCfg.embedUrl" placeholder="https://api.openai.com/v1" autocomplete="off" />
-                  <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Leave blank for standard OpenAI. Set to use LocalAI, LM Studio, Azure OpenAI, or any compatible endpoint.</div>
+                  <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">留空则使用标准 OpenAI。可设置为 LocalAI、LM Studio、Azure OpenAI 或任意兼容端点。</div>
                 </div>
               </div>
 
               <!-- Voyage AI key field -->
               <div x-show="pluginCfg.embedProvider==='voyage'" style="margin-bottom:1rem;">
                 <div class="form-group">
-                  <label>Voyage AI API Key</label>
+                  <label>Voyage AI API 密钥</label>
                   <input class="input-field" type="password" x-model="pluginCfg.embedApiKey" placeholder="pa-..." autocomplete="off" />
                 </div>
               </div>
 
 
               <div style="display:flex;gap:0.625rem;align-items:center;margin-bottom:0.875rem;">
-                <button class="btn-primary" style="font-size:0.8125rem;" @click="savePluginConfig('embed')">Save</button>
+                <button class="btn-primary" style="font-size:0.8125rem;" @click="savePluginConfig('embed')">保存</button>
                 <template x-if="pluginCfg.embedShowForm">
-                  <button class="btn-ghost" style="font-size:0.8125rem;" @click="pluginCfg.embedShowForm=false">Cancel</button>
+                  <button class="btn-ghost" style="font-size:0.8125rem;" @click="pluginCfg.embedShowForm=false">取消</button>
                 </template>
                 <span x-show="pluginCfg.embedError" x-text="pluginCfg.embedError" style="font-size:0.8125rem;color:var(--danger,#ef4444);"></span>
               </div>
@@ -1777,18 +1763,18 @@
           <!-- Card header -->
           <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1rem;">
             <div>
-              <div style="font-weight:700;font-size:1rem;margin-bottom:0.25rem;">LLM Enrichment</div>
-              <div style="font-size:0.8125rem;color:var(--text-muted);">Auto-extracts entities, summaries, and tags from stored memories using a language model.</div>
+              <div style="font-weight:700;font-size:1rem;margin-bottom:0.25rem;">LLM 增强</div>
+              <div style="font-size:0.8125rem;color:var(--text-muted);">使用语言模型从已存储记忆中自动提取实体、摘要和标签。</div>
             </div>
             <template x-if="plugins.some(p => p.tier === 3) && !pluginCfg.enrichShowForm">
               <div style="display:flex;align-items:center;gap:0.625rem;flex-shrink:0;margin-left:1rem;">
                 <span class="badge-active" data-testid="enrich-active-badge" style="border-radius:9999px;padding:0.2rem 0.75rem;font-size:0.75rem;font-weight:600;">
-                  Active &mdash; <span x-text="(plugins.find(p => p.tier === 3) || {}).provider || ''"></span>
+                  已激活 &mdash; <span x-text="(plugins.find(p => p.tier === 3) || {}).provider || ''"></span>
                 </span>
               </div>
             </template>
             <template x-if="!plugins.some(p => p.tier === 3) && !pluginCfg.enrichShowForm">
-              <span class="badge-dormant" style="border-radius:9999px;padding:0.2rem 0.75rem;font-size:0.75rem;font-weight:600;flex-shrink:0;margin-left:1rem;">Not configured</span>
+              <span class="badge-dormant" style="border-radius:9999px;padding:0.2rem 0.75rem;font-size:0.75rem;font-weight:600;flex-shrink:0;margin-left:1rem;">未配置</span>
             </template>
           </div>
 
@@ -1799,19 +1785,19 @@
                 <div style="background:var(--bg-elevated);border-radius:0.5rem;padding:0.75rem 1rem;margin-bottom:0.875rem;font-size:0.8125rem;">
                   <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;">
                     <div style="display:flex;gap:1.25rem;">
-                      <span style="color:var(--text-muted);">Provider: <strong style="color:var(--text-primary);" x-text="p.provider || '—'"></strong></span>
-                      <template x-if="p.model"><span style="color:var(--text-muted);">Model: <strong style="color:var(--text-primary);" x-text="p.model"></strong></span></template>
+                      <span style="color:var(--text-muted);">提供商：<strong style="color:var(--text-primary);" x-text="p.provider || '—'"></strong></span>
+                      <template x-if="p.model"><span style="color:var(--text-muted);">模型：<strong style="color:var(--text-primary);" x-text="p.model"></strong></span></template>
                     </div>
                     <span :class="p.healthy ? 'badge-active' : 'badge-danger'"
                           style="border-radius:9999px;padding:0.15rem 0.625rem;font-size:0.7rem;font-weight:600;"
-                          x-text="p.healthy ? 'Healthy' : 'Unhealthy'"></span>
+                          x-text="p.healthy ? '健康' : '不健康'"></span>
                   </div>
                   <template x-if="p.error">
-                    <div style="color:var(--danger);margin-top:0.5rem;" x-text="'Error: ' + p.error"></div>
+                    <div style="color:var(--danger);margin-top:0.5rem;" x-text="'错误：' + p.error"></div>
                   </template>
                 </div>
               </template>
-              <button class="btn-secondary" style="font-size:0.8125rem;" @click="pluginCfg.enrichShowForm=true;pluginCfg.enrichCmd=''">Reconfigure</button>
+              <button class="btn-secondary" style="font-size:0.8125rem;" @click="pluginCfg.enrichShowForm=true;pluginCfg.enrichCmd=''">重新配置</button>
             </div>
           </template>
 
@@ -1820,9 +1806,9 @@
             <div>
               <!-- Provider selector pills -->
               <div style="margin-bottom:1rem;">
-                <div style="font-size:0.8125rem;font-weight:600;color:var(--text-primary);margin-bottom:0.625rem;">Select provider</div>
+                <div style="font-size:0.8125rem;font-weight:600;color:var(--text-primary);margin-bottom:0.625rem;">选择提供商</div>
                 <div style="display:flex;gap:0.5rem;flex-wrap:wrap;">
-                  <template x-for="opt in [{val:'none',label:'None'},{val:'ollama',label:'Ollama (local)'},{val:'openai',label:'OpenAI'},{val:'anthropic',label:'Anthropic'},{val:'google',label:'Google'}]" :key="opt.val">
+                  <template x-for="opt in [{val:'none',label:'无'},{val:'ollama',label:'Ollama（本地）'},{val:'openai',label:'OpenAI'},{val:'anthropic',label:'Anthropic'},{val:'google',label:'Google'}]" :key="opt.val">
                     <button
                       @click="pluginCfg.enrichProvider=opt.val;pluginCfg.enrichCmd='';if(opt.val==='google')pluginCfg.enrichModel='gemini-1.5-flash';if(opt.val==='anthropic')pluginCfg.enrichModel='claude-haiku-4-5-20251001'"
                       :class="pluginCfg.enrichProvider===opt.val ? 'tab-btn active' : 'tab-btn'"
@@ -1837,28 +1823,28 @@
                 <!-- Ollama status indicator -->
                 <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;">
                   <template x-if="pluginCfg.ollamaChecking">
-                    <span style="font-size:0.75rem;color:var(--text-muted);">Detecting Ollama…</span>
+                    <span style="font-size:0.75rem;color:var(--text-muted);">正在检测 Ollama…</span>
                   </template>
                   <template x-if="!pluginCfg.ollamaChecking && pluginCfg.ollamaDetected === true">
                     <span style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.75rem;font-weight:600;color:var(--success);">
                       <span style="width:7px;height:7px;border-radius:50%;background:var(--success);flex-shrink:0;"></span>
-                      Ollama detected — <span x-text="pluginCfg.ollamaModels.length + ' model' + (pluginCfg.ollamaModels.length !== 1 ? 's' : '') + ' available'"></span>
+                      已检测到 Ollama — <span x-text="pluginCfg.ollamaModels.length + ' 个可用模型'"></span>
                     </span>
                   </template>
                   <template x-if="!pluginCfg.ollamaChecking && pluginCfg.ollamaDetected === false">
                     <span style="display:inline-flex;align-items:center;gap:0.3rem;font-size:0.75rem;font-weight:600;color:var(--warning);">
                       <span style="width:7px;height:7px;border-radius:50%;background:var(--warning);flex-shrink:0;"></span>
-                      Ollama not found at localhost:11434
+                      在 localhost:11434 未找到 Ollama
                     </span>
                   </template>
                   <template x-if="!pluginCfg.ollamaChecking && pluginCfg.ollamaDetected !== false">
-                    <button class="btn-ghost" style="font-size:0.75rem;padding:0.15rem 0.5rem;margin-left:auto;" @click="probeOllama()">Refresh</button>
+                    <button class="btn-ghost" style="font-size:0.75rem;padding:0.15rem 0.5rem;margin-left:auto;" @click="probeOllama()">刷新</button>
                   </template>
                 </div>
                 <!-- Model dropdown (when detected) or text input (fallback) -->
                 <template x-if="pluginCfg.ollamaDetected === true && pluginCfg.ollamaModels.length">
                   <div class="form-group">
-                    <label>LLM model</label>
+                    <label>LLM 模型</label>
                     <select class="input-field" data-testid="input-enrich-ollama-model" x-model="pluginCfg.enrichOllamaModel">
                       <template x-for="m in pluginCfg.ollamaModels.filter(m => !m.toLowerCase().includes('embed'))" :key="m">
                         <option :value="m" x-text="m"></option>
@@ -1873,9 +1859,9 @@
                 </template>
                 <template x-if="pluginCfg.ollamaDetected !== true">
                   <div class="form-group">
-                    <label>Model name</label>
+                    <label>模型名称</label>
                     <input class="input-field" data-testid="input-enrich-ollama-model" x-model="pluginCfg.enrichOllamaModel" placeholder="llama3.2" />
-                    <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">Start Ollama and pull a model (e.g. <code style="color:var(--accent);">ollama pull llama3.2</code>), then click Refresh above.</div>
+                    <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.25rem;">启动 Ollama 并拉取一个模型（例如 <code style="color:var(--accent);">ollama pull llama3.2</code>），然后点击上方“刷新”。</div>
                   </div>
                 </template>
               </div>
@@ -1883,13 +1869,13 @@
               <!-- OpenAI fields -->
               <div x-show="pluginCfg.enrichProvider==='openai'" style="margin-bottom:1rem;">
                 <div class="form-group" style="margin-bottom:0.75rem;">
-                  <label>OpenAI API Key</label>
+                  <label>OpenAI API 密钥</label>
                   <input class="input-field" type="password" x-model="pluginCfg.enrichApiKey" placeholder="sk-..." autocomplete="off" />
                 </div>
                 <div class="form-group">
-                  <label>Model</label>
+                  <label>模型</label>
                   <select class="input-field" x-model="pluginCfg.enrichModel">
-                    <option value="gpt-4o-mini">gpt-4o-mini (recommended)</option>
+                    <option value="gpt-4o-mini">gpt-4o-mini（推荐）</option>
                     <option value="gpt-4o">gpt-4o</option>
                     <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
                   </select>
@@ -1899,13 +1885,13 @@
               <!-- Anthropic fields -->
               <div x-show="pluginCfg.enrichProvider==='anthropic'" style="margin-bottom:1rem;">
                 <div class="form-group" style="margin-bottom:0.75rem;">
-                  <label>Anthropic API Key</label>
+                  <label>Anthropic API 密钥</label>
                   <input class="input-field" type="password" x-model="pluginCfg.enrichApiKey" placeholder="sk-ant-..." autocomplete="off" />
                 </div>
                 <div class="form-group">
-                  <label>Model</label>
+                  <label>模型</label>
                   <select class="input-field" x-model="pluginCfg.enrichModel">
-                    <option value="claude-haiku-4-5-20251001">claude-haiku-4-5-20251001 (fastest)</option>
+                    <option value="claude-haiku-4-5-20251001">claude-haiku-4-5-20251001（最快）</option>
                     <option value="claude-sonnet-4-6">claude-sonnet-4-6</option>
                   </select>
                 </div>
@@ -1914,13 +1900,13 @@
               <!-- Google fields -->
               <div x-show="pluginCfg.enrichProvider==='google'" style="margin-bottom:1rem;">
                 <div class="form-group" style="margin-bottom:0.75rem;">
-                  <label>Google API Key</label>
+                  <label>Google API 密钥</label>
                   <input class="input-field" type="password" x-model="pluginCfg.enrichApiKey" placeholder="AIza..." autocomplete="off" />
                 </div>
                 <div class="form-group">
-                  <label>Model</label>
+                  <label>模型</label>
                   <select class="input-field" x-model="pluginCfg.enrichModel">
-                    <option value="gemini-1.5-flash">gemini-1.5-flash (recommended)</option>
+                    <option value="gemini-1.5-flash">gemini-1.5-flash（推荐）</option>
                     <option value="gemini-1.5-pro">gemini-1.5-pro</option>
                     <option value="gemini-2.0-flash">gemini-2.0-flash</option>
                   </select>
@@ -1933,15 +1919,15 @@
                   @change="pluginCfg.llm_verbose_logs = $event.target.checked || undefined"
                   style="margin-top:0.125rem;cursor:pointer;" />
                 <div>
-                  <label for="llmVerboseLogs" style="font-size:0.8125rem;font-weight:500;cursor:pointer;">Verbose LLM logs</label>
-                  <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.125rem;">Logs each LLM call to the Logs page (off by default)</div>
+                  <label for="llmVerboseLogs" style="font-size:0.8125rem;font-weight:500;cursor:pointer;">详细 LLM 日志</label>
+                  <div style="font-size:0.75rem;color:var(--text-muted);margin-top:0.125rem;">将每次 LLM 调用记录到日志页面（默认关闭）</div>
                 </div>
               </div>
 
               <div style="display:flex;gap:0.625rem;align-items:center;margin-bottom:0.875rem;">
-                <button class="btn-primary" data-testid="btn-save-enrich" style="font-size:0.8125rem;" @click="savePluginConfig('enrich')">Save</button>
+                <button class="btn-primary" data-testid="btn-save-enrich" style="font-size:0.8125rem;" @click="savePluginConfig('enrich')">保存</button>
                 <template x-if="pluginCfg.enrichShowForm">
-                  <button class="btn-ghost" style="font-size:0.8125rem;" @click="pluginCfg.enrichShowForm=false">Cancel</button>
+                  <button class="btn-ghost" style="font-size:0.8125rem;" @click="pluginCfg.enrichShowForm=false">取消</button>
                 </template>
                 <span x-show="pluginCfg.enrichError" x-text="pluginCfg.enrichError" style="font-size:0.8125rem;color:var(--danger,#ef4444);"></span>
               </div>
@@ -1955,47 +1941,41 @@
       <!-- ── Connect AI Tools tab ──────────────────────────────────── -->
       <div x-show="settingsTab==='connect'">
         <p style="color:var(--text-muted);font-size:0.8125rem;margin:0 0 1.5rem;">
-          Connect AI tools via MCP or integrate any application using the SDK.
-          Once connected, memories are stored and retrieved automatically.
+          通过 MCP 连接 AI 工具，或使用 SDK 集成任意应用。
+          连接后，记忆会自动存储和检索。
         </p>
 
         <!-- MCP Endpoint card — full width -->
         <div class="card-polished" style="margin-bottom:1.25rem;">
-          <h3 style="margin:0 0 1rem;font-size:1rem;">MCP Endpoint</h3>
+          <h3 style="margin:0 0 1rem;font-size:1rem;">MCP 端点</h3>
           <div style="font-size:0.8125rem;color:var(--text-secondary);margin-bottom:0.75rem;">
-            This is the URL your AI tool needs to connect to MuninnDB.
+            这是你的 AI 工具连接 MuninnDB 所需的 URL。
           </div>
           <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.75rem;">
             <code style="flex:1;font-family:monospace;background:var(--bg-elevated);padding:0.5rem 0.75rem;border-radius:0.375rem;font-size:0.875rem;color:var(--accent);"
               x-text="mcpInfo ? mcpInfo.url : 'http://localhost:8750/mcp'"></code>
             <button class="btn-secondary" style="white-space:nowrap;"
               @click="copyToClipboard(mcpInfo ? mcpInfo.url : 'http://localhost:8750/mcp')"
-              x-text="connectCopied ? 'Copied!' : 'Copy'"></button>
+              x-text="connectCopied ? '已复制！' : '复制'"></button>
           </div>
           <!-- Auth status row -->
           <div style="font-size:0.8125rem;color:var(--text-muted);">
             <template x-if="mcpInfo && mcpInfo.token_configured">
-              <span>🔒 Token authentication enabled — your token is at <code style="font-family:monospace;background:var(--bg-elevated);padding:0.1rem 0.35rem;border-radius:0.25rem;">~/.muninn/mcp.token</code>. The configs below include the required header.</span>
+              <span>🔒 已启用令牌认证 — 你的令牌位于 <code style="font-family:monospace;background:var(--bg-elevated);padding:0.1rem 0.35rem;border-radius:0.25rem;">~/.muninn/mcp.token</code>。下方配置已包含所需请求头。</span>
             </template>
             <template x-if="!mcpInfo || !mcpInfo.token_configured">
-              <span>⚠ No MCP token configured — endpoint is open. Run <code style="font-family:monospace;background:var(--bg-elevated);padding:0.1rem 0.35rem;border-radius:0.25rem;">muninn init</code> to add a token.</span>
+              <span>⚠ 未配置 MCP 令牌 — 端点处于开放状态。运行 <code style="font-family:monospace;background:var(--bg-elevated);padding:0.1rem 0.35rem;border-radius:0.25rem;">muninn init</code> 以添加令牌。</span>
             </template>
           </div>
         </div>
 
         <!-- Platform toggle -->
         <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;">
-          <span style="font-size:0.8125rem;color:var(--text-muted);">Platform:</span>
-          <div style="display:flex;border:1px solid var(--border);border-radius:0.375rem;overflow:hidden;">
-            <button @click="connectPlatform='macos'"
-              :style="connectPlatform==='macos' ? 'background:var(--accent);color:#fff;' : 'background:var(--bg-elevated);color:var(--text-secondary);'"
-              style="padding:0.25rem 0.75rem;font-size:0.8125rem;border:none;cursor:pointer;">macOS</button>
-            <button @click="connectPlatform='linux'"
-              :style="connectPlatform==='linux' ? 'background:var(--accent);color:#fff;' : 'background:var(--bg-elevated);color:var(--text-secondary);'"
-              style="padding:0.25rem 0.75rem;font-size:0.8125rem;border:none;border-left:1px solid var(--border);cursor:pointer;">Linux</button>
-            <button @click="connectPlatform='windows'"
-              :style="connectPlatform==='windows' ? 'background:var(--accent);color:#fff;' : 'background:var(--bg-elevated);color:var(--text-secondary);'"
-              style="padding:0.25rem 0.75rem;font-size:0.8125rem;border:none;border-left:1px solid var(--border);cursor:pointer;">Windows</button>
+          <span style="font-size:0.8125rem;color:var(--text-muted);">平台：</span>
+          <div class="segmented-control">
+            <button class="seg-btn" :class="{ active: connectPlatform==='macos' }" @click="connectPlatform='macos'">macOS</button>
+            <button class="seg-btn" :class="{ active: connectPlatform==='linux' }" @click="connectPlatform='linux'">Linux</button>
+            <button class="seg-btn" :class="{ active: connectPlatform==='windows' }" @click="connectPlatform='windows'">Windows</button>
           </div>
         </div>
 
@@ -2006,7 +1986,7 @@
           <div class="card-polished">
             <h3 style="margin:0 0 0.75rem;font-size:1rem;">Claude Code / Claude CLI</h3>
             <p style="color:var(--text-muted);font-size:0.8125rem;margin:0 0 0.5rem;">
-              Add via one command — open a terminal and run:
+              一条命令即可添加——打开终端并运行：
             </p>
             <!-- No token -->
             <template x-if="!mcpInfo || !mcpInfo.token_configured">
@@ -2018,11 +1998,11 @@
   --header "Authorization: Bearer $(cat ~/.muninn/mcp.token)"</pre>
             </template>
             <p style="font-size:0.8125rem;color:var(--text-secondary);margin:0 0 0.5rem;">
-              Or auto-configure with:
+              或使用以下命令自动配置：
             </p>
             <pre style="background:var(--bg-elevated);border-radius:0.5rem;padding:0.75rem;font-size:0.8125rem;overflow-x:auto;color:var(--text-primary);margin:0 0 0.75rem;">muninn init --tool claude-code --yes</pre>
             <p style="font-size:0.75rem;color:var(--text-muted);margin:0;">
-              Config written to <code style="font-family:monospace;background:var(--bg-base);padding:0.1rem 0.3rem;border-radius:0.2rem;">~/.claude.json</code> — no restart required.
+              配置将写入 <code style="font-family:monospace;background:var(--bg-base);padding:0.1rem 0.3rem;border-radius:0.2rem;">~/.claude.json</code> —— 无需重启。
             </p>
           </div>
 
@@ -2030,7 +2010,7 @@
           <div class="card-polished">
             <h3 style="margin:0 0 0.75rem;font-size:1rem;">Claude Desktop</h3>
             <p style="color:var(--text-muted);font-size:0.8125rem;margin:0 0 0.5rem;">
-              Run <code style="font-family:monospace;background:var(--bg-elevated);padding:0.1rem 0.35rem;border-radius:0.25rem;">muninn init --tool claude --yes</code> to configure automatically, or add manually:
+              运行 <code style="font-family:monospace;background:var(--bg-elevated);padding:0.1rem 0.35rem;border-radius:0.25rem;">muninn init --tool claude --yes</code> 可自动配置，或手动添加：
             </p>
             <p style="font-size:0.75rem;color:var(--text-muted);margin:0 0 0.5rem;">
               <code x-show="connectPlatform==='macos'" style="font-family:monospace;background:var(--bg-elevated);padding:0.1rem 0.35rem;border-radius:0.25rem;">~/Library/Application Support/Claude/claude_desktop_config.json</code>
@@ -2078,7 +2058,7 @@
           <div class="card-polished">
             <h3 style="margin:0 0 0.75rem;font-size:1rem;">Cursor</h3>
             <p style="color:var(--text-muted);font-size:0.8125rem;margin:0 0 0.5rem;">
-              Run <code style="font-family:monospace;background:var(--bg-elevated);padding:0.1rem 0.35rem;border-radius:0.25rem;">muninn init --tool cursor --yes</code> or edit
+              运行 <code style="font-family:monospace;background:var(--bg-elevated);padding:0.1rem 0.35rem;border-radius:0.25rem;">muninn init --tool cursor --yes</code>，或编辑
               <code x-show="connectPlatform!=='windows'" style="font-family:monospace;background:var(--bg-elevated);padding:0.1rem 0.35rem;border-radius:0.25rem;">~/.cursor/mcp.json</code><code x-show="connectPlatform==='windows'" style="font-family:monospace;background:var(--bg-elevated);padding:0.1rem 0.35rem;border-radius:0.25rem;">%USERPROFILE%\.cursor\mcp.json</code>:
             </p>
             <!-- No token -->
@@ -2110,7 +2090,7 @@
           <div class="card-polished">
             <h3 style="margin:0 0 0.75rem;font-size:1rem;">VS Code</h3>
             <p style="color:var(--text-muted);font-size:0.8125rem;margin:0 0 0.5rem;">
-              Create <code style="font-family:monospace;background:var(--bg-elevated);padding:0.1rem 0.35rem;border-radius:0.25rem;">.vscode/mcp.json</code> in your workspace:
+              在你的工作区创建 <code style="font-family:monospace;background:var(--bg-elevated);padding:0.1rem 0.35rem;border-radius:0.25rem;">.vscode/mcp.json</code>：
             </p>
             <!-- No token -->
             <template x-if="!mcpInfo || !mcpInfo.token_configured">
@@ -2141,7 +2121,7 @@
           <div class="card-polished">
             <h3 style="margin:0 0 0.75rem;font-size:1rem;">OpenClaw</h3>
             <p style="color:var(--text-muted);font-size:0.8125rem;margin:0 0 0.5rem;">
-              Run <code style="font-family:monospace;background:var(--bg-elevated);padding:0.1rem 0.35rem;border-radius:0.25rem;">muninn init --tool openclaw --yes</code> to configure automatically, or add manually to
+              运行 <code style="font-family:monospace;background:var(--bg-elevated);padding:0.1rem 0.35rem;border-radius:0.25rem;">muninn init --tool openclaw --yes</code> 可自动配置，或手动添加到
               <code x-show="connectPlatform!=='windows'" style="font-family:monospace;background:var(--bg-elevated);padding:0.1rem 0.35rem;border-radius:0.25rem;">~/.openclaw/openclaw.json</code><code x-show="connectPlatform==='windows'" style="font-family:monospace;background:var(--bg-elevated);padding:0.1rem 0.35rem;border-radius:0.25rem;">%APPDATA%\OpenClaw\openclaw.json</code>:
             </p>
             <pre style="background:var(--bg-elevated);border-radius:0.5rem;padding:0.75rem;font-size:0.8125rem;overflow-x:auto;color:var(--text-primary);margin:0 0 0.5rem;">{
@@ -2154,7 +2134,7 @@
   }
 }</pre>
             <p style="font-size:0.75rem;color:var(--text-muted);margin:0;">
-              OpenClaw uses stdio transport. The <code style="font-family:monospace;background:var(--bg-base);padding:0.1rem 0.3rem;border-radius:0.2rem;">muninn mcp</code> proxy handles auth automatically — no token needed in the config.
+              OpenClaw 使用 stdio 传输。<code style="font-family:monospace;background:var(--bg-base);padding:0.1rem 0.3rem;border-radius:0.2rem;">muninn mcp</code> 代理会自动处理认证——配置中无需令牌。
             </p>
           </div>
 
@@ -2162,7 +2142,7 @@
           <div class="card-polished">
             <h3 style="margin:0 0 0.75rem;font-size:1rem;">Codex</h3>
             <p style="color:var(--text-muted);font-size:0.8125rem;margin:0 0 0.5rem;">
-              Run <code style="font-family:monospace;background:var(--bg-elevated);padding:0.1rem 0.35rem;border-radius:0.25rem;">muninn init --tool codex --yes</code> or edit
+              运行 <code style="font-family:monospace;background:var(--bg-elevated);padding:0.1rem 0.35rem;border-radius:0.25rem;">muninn init --tool codex --yes</code>，或编辑
               <code x-show="connectPlatform!=='windows'" style="font-family:monospace;background:var(--bg-elevated);padding:0.1rem 0.35rem;border-radius:0.25rem;">~/.codex/config.toml</code><code x-show="connectPlatform==='windows'" style="font-family:monospace;background:var(--bg-elevated);padding:0.1rem 0.35rem;border-radius:0.25rem;">%USERPROFILE%\.codex\config.toml</code>:
             </p>
             <!-- No token -->
@@ -2189,9 +2169,9 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
 
           <!-- CLI shortcut -->
           <div class="card-polished" style="background:rgba(6,182,212,0.04);border-color:rgba(6,182,212,0.15);">
-            <h3 style="margin:0 0 0.5rem;font-size:0.9375rem;">Auto-configure from CLI</h3>
+            <h3 style="margin:0 0 0.5rem;font-size:0.9375rem;">通过 CLI 自动配置</h3>
             <p style="color:var(--text-muted);font-size:0.8125rem;margin:0 0 0.75rem;">
-              The easiest way — handles token auth automatically:
+              最简单的方式——自动处理令牌认证：
             </p>
             <code style="font-family:monospace;background:var(--bg-elevated);padding:0.5rem 0.75rem;border-radius:0.375rem;font-size:0.875rem;color:var(--accent);display:block;">muninn init</code>
           </div>
@@ -2202,21 +2182,21 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
 
     <!-- ── Session View ─────────────────────────────────────────────── -->
     <div x-show="currentView==='session'">
-      <div style="display:flex;align-items:baseline;gap:0.875rem;margin-bottom:0.25rem;flex-wrap:wrap;">
-        <h2 style="margin:0;">Session Timeline</h2>
+      <div style="display:flex;align-items:baseline;gap:0.875rem;margin-bottom:1.5rem;flex-wrap:wrap;">
+        <h2 style="margin:0;">会话时间线</h2>
         <div class="vault-chip" @click="vaultModalOpen=true" style="cursor:pointer;">
           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;opacity:0.7;"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0018 0V5"/><path d="M3 12a9 3 0 0018 0"/></svg>
           <span class="vault-chip-btn" x-text="vault"></span>
         </div>
         <div style="flex:1;"></div>
         <select class="input-field" style="width:auto;" x-model="sessionRange" @change="loadSession()">
-          <option value="24h">Last 24 hours</option>
-          <option value="7d">Last 7 days</option>
-          <option value="30d">Last 30 days</option>
+          <option value="24h">最近 24 小时</option>
+          <option value="7d">最近 7 天</option>
+          <option value="30d">最近 30 天</option>
         </select>
       </div>
       <p style="color:var(--text-muted);font-size:0.8125rem;margin:0 0 1.25rem;">
-        Memories created or accessed by connected tools and applications in the selected time window.
+        在所选时间范围内，由已连接工具和应用创建或访问的记忆。
       </p>
 
       <div style="display:flex;flex-direction:column;gap:0.75rem;margin-top:1.25rem;">
@@ -2230,20 +2210,20 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
           </div>
         </template>
         <div x-show="sessionEntries.length === 0" style="color:var(--text-muted);text-align:center;padding:3rem;">
-          No activity in this time range.<br>
-          <span style="font-size:0.8125rem;">Try a longer range, or <a href="#" style="color:var(--accent);" @click.prevent="navigateTo('settings')">get started</a> to start building memory.</span>
+          此时间范围内无活动。<br>
+          <span style="font-size:0.8125rem;">试试更长的时间范围，或前往 <a href="#" style="color:var(--accent);" @click.prevent="navigateTo('settings')">开始使用</a> 以开始构建记忆。</span>
         </div>
       </div>
     </div>
 
     <!-- ── Logs View ────────────────────────────────────────────────── -->
     <div x-show="currentView==='logs'" x-data="logsTab()" x-init="init()"
-         style="display:flex;flex-direction:column;height:calc(100vh - 3rem);">
+         style="display:flex;flex-direction:column;height:calc(100vh - 7rem);">
       <!-- Toolbar -->
       <div style="display:flex;align-items:center;gap:0.625rem;margin-bottom:0.625rem;flex-shrink:0;">
-        <h2 style="margin:0;font-size:1.125rem;">Server Logs</h2>
+        <h2 style="margin:0;">服务器日志</h2>
         <select x-model="levelFilter" style="background:var(--bg-elevated);color:var(--text-secondary);font-size:0.75rem;padding:0.25rem 0.5rem;border-radius:0.25rem;border:1px solid var(--border);">
-          <option value="">All levels</option>
+          <option value="">全部级别</option>
           <option value="DEBUG">DEBUG</option>
           <option value="INFO">INFO</option>
           <option value="WARN">WARN</option>
@@ -2251,17 +2231,17 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
         </select>
         <input
           type="text"
-          placeholder="Search logs…"
+          placeholder="搜索日志…"
           :value="searchRaw"
           @input="onSearchInput($event.target.value)"
           style="flex:1;max-width:320px;background:var(--bg-elevated);color:var(--text-primary);font-size:0.75rem;padding:0.25rem 0.625rem;border-radius:0.25rem;border:1px solid var(--border);outline:none;"
         />
-        <span style="font-size:0.7rem;color:var(--text-muted);" x-show="filtered.length !== entries.length" x-text="filtered.length + ' match' + (filtered.length===1?'':'es')"></span>
+        <span style="font-size:0.7rem;color:var(--text-muted);" x-show="filtered.length !== entries.length" x-text="filtered.length + (filtered.length===1 ? ' 条匹配' : ' 条匹配')"></span>
         <label style="display:flex;align-items:center;gap:0.25rem;font-size:0.75rem;color:var(--text-muted);cursor:pointer;white-space:nowrap;">
           <input type="checkbox" x-model="autoScroll" style="accent-color:#3b82f6;">
-          Auto-scroll
+          自动滚动
         </label>
-        <button @click="clearLogs()" style="font-size:0.75rem;color:var(--text-muted);background:none;border:none;cursor:pointer;margin-left:auto;" onmouseover="this.style.color='var(--text-secondary)'" onmouseout="this.style.color='var(--text-muted)'">Clear</button>
+        <button @click="clearLogs()" style="font-size:0.75rem;color:var(--text-muted);background:none;border:none;cursor:pointer;margin-left:auto;" onmouseover="this.style.color='var(--text-secondary)'" onmouseout="this.style.color='var(--text-muted)'">清除</button>
       </div>
       <!-- Log container — fills remaining height, newest entry at top -->
       <div id="log-container" style="font-family:monospace;font-size:0.75rem;background:var(--bg-elevated);border-radius:0.375rem;padding:0.5rem;flex:1;min-height:0;overflow-y:auto;">
@@ -2273,7 +2253,7 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
             <span x-show="Object.keys(e.attrs||{}).length > 0" style="color:var(--text-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:40%;" x-text="formatAttrs(e.attrs)"></span>
           </div>
         </template>
-        <div x-show="displayed.length === 0" style="color:var(--text-muted);text-align:center;padding:2rem;">No log entries</div>
+        <div x-show="displayed.length === 0" style="color:var(--text-muted);text-align:center;padding:2rem;">暂无日志条目</div>
       </div>
     </div>
 
@@ -2281,15 +2261,15 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
     <div x-show="currentView==='cluster'" x-init="loadClusterEvents()">
       <!-- Cluster header -->
       <div style="display:flex;align-items:baseline;gap:0.875rem;margin-bottom:1.5rem;flex-wrap:wrap;">
-        <h2 style="margin:0;">Cluster</h2>
+        <h2 style="margin:0;">集群</h2>
       </div>
-
       <!-- Cluster disabled state: Enable Cluster card -->
-      <div x-show="clusterEnabled === false" style="display:flex;align-items:center;justify-content:center;min-height:16rem;">
+      <div x-show="clusterEnabled === false">
+       <div style="display:flex;align-items:center;justify-content:center;min-height:16rem;">
         <div class="card-polished" style="padding:2rem;max-width:28rem;width:100%;">
-          <h2 style="margin:0 0 0.375rem;font-size:1.125rem;font-weight:600;color:var(--text-primary);">Enable Cluster Mode</h2>
+          <h2 style="margin:0 0 0.375rem;font-size:1.125rem;font-weight:600;color:var(--text-primary);">启用集群模式</h2>
           <p style="margin:0 0 1.5rem;font-size:0.875rem;color:var(--text-muted);">
-            Connect this node to a MuninnDB cluster for high availability and replication.
+            将此节点连接到 MuninnDB 集群以实现高可用与复制。
           </p>
 
           <!-- Error banner -->
@@ -2303,56 +2283,61 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
           </div>
 
           <!-- Form -->
-          <div x-show="!clusterEnableLoading" style="display:flex;flex-direction:column;gap:1rem;">
+          <div x-show="!clusterEnableLoading">
+           <div style="display:flex;flex-direction:column;gap:1rem;">
             <div>
-              <label style="display:block;font-size:0.75rem;font-weight:500;margin-bottom:0.375rem;color:var(--text-muted);">Role</label>
+              <label style="display:block;font-size:0.75rem;font-weight:500;margin-bottom:0.375rem;color:var(--text-muted);">角色</label>
               <select x-model="clusterEnableForm.role" style="width:100%;font-size:0.875rem;border-radius:0.375rem;padding:0.5rem 0.75rem;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-primary);">
-                <option value="primary">Primary (Cortex)</option>
-                <option value="replica">Replica (Lobe)</option>
-                <option value="sentinel">Sentinel</option>
-                <option value="observer">Observer</option>
+                <option value="primary">主节点 (Cortex)</option>
+                <option value="replica">副本节点 (Lobe)</option>
+                <option value="sentinel">哨兵</option>
+                <option value="observer">观察者</option>
               </select>
             </div>
             <div>
-              <label style="display:block;font-size:0.75rem;font-weight:500;margin-bottom:0.375rem;color:var(--text-muted);">Bind Address</label>
+              <label style="display:block;font-size:0.75rem;font-weight:500;margin-bottom:0.375rem;color:var(--text-muted);">绑定地址</label>
               <input x-model="clusterEnableForm.bindAddr" type="text" placeholder="10.0.0.1:7777"
                 style="width:100%;font-size:0.875rem;border-radius:0.375rem;padding:0.5rem 0.75rem;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-primary);box-sizing:border-box;">
             </div>
             <div x-show="clusterEnableForm.role !== 'primary'">
-              <label style="display:block;font-size:0.75rem;font-weight:500;margin-bottom:0.375rem;color:var(--text-muted);">Cortex Address</label>
+              <label style="display:block;font-size:0.75rem;font-weight:500;margin-bottom:0.375rem;color:var(--text-muted);">主节点地址</label>
               <input x-model="clusterEnableForm.cortexAddr" type="text" placeholder="10.0.0.1:7777"
                 style="width:100%;font-size:0.875rem;border-radius:0.375rem;padding:0.5rem 0.75rem;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-primary);box-sizing:border-box;">
             </div>
             <div>
               <label style="display:block;font-size:0.75rem;font-weight:500;margin-bottom:0.375rem;color:var(--text-muted);">
-                Cluster Secret <span style="font-weight:400;color:var(--text-muted);">(recommended)</span>
+                集群密钥 <span style="font-weight:400;color:var(--text-muted);">（推荐）</span>
               </label>
-              <input x-model="clusterEnableForm.clusterSecret" type="password" placeholder="Leave empty for open cluster"
+              <input x-model="clusterEnableForm.clusterSecret" type="password" placeholder="留空表示开放集群"
                 style="width:100%;font-size:0.875rem;border-radius:0.375rem;padding:0.5rem 0.75rem;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-primary);box-sizing:border-box;">
               <p x-show="!clusterEnableForm.clusterSecret" style="margin:0.25rem 0 0;font-size:0.75rem;color:#eab308;">
-                &#9888; Without a secret, any node can join this cluster
+                &#9888; 无密钥时，任意节点都可加入此集群
               </p>
             </div>
             <button @click="showEnableClusterConfirm = true"
               style="width:100%;padding:0.5rem 1rem;border-radius:0.375rem;font-size:0.875rem;font-weight:500;background:var(--accent);color:white;border:none;cursor:pointer;">
-              Enable Cluster Mode
+              启用集群模式
             </button>
+           </div>
           </div>
         </div>
+       </div>
       </div>
 
       <!-- Enable Cluster confirmation modal -->
-      <div x-show="showEnableClusterConfirm" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:50;" @click.self="showEnableClusterConfirm = false">
+      <div x-show="showEnableClusterConfirm">
+       <div style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:50;" @click.self="showEnableClusterConfirm = false">
         <div class="card-polished" style="padding:1.5rem;max-width:24rem;width:100%;">
-          <h3 style="margin:0 0 0.5rem;font-weight:600;color:var(--text-primary);">Enable Cluster Mode?</h3>
+          <h3 style="margin:0 0 0.5rem;font-weight:600;color:var(--text-primary);">启用集群模式？</h3>
           <p style="margin:0 0 1rem;font-size:0.875rem;color:var(--text-muted);">
-            This will restart the replication subsystem. Existing data is not affected.
+            这将重启复制子系统。现有数据不会受影响。
           </p>
           <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
-            <button @click="showEnableClusterConfirm = false" style="padding:0.5rem 1rem;font-size:0.875rem;border-radius:0.375rem;background:var(--bg-elevated);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;">Cancel</button>
-            <button @click="showEnableClusterConfirm = false; enableCluster()" style="padding:0.5rem 1rem;font-size:0.875rem;border-radius:0.375rem;font-weight:500;background:var(--accent);color:white;border:none;cursor:pointer;">Confirm</button>
+            <button @click="showEnableClusterConfirm = false" style="padding:0.5rem 1rem;font-size:0.875rem;border-radius:0.375rem;background:var(--bg-elevated);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;">取消</button>
+            <button @click="showEnableClusterConfirm = false; enableCluster()" style="padding:0.5rem 1rem;font-size:0.875rem;border-radius:0.375rem;font-weight:500;background:var(--accent);color:white;border:none;cursor:pointer;">确认</button>
           </div>
         </div>
+       </div>
       </div>
 
       <!-- Cluster enabled content with sub-tabs -->
@@ -2362,13 +2347,13 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
         <div style="display:flex;gap:0.25rem;margin-bottom:1.5rem;border-bottom:1px solid var(--border);">
           <button @click="clusterSubTab = 'overview'; stopClusterFeed()"
             :style="clusterSubTab === 'overview' ? 'border-bottom:2px solid var(--accent);font-weight:600;opacity:1;' : 'opacity:0.6;'"
-            style="padding:0.5rem 1rem;font-size:0.875rem;background:none;border:none;cursor:pointer;color:var(--text-primary);transition:opacity 0.15s;">Overview</button>
+            style="padding:0.5rem 1rem;font-size:0.875rem;background:none;border:none;cursor:pointer;color:var(--text-primary);transition:opacity 0.15s;">概览</button>
           <button @click="clusterSubTab = 'management'; startClusterFeed()"
             :style="clusterSubTab === 'management' ? 'border-bottom:2px solid var(--accent);font-weight:600;opacity:1;' : 'opacity:0.6;'"
-            style="padding:0.5rem 1rem;font-size:0.875rem;background:none;border:none;cursor:pointer;color:var(--text-primary);transition:opacity 0.15s;">Management</button>
+            style="padding:0.5rem 1rem;font-size:0.875rem;background:none;border:none;cursor:pointer;color:var(--text-primary);transition:opacity 0.15s;">管理</button>
           <button @click="clusterSubTab = 'settings'; loadClusterToken(); loadClusterSettings(); stopClusterFeed()"
             :style="clusterSubTab === 'settings' ? 'border-bottom:2px solid var(--accent);font-weight:600;opacity:1;' : 'opacity:0.6;'"
-            style="padding:0.5rem 1rem;font-size:0.875rem;background:none;border:none;cursor:pointer;color:var(--text-primary);transition:opacity 0.15s;">Settings</button>
+            style="padding:0.5rem 1rem;font-size:0.875rem;background:none;border:none;cursor:pointer;color:var(--text-primary);transition:opacity 0.15s;">设置</button>
         </div>
 
         <!-- ── Overview sub-tab ── -->
@@ -2387,18 +2372,18 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
 
             <!-- Cluster Members Table -->
             <div class="card-polished">
-              <h3 style="margin:0 0 1rem;color:var(--text-secondary);font-size:0.875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Cluster Members</h3>
+              <h3 style="margin:0 0 1rem;color:var(--text-secondary);font-size:0.875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">集群成员</h3>
               <div x-show="clusterNodes.length === 0" style="color:var(--text-muted);font-size:0.875rem;padding:0.5rem 0;">
-                No nodes found.
+                未找到节点。
               </div>
               <table x-show="clusterNodes.length > 0" style="width:100%;border-collapse:collapse;font-size:0.8125rem;">
                 <thead>
                   <tr style="border-bottom:1px solid var(--border);text-align:left;">
-                    <th style="padding:0.5rem 0.75rem 0.5rem 0;color:var(--text-muted);font-weight:500;">Node</th>
-                    <th style="padding:0.5rem 0.75rem;color:var(--text-muted);font-weight:500;">Role</th>
-                    <th style="padding:0.5rem 0.75rem;color:var(--text-muted);font-weight:500;">Status</th>
-                    <th style="padding:0.5rem 0.75rem;color:var(--text-muted);font-weight:500;">Epoch</th>
-                    <th style="padding:0.5rem 0;color:var(--text-muted);font-weight:500;">Replication Lag</th>
+                    <th style="padding:0.5rem 0.75rem 0.5rem 0;color:var(--text-muted);font-weight:500;">节点</th>
+                    <th style="padding:0.5rem 0.75rem;color:var(--text-muted);font-weight:500;">角色</th>
+                    <th style="padding:0.5rem 0.75rem;color:var(--text-muted);font-weight:500;">状态</th>
+                    <th style="padding:0.5rem 0.75rem;color:var(--text-muted);font-weight:500;">纪元</th>
+                    <th style="padding:0.5rem 0;color:var(--text-muted);font-weight:500;">复制延迟</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -2419,15 +2404,15 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
                   </template>
                 </tbody>
               </table>
-              <p style="color:var(--text-muted);font-size:0.75rem;margin:0.75rem 0 0;">Auto-refreshes every 5 seconds</p>
+              <p style="color:var(--text-muted);font-size:0.75rem;margin:0.75rem 0 0;">每 5 秒自动刷新</p>
             </div>
 
             <!-- Cognitive Consistency Score gauge -->
             <div class="card-polished">
-              <h3 style="margin:0 0 1rem;color:var(--text-secondary);font-size:0.875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;" title="Cognitive Consistency Score — how closely cluster nodes agree on memory weights">Cognitive Consistency</h3>
+              <h3 style="margin:0 0 1rem;color:var(--text-secondary);font-size:0.875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;" title="认知一致性评分 —— 反映集群节点在记忆权重上的一致程度">认知一致性</h3>
               <div style="text-align:center;margin-bottom:1.25rem;">
                 <div style="font-size:2.5rem;font-weight:700;line-height:1;" :style="'color:' + ccsBarColor()" x-text="ccsScore() + '%'">&#8212;</div>
-                <div style="font-size:0.8125rem;color:var(--text-muted);margin-top:0.375rem;text-transform:capitalize;" x-text="clusterCCS ? clusterCCS.assessment : 'loading\u2026'"></div>
+                <div style="font-size:0.8125rem;color:var(--text-muted);margin-top:0.375rem;text-transform:capitalize;" x-text="clusterCCS ? clusterCCS.assessment : '加载中…'"></div>
               </div>
               <div style="background:var(--bg-elevated);border-radius:9999px;height:10px;overflow:hidden;margin-bottom:0.75rem;">
                 <div :style="'height:100%;border-radius:9999px;transition:width 0.6s ease;background:' + ccsBarColor() + ';width:' + ccsScore() + '%'"></div>
@@ -2438,42 +2423,42 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
                 <span style="color:#22c55e;">99%</span>
               </div>
               <div x-show="clusterCCS && clusterCCS.sampled_at" style="margin-top:1rem;font-size:0.75rem;color:var(--text-muted);">
-                Sampled: <span x-text="clusterCCS ? new Date(clusterCCS.sampled_at).toLocaleTimeString() : ''"></span>
+                采样时间：<span x-text="clusterCCS ? new Date(clusterCCS.sampled_at).toLocaleTimeString() : ''"></span>
               </div>
-              <p style="color:var(--text-muted);font-size:0.75rem;margin:0.5rem 0 0;">Auto-refreshes every 30 seconds</p>
+              <p style="color:var(--text-muted);font-size:0.75rem;margin:0.5rem 0 0;">每 30 秒自动刷新</p>
             </div>
           </div>
 
           <!-- Failover Event Timeline -->
           <div class="card-polished" style="margin-bottom:1.5rem;">
-            <h3 style="margin:0 0 1rem;color:var(--text-secondary);font-size:0.875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Failover Event Timeline</h3>
+            <h3 style="margin:0 0 1rem;color:var(--text-secondary);font-size:0.875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">故障切换事件时间线</h3>
             <div style="max-height:220px;overflow-y:auto;display:flex;flex-direction:column;gap:0.5rem;">
               <template x-for="(ev, idx) in clusterEvents" :key="idx">
                 <div style="font-size:0.8125rem;padding:0.5rem 0.75rem;background:var(--bg-elevated);border-radius:0.375rem;font-family:monospace;color:var(--text-secondary);" x-text="ev.label"></div>
               </template>
               <div x-show="clusterEvents.length === 0" style="color:var(--text-muted);font-size:0.875rem;padding:0.5rem;">
-                No failover events recorded yet. Epoch changes will appear here automatically.
+                尚无故障切换事件记录。纪元变化会自动显示在这里。
               </div>
             </div>
           </div>
 
           <!-- Security Posture -->
           <div class="card-polished" style="padding:1.25rem;">
-            <h3 style="margin:0 0 0.75rem;color:var(--text-secondary);font-size:0.875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Security Posture</h3>
+            <h3 style="margin:0 0 0.75rem;color:var(--text-secondary);font-size:0.875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">安全态势</h3>
             <div style="display:grid;grid-template-columns:auto 1fr;gap:0.5rem 1rem;font-size:0.875rem;align-items:center;">
               <div style="color:var(--text-muted);">mTLS</div>
               <div>
-                <span x-show="clusterHealth && clusterHealth.tls_enabled" style="border-radius:9999px;padding:0.125rem 0.625rem;font-size:0.75rem;font-weight:600;background:rgba(34,197,94,0.15);color:#22c55e;">Enabled</span>
-                <span x-show="!clusterHealth || !clusterHealth.tls_enabled" style="border-radius:9999px;padding:0.125rem 0.625rem;font-size:0.75rem;font-weight:600;background:rgba(234,179,8,0.15);color:#eab308;">Disabled</span>
+                <span x-show="clusterHealth && clusterHealth.tls_enabled" style="border-radius:9999px;padding:0.125rem 0.625rem;font-size:0.75rem;font-weight:600;background:rgba(34,197,94,0.15);color:#22c55e;">已启用</span>
+                <span x-show="!clusterHealth || !clusterHealth.tls_enabled" style="border-radius:9999px;padding:0.125rem 0.625rem;font-size:0.75rem;font-weight:600;background:rgba(234,179,8,0.15);color:#eab308;">已禁用</span>
               </div>
-              <div style="color:var(--text-muted);">Join Token</div>
-              <div style="color:var(--text-secondary);" x-text="clusterSecurityPosture ? 'Valid for ' + Math.floor((clusterSecurityPosture.ttl_seconds || 0) / 60) + 'm' : '\u2014'"></div>
-              <div style="color:var(--text-muted);">Cluster Secret</div>
+              <div style="color:var(--text-muted);">加入令牌</div>
+              <div style="color:var(--text-secondary);" x-text="clusterSecurityPosture ? '有效期 ' + Math.floor((clusterSecurityPosture.ttl_seconds || 0) / 60) + ' 分钟' : '\u2014'"></div>
+              <div style="color:var(--text-muted);">集群密钥</div>
               <div>
-                <span x-show="clusterSecurityPosture && clusterSecurityPosture.token" style="border-radius:9999px;padding:0.125rem 0.625rem;font-size:0.75rem;font-weight:600;background:rgba(34,197,94,0.15);color:#22c55e;">Configured</span>
-                <span x-show="!clusterSecurityPosture || !clusterSecurityPosture.token" style="border-radius:9999px;padding:0.125rem 0.625rem;font-size:0.75rem;font-weight:600;background:rgba(234,179,8,0.15);color:#eab308;">Not set</span>
+                <span x-show="clusterSecurityPosture && clusterSecurityPosture.token" style="border-radius:9999px;padding:0.125rem 0.625rem;font-size:0.75rem;font-weight:600;background:rgba(34,197,94,0.15);color:#22c55e;">已配置</span>
+                <span x-show="!clusterSecurityPosture || !clusterSecurityPosture.token" style="border-radius:9999px;padding:0.125rem 0.625rem;font-size:0.75rem;font-weight:600;background:rgba(234,179,8,0.15);color:#eab308;">未设置</span>
               </div>
-              <div style="color:var(--text-muted);">In-flight Encryption</div>
+              <div style="color:var(--text-muted);">传输中加密</div>
               <div style="color:var(--text-secondary);">TLS 1.3</div>
             </div>
           </div>
@@ -2486,13 +2471,13 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
           <div style="display:flex;gap:0.75rem;margin-bottom:1.5rem;">
             <button @click="showAddNodeModal = true"
               style="padding:0.5rem 1rem;font-size:0.875rem;border-radius:0.375rem;font-weight:500;background:var(--accent);color:white;border:none;cursor:pointer;">
-              + Add Node
+              + 添加节点
             </button>
             <button @click="showFailoverModal = true"
               :disabled="!clusterHealth || !clusterHealth.is_leader"
               :style="(!clusterHealth || !clusterHealth.is_leader) ? 'opacity:0.4;cursor:not-allowed;' : 'opacity:1;cursor:pointer;'"
               style="padding:0.5rem 1rem;font-size:0.875rem;border-radius:0.375rem;background:var(--bg-elevated);color:var(--text-primary);border:1px solid var(--border);">
-              Trigger Failover
+              触发故障切换
             </button>
           </div>
 
@@ -2501,9 +2486,9 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
             <table style="width:100%;border-collapse:collapse;font-size:0.8125rem;">
               <thead>
                 <tr style="border-bottom:1px solid var(--border);">
-                  <th style="padding:0.75rem 1rem;text-align:left;font-weight:500;color:var(--text-muted);">Node</th>
-                  <th style="padding:0.75rem 1rem;text-align:left;font-weight:500;color:var(--text-muted);">Role</th>
-                  <th style="padding:0.75rem 1rem;text-align:left;font-weight:500;color:var(--text-muted);">Lag</th>
+                  <th style="padding:0.75rem 1rem;text-align:left;font-weight:500;color:var(--text-muted);">节点</th>
+                  <th style="padding:0.75rem 1rem;text-align:left;font-weight:500;color:var(--text-muted);">角色</th>
+                  <th style="padding:0.75rem 1rem;text-align:left;font-weight:500;color:var(--text-muted);">延迟</th>
                   <th style="padding:0.75rem 1rem;"></th>
                 </tr>
               </thead>
@@ -2518,13 +2503,13 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
                     <td style="padding:0.75rem 1rem;text-align:right;">
                       <button @click="removeNodeTarget = n; removeNodeError = null; showRemoveNodeModal = true"
                         style="padding:0.25rem 0.75rem;font-size:0.75rem;border-radius:0.375rem;background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.3);cursor:pointer;">
-                        Remove
+                        删除
                       </button>
                     </td>
                   </tr>
                 </template>
                 <tr x-show="clusterNodes.length === 0">
-                  <td colspan="4" style="padding:1rem;text-align:center;color:var(--text-muted);font-size:0.875rem;">No nodes</td>
+                  <td colspan="4" style="padding:1rem;text-align:center;color:var(--text-muted);font-size:0.875rem;">无节点</td>
                 </tr>
               </tbody>
             </table>
@@ -2533,10 +2518,10 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
           <!-- Live Activity Feed -->
           <div class="card-polished" style="padding:1.25rem;">
             <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem;">
-              <h3 style="margin:0;color:var(--text-primary);font-size:0.875rem;font-weight:600;">Live Activity</h3>
+              <h3 style="margin:0;color:var(--text-primary);font-size:0.875rem;font-weight:600;">实时活动</h3>
               <button @click="clusterFeedPaused = !clusterFeedPaused"
                 style="padding:0.25rem 0.5rem;font-size:0.75rem;border-radius:0.375rem;background:var(--bg-elevated);color:var(--text-muted);border:1px solid var(--border);cursor:pointer;"
-                x-text="clusterFeedPaused ? 'Resume' : 'Pause'"></button>
+                x-text="clusterFeedPaused ? '继续' : '暂停'"></button>
             </div>
             <div style="font-family:monospace;font-size:0.75rem;max-height:16rem;overflow-y:auto;"
                  @mouseenter="clusterFeedPaused = true"
@@ -2548,7 +2533,7 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
                 </div>
               </template>
               <div x-show="clusterFeed.length === 0" style="color:var(--text-muted);">
-                Waiting for replication activity...
+                等待复制活动...
               </div>
             </div>
           </div>
@@ -2559,34 +2544,34 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
 
           <!-- Join Token -->
           <div class="card-polished" style="padding:1.25rem;margin-bottom:1.25rem;">
-            <h3 style="margin:0 0 1rem;color:var(--text-secondary);font-size:0.875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Join Token</h3>
-            <div x-show="clusterTokenLoading" style="font-size:0.875rem;color:var(--text-muted);">Loading...</div>
+            <h3 style="margin:0 0 1rem;color:var(--text-secondary);font-size:0.875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">加入令牌</h3>
+            <div x-show="clusterTokenLoading" style="font-size:0.875rem;color:var(--text-muted);">加载中...</div>
             <div x-show="!clusterTokenLoading && clusterToken">
               <div style="display:flex;gap:0.5rem;margin-bottom:0.5rem;">
                 <input type="text" :value="clusterToken && clusterToken.token" readonly
                   style="flex:1;font-size:0.75rem;font-family:monospace;border-radius:0.375rem;padding:0.5rem 0.75rem;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-secondary);">
                 <button @click="copyToken()"
                   style="padding:0.5rem 0.75rem;font-size:0.75rem;border-radius:0.375rem;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-secondary);cursor:pointer;flex-shrink:0;">
-                  <span x-show="!clusterTokenCopied">Copy</span>
-                  <span x-show="clusterTokenCopied" style="color:#22c55e;">Copied &#10003;</span>
+                  <span x-show="!clusterTokenCopied">复制</span>
+                  <span x-show="clusterTokenCopied" style="color:#22c55e;">已复制 &#10003;</span>
                 </button>
               </div>
               <p style="margin:0 0 0.75rem;font-size:0.75rem;color:var(--text-muted);">
-                Valid for <span x-text="Math.floor(((clusterToken && clusterToken.ttl_seconds) || 0) / 60)"></span> minutes
+                有效期 <span x-text="Math.floor(((clusterToken && clusterToken.ttl_seconds) || 0) / 60)"></span> 分钟
               </p>
               <button @click="showRegenerateTokenConfirm = true"
                 style="padding:0.375rem 0.75rem;font-size:0.75rem;border-radius:0.375rem;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-secondary);cursor:pointer;">
-                Regenerate Token
+                重新生成令牌
               </button>
             </div>
             <div x-show="!clusterTokenLoading && !clusterToken" style="font-size:0.875rem;color:var(--text-muted);">
-              No token available (cluster may not have a secret configured).
+              无可用令牌（集群可能未配置密钥）。
             </div>
           </div>
 
           <!-- TLS Certificate -->
           <div class="card-polished" style="padding:1.25rem;margin-bottom:1.25rem;">
-            <h3 style="margin:0 0 1rem;color:var(--text-secondary);font-size:0.875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">TLS Certificate</h3>
+            <h3 style="margin:0 0 1rem;color:var(--text-secondary);font-size:0.875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">TLS 证书</h3>
             <div style="display:flex;justify-content:space-between;align-items:center;">
               <div>
                 <p style="margin:0 0 0.25rem;font-size:0.875rem;color:var(--text-secondary);">mTLS</p>
@@ -2594,19 +2579,19 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
               </div>
               <button @click="rotateTLS()"
                 style="padding:0.375rem 0.75rem;font-size:0.75rem;border-radius:0.375rem;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-secondary);cursor:pointer;">
-                Rotate Certificate
+                轮换证书
               </button>
             </div>
           </div>
 
           <!-- Cluster Behavior -->
           <div class="card-polished" style="padding:1.25rem;">
-            <h3 style="margin:0 0 1rem;color:var(--text-secondary);font-size:0.875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">Cluster Behavior</h3>
+            <h3 style="margin:0 0 1rem;color:var(--text-secondary);font-size:0.875rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;">集群行为</h3>
             <div style="display:flex;flex-direction:column;gap:1rem;">
               <div style="display:flex;justify-content:space-between;align-items:center;">
                 <div>
-                  <p style="margin:0 0 0.25rem;font-size:0.875rem;color:var(--text-secondary);">Heartbeat Interval</p>
-                  <p style="margin:0;font-size:0.75rem;color:var(--text-muted);">Milliseconds between PING messages</p>
+                  <p style="margin:0 0 0.25rem;font-size:0.875rem;color:var(--text-secondary);">心跳间隔</p>
+                  <p style="margin:0;font-size:0.75rem;color:var(--text-muted);">PING 消息之间的毫秒数</p>
                 </div>
                 <input type="number" x-model.number="clusterSettings.heartbeat_ms" min="100" max="10000"
                   data-testid="input-cluster-heartbeat-ms"
@@ -2614,8 +2599,8 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
               </div>
               <div style="display:flex;justify-content:space-between;align-items:center;">
                 <div>
-                  <p style="margin:0 0 0.25rem;font-size:0.875rem;color:var(--text-secondary);">SDOWN Threshold</p>
-                  <p style="margin:0;font-size:0.75rem;color:var(--text-muted);">Missed heartbeats before marking SDOWN</p>
+                  <p style="margin:0 0 0.25rem;font-size:0.875rem;color:var(--text-secondary);">SDOWN 阈值</p>
+                  <p style="margin:0;font-size:0.75rem;color:var(--text-muted);">标记为 SDOWN 前允许丢失的心跳次数</p>
                 </div>
                 <input type="number" x-model.number="clusterSettings.sdown_beats" min="1" max="20"
                   data-testid="input-cluster-sdown-beats"
@@ -2623,8 +2608,8 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
               </div>
               <div style="display:flex;justify-content:space-between;align-items:center;">
                 <div>
-                  <p style="margin:0 0 0.25rem;font-size:0.875rem;color:var(--text-secondary);">CCS Probe Interval</p>
-                  <p style="margin:0;font-size:0.75rem;color:var(--text-muted);">Seconds between consistency checks</p>
+                  <p style="margin:0 0 0.25rem;font-size:0.875rem;color:var(--text-secondary);">CCS 探测间隔</p>
+                  <p style="margin:0;font-size:0.75rem;color:var(--text-muted);">一致性检查之间的秒数</p>
                 </div>
                 <input type="number" x-model.number="clusterSettings.ccs_interval_seconds" min="5" max="300"
                   data-testid="input-cluster-ccs-interval"
@@ -2632,8 +2617,8 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
               </div>
               <div style="display:flex;justify-content:space-between;align-items:center;">
                 <div>
-                  <p style="margin:0 0 0.25rem;font-size:0.875rem;color:var(--text-secondary);">Reconcile on Heal</p>
-                  <p style="margin:0;font-size:0.75rem;color:var(--text-muted);">Run reconciliation after partition heals</p>
+                  <p style="margin:0 0 0.25rem;font-size:0.875rem;color:var(--text-secondary);">恢复后对账</p>
+                  <p style="margin:0;font-size:0.75rem;color:var(--text-muted);">网络分区恢复后执行对账</p>
                 </div>
                 <div @click="clusterSettings.reconcile_on_heal = !clusterSettings.reconcile_on_heal"
                   data-testid="toggle-cluster-reconcile-heal"
@@ -2648,10 +2633,10 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
               <button @click="saveClusterSettings()" :disabled="clusterSettingsSaving"
                 data-testid="btn-save-cluster-settings"
                 style="padding:0.5rem 1rem;font-size:0.875rem;border-radius:0.375rem;font-weight:500;background:var(--accent);color:white;border:none;cursor:pointer;">
-                <span x-show="!clusterSettingsSaving">Save</span>
-                <span x-show="clusterSettingsSaving">Saving...</span>
+                <span x-show="!clusterSettingsSaving">保存</span>
+                <span x-show="clusterSettingsSaving">保存中...</span>
               </button>
-              <span x-show="clusterSettingsSaved" data-testid="cluster-settings-saved-msg" style="font-size:0.75rem;color:#22c55e;">Saved &#10003;</span>
+              <span x-show="clusterSettingsSaved" data-testid="cluster-settings-saved-msg" style="font-size:0.75rem;color:#22c55e;">已保存 &#10003;</span>
             </div>
           </div>
         </div>
@@ -2659,73 +2644,81 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
         <!-- Modals (inside enabled cluster div) -->
 
         <!-- Add Node Modal -->
-        <div x-show="showAddNodeModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:50;" @click.self="showAddNodeModal = false">
+        <div x-show="showAddNodeModal">
+         <div style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:50;" @click.self="showAddNodeModal = false">
           <div class="card-polished" style="padding:1.5rem;max-width:28rem;width:100%;">
-            <h3 style="margin:0 0 1rem;font-weight:600;color:var(--text-primary);">Add Node</h3>
+            <h3 style="margin:0 0 1rem;font-weight:600;color:var(--text-primary);">添加节点</h3>
             <div x-show="addNodeError" style="margin-bottom:0.75rem;padding:0.75rem;border-radius:0.375rem;background:rgba(239,68,68,0.1);color:#ef4444;font-size:0.875rem;" x-text="addNodeError"></div>
             <div x-show="addNodeLoading" style="margin-bottom:0.75rem;">
               <template x-for="step in addNodeProgress" :key="step">
                 <div style="font-size:0.875rem;color:var(--text-secondary);margin-bottom:0.25rem;" x-text="'→ ' + step"></div>
               </template>
             </div>
-            <div x-show="!addNodeLoading" style="display:flex;flex-direction:column;gap:1rem;">
+            <div x-show="!addNodeLoading">
+             <div style="display:flex;flex-direction:column;gap:1rem;">
               <div>
-                <label style="display:block;font-size:0.75rem;font-weight:500;margin-bottom:0.375rem;color:var(--text-muted);">Node Address</label>
+                <label style="display:block;font-size:0.75rem;font-weight:500;margin-bottom:0.375rem;color:var(--text-muted);">节点地址</label>
                 <div style="display:flex;gap:0.5rem;">
                   <input x-model="addNodeForm.addr" type="text" placeholder="10.0.0.2:7777"
                     style="flex:1;font-size:0.875rem;border-radius:0.375rem;padding:0.5rem 0.75rem;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-primary);">
                   <button @click="testNodeReachability()" :disabled="!addNodeForm.addr || addNodeTesting"
                     style="padding:0.5rem 0.75rem;font-size:0.75rem;border-radius:0.375rem;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-secondary);cursor:pointer;flex-shrink:0;"
                     :style="(!addNodeForm.addr || addNodeTesting) ? 'opacity:0.5;cursor:not-allowed;' : ''">
-                    <span x-show="!addNodeTesting">Test</span>
+                    <span x-show="!addNodeTesting">测试</span>
                     <span x-show="addNodeTesting">...</span>
                   </button>
                 </div>
                 <div x-show="addNodeTestResult" style="margin-top:0.375rem;font-size:0.75rem;">
-                  <span x-show="addNodeTestResult && addNodeTestResult.reachable" style="color:#22c55e;">&#10003; Reachable (<span x-text="addNodeTestResult && addNodeTestResult.latency_ms"></span>ms)</span>
-                  <span x-show="addNodeTestResult && !addNodeTestResult.reachable" style="color:#ef4444;">&#10007; <span x-text="addNodeTestResult && (addNodeTestResult.error || 'Unreachable')"></span></span>
+                  <span x-show="addNodeTestResult && addNodeTestResult.reachable" style="color:#22c55e;">&#10003; 可达（<span x-text="addNodeTestResult && addNodeTestResult.latency_ms"></span>ms）</span>
+                  <span x-show="addNodeTestResult && !addNodeTestResult.reachable" style="color:#ef4444;">&#10007; <span x-text="addNodeTestResult && (addNodeTestResult.error || '不可达')"></span></span>
                 </div>
               </div>
               <div>
-                <label style="display:block;font-size:0.75rem;font-weight:500;margin-bottom:0.375rem;color:var(--text-muted);">Join Token</label>
-                <input x-model="addNodeForm.token" type="text" placeholder="Paste token from new node"
+                <label style="display:block;font-size:0.75rem;font-weight:500;margin-bottom:0.375rem;color:var(--text-muted);">加入令牌</label>
+                <input x-model="addNodeForm.token" type="text" placeholder="粘贴新节点的令牌"
                   style="width:100%;font-size:0.875rem;font-family:monospace;border-radius:0.375rem;padding:0.5rem 0.75rem;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-primary);box-sizing:border-box;">
               </div>
               <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
-                <button @click="showAddNodeModal = false; addNodeError = null" style="padding:0.5rem 1rem;font-size:0.875rem;border-radius:0.375rem;background:var(--bg-elevated);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;">Cancel</button>
-                <button @click="addNode()" style="padding:0.5rem 1rem;font-size:0.875rem;border-radius:0.375rem;font-weight:500;background:var(--accent);color:white;border:none;cursor:pointer;">Add Node</button>
+                <button @click="showAddNodeModal = false; addNodeError = null" style="padding:0.5rem 1rem;font-size:0.875rem;border-radius:0.375rem;background:var(--bg-elevated);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;">取消</button>
+                <button @click="addNode()" style="padding:0.5rem 1rem;font-size:0.875rem;border-radius:0.375rem;font-weight:500;background:var(--accent);color:white;border:none;cursor:pointer;">添加节点</button>
               </div>
+             </div>
             </div>
+           </div>
           </div>
+         </div>
         </div>
 
         <!-- Remove Node Modal -->
-        <div x-show="showRemoveNodeModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:50;" @click.self="showRemoveNodeModal = false">
+        <div x-show="showRemoveNodeModal">
+         <div style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:50;" @click.self="showRemoveNodeModal = false">
           <div class="card-polished" style="padding:1.5rem;max-width:24rem;width:100%;">
-            <h3 style="margin:0 0 0.5rem;font-weight:600;color:var(--text-primary);">Remove Node</h3>
+            <h3 style="margin:0 0 0.5rem;font-weight:600;color:var(--text-primary);">删除节点</h3>
             <p style="margin:0 0 1rem;font-size:0.875rem;color:var(--text-muted);">
-              Remove <span style="font-family:monospace;font-size:0.75rem;" x-text="removeNodeTarget && removeNodeTarget.nodeId"></span> from the cluster?
+              要从集群中删除 <span style="font-family:monospace;font-size:0.75rem;" x-text="removeNodeTarget && removeNodeTarget.nodeId"></span> 吗？
             </p>
             <div x-show="removeNodeError" style="margin-bottom:0.75rem;padding:0.75rem;border-radius:0.375rem;background:rgba(239,68,68,0.1);color:#ef4444;font-size:0.875rem;" x-text="removeNodeError"></div>
             <label style="display:flex;align-items:center;gap:0.5rem;margin-bottom:1rem;font-size:0.875rem;cursor:pointer;color:var(--text-secondary);">
               <input type="checkbox" x-model="removeNodeDrain">
-              Drain before removing (wait for replication catch-up)
+              删除前先排空（等待复制追平）
             </label>
             <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
-              <button @click="showRemoveNodeModal = false; removeNodeTarget = null; removeNodeError = null" style="padding:0.5rem 1rem;font-size:0.875rem;border-radius:0.375rem;background:var(--bg-elevated);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;">Cancel</button>
+              <button @click="showRemoveNodeModal = false; removeNodeTarget = null; removeNodeError = null" style="padding:0.5rem 1rem;font-size:0.875rem;border-radius:0.375rem;background:var(--bg-elevated);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;">取消</button>
               <button @click="removeNode()" :disabled="removeNodeLoading"
                 style="padding:0.5rem 1rem;font-size:0.875rem;border-radius:0.375rem;font-weight:500;background:#ef4444;color:white;border:none;cursor:pointer;">
-                <span x-show="!removeNodeLoading">Remove</span>
-                <span x-show="removeNodeLoading">Removing...</span>
+                <span x-show="!removeNodeLoading">删除</span>
+                <span x-show="removeNodeLoading">删除中...</span>
               </button>
             </div>
           </div>
+         </div>
         </div>
 
         <!-- Failover Modal -->
-        <div x-show="showFailoverModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:50;" @click.self="showFailoverModal = false">
+        <div x-show="showFailoverModal">
+         <div style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:50;" @click.self="showFailoverModal = false">
           <div class="card-polished" style="padding:1.5rem;max-width:24rem;width:100%;">
-            <h3 style="margin:0 0 0.5rem;font-weight:600;color:var(--text-primary);">Trigger Failover</h3>
+            <h3 style="margin:0 0 0.5rem;font-weight:600;color:var(--text-primary);">触发故障切换</h3>
             <div x-show="failoverError" style="margin-bottom:0.75rem;padding:0.75rem;border-radius:0.375rem;background:rgba(239,68,68,0.1);color:#ef4444;font-size:0.875rem;" x-text="failoverError"></div>
             <div x-show="failoverLoading" style="margin-bottom:0.75rem;">
               <template x-for="step in failoverProgress" :key="step">
@@ -2733,40 +2726,43 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
               </template>
             </div>
             <div x-show="!failoverLoading">
-              <label style="display:block;font-size:0.75rem;font-weight:500;margin-bottom:0.375rem;color:var(--text-muted);">Target Node</label>
+              <label style="display:block;font-size:0.75rem;font-weight:500;margin-bottom:0.375rem;color:var(--text-muted);">目标节点</label>
               <select x-model="failoverTarget" style="width:100%;font-size:0.875rem;border-radius:0.375rem;padding:0.5rem 0.75rem;margin-bottom:1rem;background:var(--bg-elevated);border:1px solid var(--border);color:var(--text-primary);">
-                <option value="">Select target...</option>
+                <option value="">选择目标...</option>
                 <template x-for="n in clusterNodes.filter(node => node.role === 'replica')" :key="n.nodeId">
                   <option :value="n.nodeId" x-text="`${n.nodeId} (lag: ${n.lag ?? '?'})`"></option>
                 </template>
               </select>
               <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
-                <button @click="showFailoverModal = false; failoverError = null" style="padding:0.5rem 1rem;font-size:0.875rem;border-radius:0.375rem;background:var(--bg-elevated);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;">Cancel</button>
+                <button @click="showFailoverModal = false; failoverError = null" style="padding:0.5rem 1rem;font-size:0.875rem;border-radius:0.375rem;background:var(--bg-elevated);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;">取消</button>
                 <button @click="triggerFailover()" :disabled="!failoverTarget"
                   :style="!failoverTarget ? 'opacity:0.5;cursor:not-allowed;' : ''"
-                  style="padding:0.5rem 1rem;font-size:0.875rem;border-radius:0.375rem;font-weight:500;background:#eab308;color:#000;border:none;cursor:pointer;">Trigger</button>
+                  style="padding:0.5rem 1rem;font-size:0.875rem;border-radius:0.375rem;font-weight:500;background:#eab308;color:#000;border:none;cursor:pointer;">触发</button>
               </div>
             </div>
           </div>
+         </div>
         </div>
 
         <!-- Regenerate Token confirmation modal -->
-        <div x-show="showRegenerateTokenConfirm" style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:50;" @click.self="showRegenerateTokenConfirm = false">
+        <div x-show="showRegenerateTokenConfirm">
+         <div style="position:fixed;inset:0;background:rgba(0,0,0,0.5);display:flex;align-items:center;justify-content:center;z-index:50;" @click.self="showRegenerateTokenConfirm = false">
           <div class="card-polished" style="padding:1.5rem;max-width:24rem;width:100%;">
-            <h3 style="margin:0 0 0.5rem;font-weight:600;color:var(--text-primary);">Regenerate Join Token?</h3>
-            <p style="margin:0 0 1rem;font-size:0.875rem;color:var(--text-muted);">The old token will immediately become invalid.</p>
+            <h3 style="margin:0 0 0.5rem;font-weight:600;color:var(--text-primary);">重新生成加入令牌？</h3>
+            <p style="margin:0 0 1rem;font-size:0.875rem;color:var(--text-muted);">旧令牌将立即失效。</p>
             <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
-              <button @click="showRegenerateTokenConfirm = false" style="padding:0.5rem 1rem;font-size:0.875rem;border-radius:0.375rem;background:var(--bg-elevated);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;">Cancel</button>
-              <button @click="regenerateToken()" style="padding:0.5rem 1rem;font-size:0.875rem;border-radius:0.375rem;font-weight:500;background:var(--accent);color:white;border:none;cursor:pointer;">Regenerate</button>
+              <button @click="showRegenerateTokenConfirm = false" style="padding:0.5rem 1rem;font-size:0.875rem;border-radius:0.375rem;background:var(--bg-elevated);color:var(--text-secondary);border:1px solid var(--border);cursor:pointer;">取消</button>
+              <button @click="regenerateToken()" style="padding:0.5rem 1rem;font-size:0.875rem;border-radius:0.375rem;font-weight:500;background:var(--accent);color:white;border:none;cursor:pointer;">重新生成</button>
             </div>
           </div>
+         </div>
         </div>
 
       </div>
 
       <!-- Unknown state (still loading) -->
       <div x-show="clusterEnabled === null" style="color:var(--text-muted);font-size:0.875rem;padding:1rem;">
-        Loading cluster status&#8230;
+        正在加载集群状态&#8230;
       </div>
     </div>
 
@@ -2777,13 +2773,13 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
     <div class="modal-box" style="max-width:380px;padding:0;overflow:hidden;">
       <!-- Header -->
       <div class="vault-picker-header">
-        <span class="vault-picker-heading">Switch Vault</span>
+        <span class="vault-picker-heading">切换仓库</span>
         <button class="btn-ghost" style="padding:0.125rem 0.375rem;line-height:1;font-size:0.875rem;" @click="vaultModalOpen=false; vaultPickerSearch=''">✕</button>
       </div>
       <!-- Search -->
       <div class="vault-picker-search-row">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="flex-shrink:0;opacity:0.4;"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-        <input type="text" class="vault-modal-input" placeholder="Search vaults…" x-model="vaultPickerSearch" x-effect="if(vaultModalOpen) $nextTick(()=>$el.focus())" @keydown.escape="vaultModalOpen=false; vaultPickerSearch=''">
+        <input type="text" class="vault-modal-input" placeholder="搜索仓库…" x-model="vaultPickerSearch" x-effect="if(vaultModalOpen) $nextTick(()=>$el.focus())" @keydown.escape="vaultModalOpen=false; vaultPickerSearch=''">
       </div>
       <!-- Vault list -->
       <div class="vault-picker-scroll">
@@ -2791,11 +2787,11 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
           <div class="vault-modal-item" :class="{'is-active': v===vault}" @click="pickVault(v)">
             <svg class="vault-item-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0018 0V5"/><path d="M3 12a9 3 0 0018 0"/></svg>
             <span class="vault-item-name" x-text="v"></span>
-            <span class="vault-item-count" x-show="vaultStats[v] !== undefined" x-text="vaultStats[v] + (vaultStats[v] === 1 ? ' engram' : ' engrams')"></span>
+            <span class="vault-item-count" x-show="vaultStats[v] !== undefined" x-text="vaultStats[v] + ' 条记忆'"></span>
             <svg x-show="v===vault" class="vault-item-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
           </div>
         </template>
-        <div x-show="vaults.filter(v => v.toLowerCase().includes(vaultPickerSearch.toLowerCase())).length===0" style="padding:1.25rem;text-align:center;color:var(--text-muted);font-size:0.875rem;">No vaults found</div>
+        <div x-show="vaults.filter(v => v.toLowerCase().includes(vaultPickerSearch.toLowerCase())).length===0" style="padding:1.25rem;text-align:center;color:var(--text-muted);font-size:0.875rem;">未找到仓库</div>
       </div>
     </div>
   </div>
@@ -2804,28 +2800,28 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
   <div x-show="newVaultModal.show" x-cloak class="modal-backdrop" @click.self="newVaultModal.show=false" @keydown.escape.window="newVaultModal.show=false">
     <div class="modal-box" style="max-width:400px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
-        <h2 style="margin:0;font-size:1.125rem;">New Vault</h2>
+        <h2 style="margin:0;font-size:1.125rem;">新建仓库</h2>
         <button class="btn-ghost" style="padding:0.25rem 0.375rem;line-height:1;" @click="newVaultModal.show=false">✕</button>
       </div>
       <form @submit.prevent="submitNewVault(false)">
         <div class="form-group" style="margin-bottom:1rem;">
-          <label>Vault name</label>
+          <label>仓库名称</label>
           <input class="input-field" style="margin-top:0.375rem;" type="text" placeholder="my-vault" x-model="newVaultModal.name" x-effect="if(newVaultModal.show) $nextTick(()=>$el.focus())" @input="newVaultModal.error='';newVaultModal.collision=null" autocomplete="off" spellcheck="false">
           <span x-show="newVaultModal.error" x-text="newVaultModal.error" style="font-size:0.8125rem;color:var(--danger);margin-top:0.375rem;"></span>
-          <span style="font-size:0.75rem;color:var(--text-muted);margin-top:0.375rem;">Lowercase letters, digits, hyphens, underscores · 1–64 chars</span>
+          <span style="font-size:0.75rem;color:var(--text-muted);margin-top:0.375rem;">小写字母、数字、连字符、下划线 · 1–64 个字符</span>
         </div>
         <!-- Collision warning banner — shown only when backend returns VAULT_NAME_COLLISION -->
         <div x-show="newVaultModal.collision" style="background:var(--warning-bg,#fffbeb);border:1px solid var(--warning-border,#f59e0b);border-radius:0.375rem;padding:0.75rem;margin-bottom:1rem;font-size:0.875rem;">
-          <div style="font-weight:600;margin-bottom:0.25rem;">Similar vault name detected</div>
-          <div>A vault named <strong x-text="newVaultModal.collision && newVaultModal.collision.conflict"></strong> already exists with a similar name. Create anyway?</div>
+          <div style="font-weight:600;margin-bottom:0.25rem;">检测到相似仓库名称</div>
+          <div>名为 <strong x-text="newVaultModal.collision && newVaultModal.collision.conflict"></strong> 的仓库已存在且名称相似。仍要创建吗？</div>
           <div style="display:flex;gap:0.5rem;margin-top:0.75rem;">
-            <button type="button" class="btn-secondary" style="font-size:0.8125rem;padding:0.25rem 0.625rem;" @click="newVaultModal.collision=null">Cancel</button>
-            <button type="button" class="btn-primary" style="font-size:0.8125rem;padding:0.25rem 0.625rem;" @click="submitNewVault(true)">Create anyway</button>
+            <button type="button" class="btn-secondary" style="font-size:0.8125rem;padding:0.25rem 0.625rem;" @click="newVaultModal.collision=null">取消</button>
+            <button type="button" class="btn-primary" style="font-size:0.8125rem;padding:0.25rem 0.625rem;" @click="submitNewVault(true)">仍然创建</button>
           </div>
         </div>
         <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
-          <button type="button" class="btn-secondary" @click="newVaultModal.show=false">Cancel</button>
-          <button type="submit" class="btn-primary" :disabled="newVaultModal.loading || !newVaultModal.name.trim()" x-text="newVaultModal.loading ? 'Creating…' : 'Create Vault'"></button>
+          <button type="button" class="btn-secondary" @click="newVaultModal.show=false">取消</button>
+          <button type="submit" class="btn-primary" :disabled="newVaultModal.loading || !newVaultModal.name.trim()" x-text="newVaultModal.loading ? '创建中…' : '创建仓库'"></button>
         </div>
       </form>
     </div>
@@ -2834,27 +2830,27 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
   <!-- ── New Memory Modal ─────────────────────────────────────────── -->
   <div x-show="showNewMemoryModal" class="modal-backdrop" @click.self="showNewMemoryModal=false">
     <div class="modal-box">
-      <h2 style="margin:0 0 1.5rem;">New Memory</h2>
+      <h2 style="margin:0 0 1.5rem;">新建记忆</h2>
       <form @submit.prevent="createMemory(newMemoryForm)">
         <div class="form-group" style="margin-bottom:1rem;">
-          <label>Concept *</label>
+          <label>概念 *</label>
           <input class="input-field" data-testid="input-concept" x-model="newMemoryForm.concept" required placeholder="golang channels" />
         </div>
         <div class="form-group" style="margin-bottom:1rem;">
-          <label>Content *</label>
+          <label>内容 *</label>
           <textarea class="input-field" data-testid="input-content" x-model="newMemoryForm.content" required rows="4" placeholder="Channels are the pipes that connect concurrent goroutines…"></textarea>
         </div>
         <div class="form-group" style="margin-bottom:1rem;">
-          <label>Tags (comma-separated)</label>
+          <label>标签（逗号分隔）</label>
           <input class="input-field" x-model="newMemoryForm.tagsRaw" placeholder="golang, concurrency, channels" />
         </div>
         <div class="form-group" style="margin-bottom:1.5rem;">
-          <label>Confidence: <span x-text="parseFloat(newMemoryForm.confidence).toFixed(2)"></span></label>
+          <label>置信度：<span x-text="parseFloat(newMemoryForm.confidence).toFixed(2)"></span></label>
           <input type="range" min="0" max="1" step="0.01" x-model="newMemoryForm.confidence" style="width:100%;" />
         </div>
         <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
-          <button type="button" class="btn-secondary" @click="showNewMemoryModal=false">Cancel</button>
-          <button type="submit" class="btn-primary" data-testid="btn-create-memory">Create Memory</button>
+          <button type="button" class="btn-secondary" @click="showNewMemoryModal=false">取消</button>
+          <button type="submit" class="btn-primary" data-testid="btn-create-memory">创建记忆</button>
         </div>
       </form>
     </div>
@@ -2863,11 +2859,11 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
   <!-- ── Forget confirmation modal ────────────────────────────────── -->
   <div x-show="confirmForgetId !== null" class="modal-backdrop" @click.self="confirmForgetId=null">
     <div class="modal-box" style="max-width:400px;text-align:center;">
-      <h2 style="margin:0 0 1rem;">Forget this memory?</h2>
-      <p style="color:var(--text-secondary);margin-bottom:1.5rem;">This is a soft-delete. The engram will be marked forgotten.</p>
+      <h2 style="margin:0 0 1rem;">要遗忘这条记忆吗？</h2>
+      <p style="color:var(--text-secondary);margin-bottom:1.5rem;">这是软删除操作。该记忆将被标记为已遗忘。</p>
       <div style="display:flex;gap:0.75rem;justify-content:center;">
-        <button class="btn-secondary" @click="confirmForgetId=null">Cancel</button>
-        <button class="btn-danger" @click="doForget()">Forget</button>
+        <button class="btn-secondary" @click="confirmForgetId=null">取消</button>
+        <button class="btn-danger" @click="doForget()">遗忘</button>
       </div>
     </div>
   </div>
@@ -2875,45 +2871,45 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
   <!-- ── Link creation modal ─────────────────────────────────────── -->
   <div x-show="linkModal.show" x-cloak class="modal-backdrop" @click.self="closeLinkModal()" @keydown.escape.window="closeLinkModal()">
     <div class="modal-box" style="max-width:480px;">
-      <h2 style="margin:0 0 1.25rem;font-size:1.125rem;">Create Association</h2>
+      <h2 style="margin:0 0 1.25rem;font-size:1.125rem;">创建关联</h2>
       <div class="form-group" style="margin-bottom:0.875rem;">
-        <label>Source ID</label>
+        <label>源 ID</label>
         <input class="input-field" :value="linkModal.sourceId" readonly style="opacity:0.6;cursor:not-allowed;margin-top:0.375rem;" />
       </div>
       <div class="form-group" style="margin-bottom:0.875rem;">
-        <label>Target Engram ID *</label>
-        <input class="input-field" style="margin-top:0.375rem;" type="text" placeholder="Paste the target engram ID"
+        <label>目标记忆 ID *</label>
+        <input class="input-field" style="margin-top:0.375rem;" type="text" placeholder="粘贴目标记忆 ID"
           x-model="linkModal.targetId" />
       </div>
       <div class="form-group" style="margin-bottom:0.875rem;">
-        <label>Relationship Type</label>
+        <label>关系类型</label>
         <select class="input-field" style="margin-top:0.375rem;" x-model.number="linkModal.relType">
-          <option value="1">Supports (1)</option>
-          <option value="2">Contradicts (2)</option>
-          <option value="3">Depends On (3)</option>
-          <option value="4">Supersedes (4)</option>
-          <option value="5">Relates To (5)</option>
-          <option value="6">Is Part Of (6)</option>
-          <option value="7">Causes (7)</option>
-          <option value="8">Preceded By (8)</option>
-          <option value="9">Followed By (9)</option>
-          <option value="10">Created By Person (10)</option>
-          <option value="11">Belongs To Project (11)</option>
-          <option value="12">References (12)</option>
-          <option value="13">Implements (13)</option>
-          <option value="14">Blocks (14)</option>
-          <option value="15">Resolves (15)</option>
-          <option value="16">Refines (16)</option>
+          <option value="1">支持 (1)</option>
+          <option value="2">矛盾 (2)</option>
+          <option value="3">依赖于 (3)</option>
+          <option value="4">取代 (4)</option>
+          <option value="5">相关于 (5)</option>
+          <option value="6">属于其中一部分 (6)</option>
+          <option value="7">导致 (7)</option>
+          <option value="8">先于 (8)</option>
+          <option value="9">后于 (9)</option>
+          <option value="10">由某人创建 (10)</option>
+          <option value="11">属于项目 (11)</option>
+          <option value="12">引用 (12)</option>
+          <option value="13">实现 (13)</option>
+          <option value="14">阻塞 (14)</option>
+          <option value="15">解决 (15)</option>
+          <option value="16">细化 (16)</option>
         </select>
       </div>
       <div class="form-group" style="margin-bottom:1.25rem;">
-        <label>Weight: <span x-text="parseFloat(linkModal.weight).toFixed(2)"></span></label>
+        <label>权重：<span x-text="parseFloat(linkModal.weight).toFixed(2)"></span></label>
         <input type="range" min="0" max="1" step="0.05" x-model.number="linkModal.weight"
           style="width:100%;margin-top:0.5rem;" />
       </div>
       <div style="display:flex;gap:0.75rem;justify-content:flex-end;">
-        <button class="btn-secondary" @click="closeLinkModal()">Cancel</button>
-        <button class="btn-primary" @click="createLink()">Create Link</button>
+        <button class="btn-secondary" @click="closeLinkModal()">取消</button>
+        <button class="btn-primary" @click="createLink()">创建关联</button>
       </div>
     </div>
   </div>
@@ -2921,11 +2917,11 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
   <!-- ── Sign out confirmation modal ─────────────────────────────── -->
   <div x-show="showSignOutConfirm" class="modal-backdrop" @click.self="showSignOutConfirm=false">
     <div class="modal-box" style="max-width:360px;text-align:center;">
-      <h2 style="margin:0 0 1rem;">Sign out?</h2>
-      <p style="color:var(--text-secondary);margin-bottom:1.5rem;">Are you sure you want to sign out?</p>
+      <h2 style="margin:0 0 1rem;">要退出登录吗？</h2>
+      <p style="color:var(--text-secondary);margin-bottom:1.5rem;">确认要退出登录吗？</p>
       <div style="display:flex;gap:0.75rem;justify-content:center;">
-        <button class="btn-secondary" @click="showSignOutConfirm=false">Cancel</button>
-        <button class="btn-danger" @click="showSignOutConfirm=false; logout()">Sign out</button>
+        <button class="btn-secondary" @click="showSignOutConfirm=false">取消</button>
+        <button class="btn-danger" @click="showSignOutConfirm=false; logout()">退出登录</button>
       </div>
     </div>
   </div>
@@ -2937,30 +2933,30 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
     <div class="modal-box" style="max-width:440px;">
       <h2 style="margin:0 0 0.75rem;"
           :style="vaultActionModal.action === 'delete' ? 'color:#ef4444;' : 'color:#d97706;'"
-          x-text="vaultActionModal.action === 'delete' ? 'Delete Vault' : 'Clear Memories'">
+          x-text="vaultActionModal.action === 'delete' ? '删除仓库' : '清除记忆'">
       </h2>
       <p style="color:var(--text-secondary);font-size:0.875rem;margin:0 0 0.75rem;">
-        This will permanently remove all memories from vault
+        这将永久删除仓库
         <strong x-text="vaultActionModal.vault"></strong>
-        (<span x-text="vaultActionModal.memCount"></span> memories).
-        <span x-show="vaultActionModal.action === 'delete'">The vault itself will also be deleted.</span>
-        This cannot be undone.
+        的全部记忆（<span x-text="vaultActionModal.memCount"></span> 条）。
+        <span x-show="vaultActionModal.action === 'delete'">仓库本身也会被删除。</span>
+        此操作无法撤销。
       </p>
       <p style="font-size:0.875rem;font-weight:500;margin:0 0 0.5rem;color:var(--text-primary);">
-        Type <strong x-text="vaultActionModal.vault"></strong> to confirm:
+        输入 <strong x-text="vaultActionModal.vault"></strong> 以确认：
       </p>
       <input type="text" x-model="vaultActionModal.confirmText"
              @keydown.enter="vaultActionModal.confirmText === vaultActionModal.vault && confirmVaultAction()"
              class="input-field" style="margin-bottom:1.25rem;"
-             placeholder="vault name" />
+             placeholder="仓库名称" />
       <div style="display:flex;justify-content:flex-end;gap:0.75rem;">
-        <button class="btn-secondary" @click="vaultActionModal.show = false">Cancel</button>
+        <button class="btn-secondary" @click="vaultActionModal.show = false">取消</button>
         <button @click="confirmVaultAction()"
                 :disabled="vaultActionModal.confirmText !== vaultActionModal.vault"
                 :style="vaultActionModal.action === 'delete'
                     ? (vaultActionModal.confirmText !== vaultActionModal.vault ? 'background:#ef4444;opacity:0.45;cursor:not-allowed;color:#fff;border:none;padding:0.5rem 1rem;border-radius:0.5rem;font-size:0.875rem;font-weight:500;' : 'background:#ef4444;cursor:pointer;color:#fff;border:none;padding:0.5rem 1rem;border-radius:0.5rem;font-size:0.875rem;font-weight:500;')
                     : (vaultActionModal.confirmText !== vaultActionModal.vault ? 'background:#f59e0b;opacity:0.45;cursor:not-allowed;color:#fff;border:none;padding:0.5rem 1rem;border-radius:0.5rem;font-size:0.875rem;font-weight:500;' : 'background:#f59e0b;cursor:pointer;color:#fff;border:none;padding:0.5rem 1rem;border-radius:0.5rem;font-size:0.875rem;font-weight:500;')"
-                x-text="vaultActionModal.action === 'delete' ? 'Delete Vault' : 'Clear Memories'">
+                x-text="vaultActionModal.action === 'delete' ? '删除仓库' : '清除记忆'">
         </button>
       </div>
     </div>
@@ -2971,19 +2967,19 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
        class="modal-backdrop" @click.self="cloneModal.show = false"
        @keydown.escape.window="cloneModal.show = false">
     <div class="modal-box" style="max-width:440px;">
-      <h2 style="margin:0 0 0.75rem;color:#6366f1;">Clone Vault</h2>
+      <h2 style="margin:0 0 0.75rem;color:#6366f1;">克隆仓库</h2>
       <p style="color:var(--text-secondary);font-size:0.875rem;margin:0 0 0.75rem;">
-        Create a copy of vault <strong x-text="cloneModal.source"></strong> with a new name.
-        Access counts will be reset on the cloned memories.
+        为仓库 <strong x-text="cloneModal.source"></strong> 创建一个新名称的副本。
+        克隆后的记忆访问计数将重置。
       </p>
-      <label style="display:block;font-size:0.875rem;font-weight:500;margin-bottom:0.375rem;color:var(--text-primary);">New vault name</label>
+      <label style="display:block;font-size:0.875rem;font-weight:500;margin-bottom:0.375rem;color:var(--text-primary);">新仓库名称</label>
       <input type="text" x-model="cloneModal.newName"
              @keydown.enter="cloneModal.newName && startClone()"
              class="input-field" style="margin-bottom:1rem;"
              placeholder="my-vault-clone" />
       <div x-show="activeJob" style="margin-bottom:1rem;">
         <p style="font-size:0.75rem;color:var(--text-muted);margin:0 0 0.25rem;"
-           x-text="activeJob?.phase === 'indexing' ? 'Re-indexing...' : 'Copying...'"></p>
+           x-text="activeJob?.phase === 'indexing' ? '重建索引中...' : '复制中...'"></p>
         <div style="height:0.5rem;background:var(--border-color,#e5e7eb);border-radius:9999px;overflow:hidden;">
           <div style="height:100%;background:#6366f1;border-radius:9999px;transition:width 0.5s ease;"
                :style="'width:' + (activeJob?.pct || 0) + '%'"></div>
@@ -2993,12 +2989,12 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
         </p>
       </div>
       <div style="display:flex;justify-content:flex-end;gap:0.75rem;">
-        <button class="btn-secondary" @click="cloneModal.show = false; clearActiveJob()">Cancel</button>
+        <button class="btn-secondary" @click="cloneModal.show = false; clearActiveJob()">取消</button>
         <button @click="startClone()"
                 :disabled="!cloneModal.newName || activeJob?.status === 'running'"
                 style="padding:0.5rem 1rem;font-size:0.875rem;font-weight:500;background:#6366f1;color:#fff;border:none;border-radius:0.5rem;cursor:pointer;"
                 :style="(!cloneModal.newName || activeJob?.status === 'running') ? 'opacity:0.45;cursor:not-allowed;' : 'opacity:1;cursor:pointer;'">
-          Clone
+          克隆
         </button>
       </div>
     </div>
@@ -3009,25 +3005,25 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
        class="modal-backdrop" @click.self="mergeModal.show = false"
        @keydown.escape.window="mergeModal.show = false">
     <div class="modal-box" style="max-width:440px;">
-      <h2 style="margin:0 0 0.75rem;color:#a855f7;">Merge Vault Into…</h2>
+      <h2 style="margin:0 0 0.75rem;color:#a855f7;">将仓库合并到…</h2>
       <p style="color:var(--text-secondary);font-size:0.875rem;margin:0 0 0.75rem;">
-        Merge all memories from <strong x-text="mergeModal.source"></strong> into another vault.
+        将 <strong x-text="mergeModal.source"></strong> 中的全部记忆合并到另一个仓库。
       </p>
-      <label style="display:block;font-size:0.875rem;font-weight:500;margin-bottom:0.375rem;color:var(--text-primary);">Target vault</label>
+      <label style="display:block;font-size:0.875rem;font-weight:500;margin-bottom:0.375rem;color:var(--text-primary);">目标仓库</label>
       <select x-model="mergeModal.target"
               class="input-field" style="margin-bottom:0.75rem;">
-        <option value="">Select target vault…</option>
+        <option value="">选择目标仓库…</option>
         <template x-for="v in vaults.filter(v => v !== mergeModal.source)" :key="v">
           <option :value="v" x-text="v"></option>
         </template>
       </select>
       <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.875rem;color:var(--text-primary);margin-bottom:1rem;cursor:pointer;">
         <input type="checkbox" x-model="mergeModal.deleteSource" />
-        Delete source vault after merge
+        合并后删除源仓库
       </label>
       <div x-show="activeJob" style="margin-bottom:1rem;">
         <p style="font-size:0.75rem;color:var(--text-muted);margin:0 0 0.25rem;"
-           x-text="activeJob?.phase === 'indexing' ? 'Re-indexing...' : 'Merging...'"></p>
+           x-text="activeJob?.phase === 'indexing' ? '重建索引中...' : '合并中...'"></p>
         <div style="height:0.5rem;background:var(--border-color,#e5e7eb);border-radius:9999px;overflow:hidden;">
           <div style="height:100%;background:#a855f7;border-radius:9999px;transition:width 0.5s ease;"
                :style="'width:' + (activeJob?.pct || 0) + '%'"></div>
@@ -3037,12 +3033,12 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
         </p>
       </div>
       <div style="display:flex;justify-content:flex-end;gap:0.75rem;">
-        <button class="btn-secondary" @click="mergeModal.show = false; clearActiveJob()">Cancel</button>
+        <button class="btn-secondary" @click="mergeModal.show = false; clearActiveJob()">取消</button>
         <button @click="startMerge()"
                 :disabled="!mergeModal.target || activeJob?.status === 'running'"
                 style="padding:0.5rem 1rem;font-size:0.875rem;font-weight:500;background:#a855f7;color:#fff;border:none;border-radius:0.5rem;"
                 :style="(!mergeModal.target || activeJob?.status === 'running') ? 'opacity:0.45;cursor:not-allowed;' : 'opacity:1;cursor:pointer;'">
-          Merge
+          合并
         </button>
       </div>
     </div>
@@ -3053,29 +3049,29 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
        class="modal-backdrop" @click.self="importModal.show = false"
        @keydown.escape.window="importModal.show = false">
     <div class="modal-box" style="max-width:440px;">
-      <h2 style="margin:0 0 0.75rem;color:#d97706;">Import Vault</h2>
+      <h2 style="margin:0 0 0.75rem;color:#d97706;">导入仓库</h2>
       <p style="color:var(--text-secondary);font-size:0.875rem;margin:0 0 1rem;">
-        Import a <code>.muninn</code> export file into a new or existing vault.
+        将 <code>.muninn</code> 导出文件导入到新建或已有仓库。
       </p>
       <div class="form-group" style="margin-bottom:0.75rem;">
-        <label style="display:block;font-size:0.875rem;font-weight:500;margin-bottom:0.375rem;color:var(--text-primary);">Target vault name</label>
+        <label style="display:block;font-size:0.875rem;font-weight:500;margin-bottom:0.375rem;color:var(--text-primary);">目标仓库名称</label>
         <input type="text" x-model="importModal.vaultName"
                class="input-field"
                placeholder="my-imported-vault" />
       </div>
       <div class="form-group" style="margin-bottom:0.75rem;">
-        <label style="display:block;font-size:0.875rem;font-weight:500;margin-bottom:0.375rem;color:var(--text-primary);">File</label>
+        <label style="display:block;font-size:0.875rem;font-weight:500;margin-bottom:0.375rem;color:var(--text-primary);">文件</label>
         <input type="file" accept=".muninn"
                @change="importModal.file = $event.target.files[0]"
                style="font-size:0.875rem;color:var(--text-primary);" />
       </div>
       <label style="display:flex;align-items:center;gap:0.5rem;font-size:0.875rem;color:var(--text-primary);margin-bottom:1rem;cursor:pointer;">
         <input type="checkbox" x-model="importModal.resetMeta" />
-        Reset metadata (timestamps, access counts)
+        重置元数据（时间戳、访问计数）
       </label>
       <div x-show="activeJob" style="margin-bottom:1rem;">
         <p style="font-size:0.75rem;color:var(--text-muted);margin:0 0 0.25rem;"
-           x-text="activeJob?.phase === 'indexing' ? 'Re-indexing...' : 'Importing...'"></p>
+           x-text="activeJob?.phase === 'indexing' ? '重建索引中...' : '导入中...'"></p>
         <div style="height:0.5rem;background:var(--border-color,#e5e7eb);border-radius:9999px;overflow:hidden;">
           <div style="height:100%;background:#f59e0b;border-radius:9999px;transition:width 0.5s ease;"
                :style="'width:' + (activeJob?.pct || 0) + '%'"></div>
@@ -3084,12 +3080,12 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
            x-text="(activeJob?.pct || 0).toFixed(0) + '%'"></p>
       </div>
       <div style="display:flex;justify-content:flex-end;gap:0.75rem;">
-        <button class="btn-secondary" @click="importModal.show = false; clearActiveJob()">Cancel</button>
+        <button class="btn-secondary" @click="importModal.show = false; clearActiveJob()">取消</button>
         <button @click="startImport()"
                 :disabled="!importModal.vaultName || !importModal.file || activeJob?.status === 'running'"
                 style="padding:0.5rem 1rem;font-size:0.875rem;font-weight:500;background:#f59e0b;color:#fff;border:none;border-radius:0.5rem;cursor:pointer;"
                 :style="(!importModal.vaultName || !importModal.file || activeJob?.status === 'running') ? 'opacity:0.45;cursor:not-allowed;' : 'opacity:1;cursor:pointer;'">
-          Import
+          导入
         </button>
       </div>
     </div>
@@ -3101,7 +3097,7 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
        @keydown.escape.window="showShortcutsHelp=false">
     <div class="modal-box" style="max-width:400px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-        <h2 style="margin:0;font-size:1.125rem;">Keyboard Shortcuts</h2>
+        <h2 style="margin:0;font-size:1.125rem;">键盘快捷键</h2>
         <button class="btn-ghost" @click="showShortcutsHelp=false">✕</button>
       </div>
       <table style="width:100%;border-collapse:collapse;font-size:0.875rem;">
@@ -3110,29 +3106,29 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
             <td style="padding:0.5rem 0.75rem 0.5rem 0;font-family:monospace;background:var(--bg-elevated);border-radius:0.25rem;padding:0.2rem 0.5rem;margin-right:0.5rem;font-size:0.8125rem;">
               <kbd style="font-family:monospace;background:var(--bg-elevated);border:1px solid var(--border);border-radius:0.25rem;padding:0.1rem 0.4rem;font-size:0.8rem;">/</kbd>
             </td>
-            <td style="padding:0.5rem 0.75rem;color:var(--text-secondary);">Focus search bar <span style="color:var(--text-muted);font-size:0.8125rem;">(Memories view)</span></td>
+            <td style="padding:0.5rem 0.75rem;color:var(--text-secondary);">聚焦搜索栏 <span style="color:var(--text-muted);font-size:0.8125rem;">（记忆视图）</span></td>
           </tr>
           <tr style="border-bottom:1px solid var(--border);">
             <td style="padding:0.5rem 0.75rem 0.5rem 0;">
               <kbd style="font-family:monospace;background:var(--bg-elevated);border:1px solid var(--border);border-radius:0.25rem;padding:0.1rem 0.4rem;font-size:0.8rem;">n</kbd>
             </td>
-            <td style="padding:0.5rem 0.75rem;color:var(--text-secondary);">New memory <span style="color:var(--text-muted);font-size:0.8125rem;">(Memories view)</span></td>
+            <td style="padding:0.5rem 0.75rem;color:var(--text-secondary);">新建记忆 <span style="color:var(--text-muted);font-size:0.8125rem;">（记忆视图）</span></td>
           </tr>
           <tr style="border-bottom:1px solid var(--border);">
             <td style="padding:0.5rem 0.75rem 0.5rem 0;">
               <kbd style="font-family:monospace;background:var(--bg-elevated);border:1px solid var(--border);border-radius:0.25rem;padding:0.1rem 0.4rem;font-size:0.8rem;">Esc</kbd>
             </td>
-            <td style="padding:0.5rem 0.75rem;color:var(--text-secondary);">Close modal / detail panel</td>
+            <td style="padding:0.5rem 0.75rem;color:var(--text-secondary);">关闭弹窗 / 详情面板</td>
           </tr>
           <tr>
             <td style="padding:0.5rem 0.75rem 0.5rem 0;">
               <kbd style="font-family:monospace;background:var(--bg-elevated);border:1px solid var(--border);border-radius:0.25rem;padding:0.1rem 0.4rem;font-size:0.8rem;">?</kbd>
             </td>
-            <td style="padding:0.5rem 0.75rem;color:var(--text-secondary);">Toggle this help panel</td>
+            <td style="padding:0.5rem 0.75rem;color:var(--text-secondary);">切换此帮助面板</td>
           </tr>
         </tbody>
       </table>
-      <p style="color:var(--text-muted);font-size:0.75rem;margin:0.875rem 0 0;">Shortcuts are disabled when typing in a text field.</p>
+      <p style="color:var(--text-muted);font-size:0.75rem;margin:0.875rem 0 0;">在文本输入框中输入时，快捷键会被禁用。</p>
     </div>
   </div>
 
@@ -3142,12 +3138,12 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
        @keydown.escape.window="closeExplainModal()">
     <div class="modal-box" style="max-width:520px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-        <h2 style="margin:0;font-size:1.125rem;">Why did this score high?</h2>
+        <h2 style="margin:0;font-size:1.125rem;">为什么这个分数这么高？</h2>
         <button class="btn-ghost" @click="closeExplainModal()">✕</button>
       </div>
 
       <!-- Loading state -->
-      <div x-show="explainModal.loading" style="text-align:center;padding:2rem;color:var(--text-muted);">Analyzing…</div>
+      <div x-show="explainModal.loading" style="text-align:center;padding:2rem;color:var(--text-muted);">分析中…</div>
 
       <!-- Data loaded -->
       <template x-if="explainModal.data && !explainModal.loading">
@@ -3155,30 +3151,30 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
           <!-- Concept + final score -->
           <div style="display:flex;align-items:baseline;gap:1rem;margin-bottom:1.25rem;">
             <div>
-              <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.25rem;">Memory</div>
+              <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.25rem;">记忆</div>
               <div style="font-weight:600;font-size:0.9375rem;" x-text="explainModal.data.concept || explainModal.data.engram_id.slice(0,12) + '…'"></div>
             </div>
             <div style="margin-left:auto;text-align:right;">
-              <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.25rem;">Final Score</div>
+              <div style="font-size:0.75rem;color:var(--text-muted);margin-bottom:0.25rem;">最终评分</div>
               <div style="font-size:2rem;font-weight:700;"
                 :style="explainModal.data.would_return ? 'color:#22c55e;' : 'color:#ef4444;'"
                 x-text="explainModal.data.final_score.toFixed(4)"></div>
               <div style="font-size:0.75rem;"
                 :style="explainModal.data.would_return ? 'color:#22c55e;' : 'color:#ef4444;'"
-                x-text="explainModal.data.would_return ? 'Above threshold' : 'Below threshold (' + explainModal.data.threshold.toFixed(3) + ')'"></div>
+                x-text="explainModal.data.would_return ? '高于阈值' : '低于阈值（' + explainModal.data.threshold.toFixed(3) + '）'"></div>
             </div>
           </div>
 
           <!-- Component breakdown -->
           <div style="margin-bottom:1.25rem;">
-            <div style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.625rem;">Score Components</div>
+            <div style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.625rem;">评分组成</div>
             <template x-for="[label, val] in [
-              ['Semantic Similarity', explainModal.data.components.semantic_similarity],
-              ['Full-Text Relevance', explainModal.data.components.full_text_relevance],
-              ['Decay Factor', explainModal.data.components.decay_factor],
-              ['Hebbian Boost', explainModal.data.components.hebbian_boost],
-              ['Access Frequency', explainModal.data.components.access_frequency],
-              ['Confidence', explainModal.data.components.confidence]
+              ['语义相似度', explainModal.data.components.semantic_similarity],
+              ['全文相关性', explainModal.data.components.full_text_relevance],
+              ['衰减因子', explainModal.data.components.decay_factor],
+              ['Hebbian 增强', explainModal.data.components.hebbian_boost],
+              ['访问频率', explainModal.data.components.access_frequency],
+              ['置信度', explainModal.data.components.confidence]
             ]" :key="label">
               <div style="margin-bottom:0.5rem;">
                 <div style="display:flex;justify-content:space-between;font-size:0.8125rem;margin-bottom:0.2rem;">
@@ -3196,7 +3192,7 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
           <!-- FTS matches -->
           <template x-if="explainModal.data.fts_matches && explainModal.data.fts_matches.length > 0">
             <div style="margin-bottom:1rem;">
-              <div style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.375rem;">FTS Term Matches</div>
+              <div style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.375rem;">FTS 词项匹配</div>
               <div style="display:flex;flex-wrap:wrap;gap:0.375rem;">
                 <template x-for="term in explainModal.data.fts_matches" :key="term">
                   <span style="background:rgba(6,182,212,0.15);color:var(--accent);border-radius:0.25rem;padding:0.15rem 0.5rem;font-size:0.8125rem;font-family:monospace;" x-text="term"></span>
@@ -3208,7 +3204,7 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
           <!-- Association path -->
           <template x-if="explainModal.data.assoc_path && explainModal.data.assoc_path.length > 0">
             <div style="margin-bottom:1rem;">
-              <div style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.375rem;">Association Path</div>
+              <div style="font-size:0.75rem;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.375rem;">关联路径</div>
               <div style="font-size:0.8125rem;color:var(--text-secondary);font-family:monospace;background:var(--bg-elevated);border-radius:0.375rem;padding:0.5rem 0.75rem;">
                 <span x-text="explainModal.data.assoc_path.join(' → ')"></span>
               </div>
@@ -3216,7 +3212,7 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
           </template>
 
           <div style="display:flex;justify-content:flex-end;margin-top:0.5rem;">
-            <button class="btn-secondary" @click="closeExplainModal()">Close</button>
+            <button class="btn-secondary" @click="closeExplainModal()">关闭</button>
           </div>
         </div>
       </template>
@@ -3229,25 +3225,25 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
        @keydown.escape.window="consolidateModal.show = false">
     <div class="modal-box" style="max-width:560px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-        <h2 style="margin:0;font-size:1.125rem;color:#a855f7;">Consolidate Memories</h2>
+        <h2 style="margin:0;font-size:1.125rem;color:#a855f7;">整合记忆</h2>
         <button class="btn-ghost" @click="consolidateModal.show = false">✕</button>
       </div>
       <p style="color:var(--text-secondary);font-size:0.875rem;margin:0 0 0.875rem;">
-        Merge <strong x-text="selectedMemoryIds.length"></strong> selected memories into one. The original memories will be archived.
-        Edit the merged content below before submitting.
+        将已选中的 <strong x-text="selectedMemoryIds.length"></strong> 条记忆合并为一条。原始记忆将被归档。
+        提交前可先编辑下方合并内容。
       </p>
       <div class="form-group" style="margin-bottom:1.25rem;">
-        <label style="font-size:0.875rem;font-weight:500;">Merged Content *</label>
+        <label style="font-size:0.875rem;font-weight:500;">合并内容 *</label>
         <textarea class="input-field" style="width:100%;min-height:180px;margin-top:0.375rem;resize:vertical;font-family:inherit;"
           x-model="consolidateModal.mergedContent"
-          placeholder="Combined content for the merged memory…"></textarea>
+          placeholder="用于合并记忆的整合内容…"></textarea>
       </div>
       <div style="display:flex;justify-content:flex-end;gap:0.75rem;">
-        <button class="btn-secondary" @click="consolidateModal.show = false">Cancel</button>
+        <button class="btn-secondary" @click="consolidateModal.show = false">取消</button>
         <button style="padding:0.5rem 1rem;font-size:0.875rem;font-weight:500;background:#a855f7;color:#fff;border:none;border-radius:0.5rem;cursor:pointer;"
           :style="!consolidateModal.mergedContent.trim() ? 'opacity:0.45;cursor:not-allowed;' : 'opacity:1;'"
           :disabled="!consolidateModal.mergedContent.trim()"
-          @click="submitConsolidate()">Consolidate</button>
+          @click="submitConsolidate()">整合</button>
       </div>
     </div>
   </div>
@@ -3258,42 +3254,42 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
        @keydown.escape.window="decideModal.show = false">
     <div class="modal-box" style="max-width:560px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;">
-        <h2 style="margin:0;font-size:1.125rem;color:#06b6d4;">Record Decision</h2>
+        <h2 style="margin:0;font-size:1.125rem;color:#06b6d4;">记录决策</h2>
         <button class="btn-ghost" @click="decideModal.show = false">✕</button>
       </div>
       <p style="color:var(--text-secondary);font-size:0.875rem;margin:0 0 0.875rem;">
-        Record an architectural decision or commitment. The decision will be stored as a memory with special metadata.
+        记录架构决策或承诺。该决策将作为带有特殊元数据的记忆存储。
       </p>
       <div class="form-group" style="margin-bottom:0.875rem;">
-        <label style="font-size:0.875rem;font-weight:500;">Decision *</label>
+        <label style="font-size:0.875rem;font-weight:500;">决策 *</label>
         <textarea class="input-field" style="width:100%;min-height:80px;margin-top:0.375rem;resize:vertical;"
           x-model="decideModal.decision"
-          placeholder="We will use PostgreSQL as the primary datastore…"></textarea>
+          placeholder="我们将使用 PostgreSQL 作为主数据存储…"></textarea>
       </div>
       <div class="form-group" style="margin-bottom:0.875rem;">
-        <label style="font-size:0.875rem;font-weight:500;">Rationale</label>
+        <label style="font-size:0.875rem;font-weight:500;">理由</label>
         <textarea class="input-field" style="width:100%;min-height:80px;margin-top:0.375rem;resize:vertical;"
           x-model="decideModal.rationale"
-          placeholder="Because we need ACID transactions and full-text search…"></textarea>
+          placeholder="因为我们需要 ACID 事务和全文搜索…"></textarea>
       </div>
       <div class="form-group" style="margin-bottom:0.875rem;">
-        <label style="font-size:0.875rem;font-weight:500;">Alternatives Considered <span style="color:var(--text-muted);font-weight:400;">(one per line)</span></label>
+        <label style="font-size:0.875rem;font-weight:500;">已考虑的替代方案 <span style="color:var(--text-muted);font-weight:400;">（每行一个）</span></label>
         <textarea class="input-field" style="width:100%;min-height:60px;margin-top:0.375rem;resize:vertical;"
           x-model="decideModal.alternatives"
           placeholder="MySQL&#10;SQLite&#10;CockroachDB"></textarea>
       </div>
       <div class="form-group" style="margin-bottom:1.25rem;">
-        <label style="font-size:0.875rem;font-weight:500;">Evidence Memory IDs <span style="color:var(--text-muted);font-weight:400;">(one per line)</span></label>
+        <label style="font-size:0.875rem;font-weight:500;">证据记忆 ID <span style="color:var(--text-muted);font-weight:400;">（每行一个）</span></label>
         <textarea class="input-field" style="width:100%;min-height:60px;margin-top:0.375rem;resize:vertical;font-family:monospace;"
           x-model="decideModal.evidenceIds"
           placeholder="abc123…&#10;def456…"></textarea>
       </div>
       <div style="display:flex;justify-content:flex-end;gap:0.75rem;">
-        <button class="btn-secondary" @click="decideModal.show = false">Cancel</button>
+        <button class="btn-secondary" @click="decideModal.show = false">取消</button>
         <button class="btn-primary"
           :disabled="!decideModal.decision.trim()"
           :style="!decideModal.decision.trim() ? 'opacity:0.45;cursor:not-allowed;' : ''"
-          @click="submitDecide()">Record Decision</button>
+          @click="submitDecide()">记录决策</button>
       </div>
     </div>
   </div>
@@ -3304,21 +3300,21 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
        @keydown.escape.window="cognitiveInfoModal = false">
     <div class="modal-box" style="max-width:580px;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.125rem;">
-        <h2 style="margin:0;font-size:1.125rem;color:var(--text-secondary);">Cognitive Workers</h2>
+        <h2 style="margin:0;font-size:1.125rem;color:var(--text-secondary);">认知工作线程</h2>
         <button class="btn-ghost" @click="cognitiveInfoModal = false">✕</button>
       </div>
       <p style="color:var(--text-muted);font-size:0.875rem;margin:0 0 1.125rem;line-height:1.6;">
-        Background workers continuously refine the memory graph — strengthening associations, detecting contradictions, and updating confidence scores — without requiring user interaction.
+        后台工作线程会持续优化记忆图谱——增强关联、检测矛盾并更新置信度评分——无需用户交互。
       </p>
 
       <!-- Hebbian -->
       <div style="margin-bottom:0.875rem;padding:0.875rem;border-radius:0.625rem;border:1px solid var(--border);background:var(--bg-base);">
         <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.375rem;">
           <span style="font-size:1rem;">🔗</span>
-          <span style="font-weight:600;color:var(--text-secondary);font-size:0.9375rem;">Hebbian &mdash; Associations</span>
+          <span style="font-weight:600;color:var(--text-secondary);font-size:0.9375rem;">赫布学习 &mdash; 关联</span>
         </div>
         <p style="margin:0 0 0.5rem;font-size:0.8125rem;color:var(--text-muted);line-height:1.6;">
-          Strengthens association weights between co-recalled memories using the Hebbian learning rule. Memories retrieved together become more strongly linked over time — <em style="color:var(--text-secondary);">"neurons that fire together, wire together."</em>
+          使用赫布学习规则增强共同召回记忆之间的关联权重。一起被检索的记忆会随着时间推移形成更强连接——<em style="color:var(--text-secondary);">“一起激活的神经元，会连接得更紧密。”</em>
         </p>
         <code style="font-size:0.75rem;color:#a78bfa;background:var(--bg-card);padding:0.25rem 0.5rem;border-radius:0.375rem;display:inline-block;">
           w&prime; = min(1.0,&nbsp;w &times; (1 + &eta;)<sup>n</sup>)
@@ -3329,10 +3325,10 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
       <div style="margin-bottom:0.875rem;padding:0.875rem;border-radius:0.625rem;border:1px solid var(--border);background:var(--bg-base);">
         <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.375rem;">
           <span style="font-size:1rem;">⚡</span>
-          <span style="font-weight:600;color:var(--text-secondary);font-size:0.9375rem;">Contradict &mdash; Conflict Detection</span>
+          <span style="font-weight:600;color:var(--text-secondary);font-size:0.9375rem;">冲突检测 &mdash; 逻辑一致性</span>
         </div>
         <p style="margin:0;font-size:0.8125rem;color:var(--text-muted);line-height:1.6;">
-          Scans relation-type pairs for logical incompatibilities (e.g., a memory cannot simultaneously <em>support</em> and <em>contradict</em> another). Scores severity against a compatibility matrix and flags conflicts so the recall layer can surface warnings instead of silently returning inconsistent data.
+          扫描关系类型组合中的逻辑不兼容（例如，一条记忆不能同时<em>支持</em>并<em>矛盾于</em>另一条）。系统会依据兼容性矩阵评估严重性并标记冲突，使召回层能够给出警告，而不是静默返回不一致数据。
         </p>
       </div>
 
@@ -3340,10 +3336,10 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
       <div style="padding:0.875rem;border-radius:0.625rem;border:1px solid var(--border);background:var(--bg-base);">
         <div style="display:flex;align-items:center;gap:0.5rem;margin-bottom:0.375rem;">
           <span style="font-size:1rem;">📊</span>
-          <span style="font-weight:600;color:var(--text-secondary);font-size:0.9375rem;">Confidence &mdash; Belief Updating</span>
+          <span style="font-weight:600;color:var(--text-secondary);font-size:0.9375rem;">置信度 &mdash; 信念更新</span>
         </div>
         <p style="margin:0 0 0.5rem;font-size:0.8125rem;color:var(--text-muted);line-height:1.6;">
-          Updates per-memory confidence scores using Bayesian inference with Laplace smoothing. Each access event (recall, link, confirm, contradict) is a trial; the posterior is recalculated so frequently validated memories rank higher in search results.
+          使用带拉普拉斯平滑的贝叶斯推断更新每条记忆的置信度评分。每次访问事件（召回、关联、确认、矛盾）都视为一次试验；系统会重新计算后验概率，使频繁被验证的记忆在搜索结果中排名更高。
         </p>
         <code style="font-size:0.75rem;color:#34d399;background:var(--bg-card);padding:0.25rem 0.5rem;border-radius:0.375rem;display:inline-block;">
           P(belief) = (hits + &alpha;) / (trials + 2&alpha;)
@@ -3351,7 +3347,7 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
       </div>
 
       <div style="display:flex;justify-content:flex-end;margin-top:1.125rem;">
-        <button class="btn-secondary" @click="cognitiveInfoModal = false">Close</button>
+        <button class="btn-secondary" @click="cognitiveInfoModal = false">关闭</button>
       </div>
     </div>
   </div>
@@ -3377,22 +3373,22 @@ Authorization = "Bearer &lt;token from %USERPROFILE%\.muninn\mcp.token&gt;"</pre
         <img src="/static/logo.jpg" style="height:44px;border-radius:8px;" alt="MuninnDB" />
         <h1 style="margin:0;font-size:1.5rem;font-weight:700;">MuninnDB</h1>
       </div>
-      <p style="margin:0;font-size:0.875rem;color:var(--text-muted);">Sign in to continue</p>
+      <p style="margin:0;font-size:0.875rem;color:var(--text-muted);">登录以继续</p>
     </div>
     <form @submit.prevent="login()" style="background:var(--bg-card);border:1px solid var(--border);border-radius:0.875rem;padding:1.75rem;">
       <div class="form-group" style="margin-bottom:1rem;">
-        <label>Username</label>
+        <label>用户名</label>
         <input class="input-field" x-model="loginForm.username" autocomplete="username" required autofocus />
       </div>
       <div class="form-group" style="margin-bottom:1.5rem;">
-        <label>Password</label>
+        <label>密码</label>
         <input class="input-field" type="password" x-model="loginForm.password" autocomplete="current-password" required />
       </div>
-      <button type="submit" class="btn-primary" style="width:100%;padding:0.75rem;">Sign in</button>
+      <button type="submit" class="btn-primary" style="width:100%;padding:0.75rem;">登录</button>
       <p x-show="loginError" style="color:var(--danger);text-align:center;margin-top:0.875rem;font-size:0.875rem;" x-text="loginError"></p>
     </form>
     <p style="color:var(--text-muted);text-align:center;margin-top:1rem;font-size:0.75rem;">
-      Default credentials: <strong>root</strong> / <strong>password</strong>
+      默认凭据：<strong>root</strong> / <strong>password</strong>
     </p>
     <p x-show="appVersion" x-text="appVersion" style="color:var(--text-muted);text-align:center;margin-top:1.5rem;font-size:0.6875rem;opacity:0.5;"></p>
   </div>

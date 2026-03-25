@@ -263,7 +263,7 @@ document.addEventListener('alpine:init', () => {
         const parts = hash.split('/');
         const raw = parts[0];
         // Only use known views
-        const known = ['dashboard', 'memories', 'graph', 'session', 'settings', 'logs', 'cluster'];
+        const known = ['dashboard', 'memories', 'graph', 'session', 'observability', 'settings', 'logs', 'cluster'];
         this.currentView = known.includes(raw) ? raw : 'dashboard';
 
         // Parse settings sub-tab if entering settings view
@@ -367,7 +367,7 @@ document.addEventListener('alpine:init', () => {
         this.connectLive();
         this.navigateTo('dashboard');
       } catch (err) {
-        this.loginError = 'Invalid username or password';
+        this.loginError = '用户名或密码无效';
       }
     },
 
@@ -381,7 +381,7 @@ document.addEventListener('alpine:init', () => {
       this.changePassError = '';
       this.changePassSuccess = false;
       if (this.changePassForm.newPassword !== this.changePassForm.confirmPassword) {
-        this.changePassError = 'Passwords do not match.';
+        this.changePassError = '两次输入的密码不一致。';
         return;
       }
       try {
@@ -396,7 +396,7 @@ document.addEventListener('alpine:init', () => {
         this.changePassForm.newPassword = '';
         this.changePassForm.confirmPassword = '';
       } catch (err) {
-        this.changePassError = 'Failed to update password. Check the username and try again.';
+        this.changePassError = '更新密码失败。请检查用户名后重试。';
       }
     },
 
@@ -550,10 +550,10 @@ document.addEventListener('alpine:init', () => {
         // Connection-level errors have null data; onerror already handles those silently.
         // Only process named 'event: error' server events (which carry non-null data).
         if (!e.data) return;
-        let msg = 'Live feed error';
+        let msg = '实时流错误';
         try {
           const data = JSON.parse(e.data);
-          if (data.error) msg = 'Live feed: ' + data.error;
+          if (data.error) msg = '实时流：' + data.error;
         } catch (_) {}
         console.warn('[muninn] SSE error event:', msg);
         this.addNotification('error', msg);
@@ -646,7 +646,7 @@ document.addEventListener('alpine:init', () => {
           indexSize:    data.index_size     || data.indexSize    || 0,
         };
       } catch (err) {
-        this.addNotification('error', 'Stats: ' + err.message);
+        this.addNotification('error', '统计信息：' + err.message);
       }
     },
 
@@ -672,7 +672,7 @@ document.addEventListener('alpine:init', () => {
     },
 
     workerStateName(state) {
-      return ['Active', 'Idle', 'Dormant'][state] ?? 'Unknown';
+      return ['活跃', '空闲', '休眠'][state] ?? '未知';
     },
 
     workerStateBadge(state) {
@@ -688,23 +688,23 @@ document.addEventListener('alpine:init', () => {
     },
 
     formatWorkerLastRun(nanos) {
-      if (!nanos) return 'never';
+      if (!nanos) return '从未';
       const ago = Date.now() - nanos / 1_000_000;
-      if (ago < 5_000)        return 'just now';
-      if (ago < 60_000)       return Math.floor(ago / 1_000) + 's ago';
-      if (ago < 3_600_000)    return Math.floor(ago / 60_000) + 'm ago';
-      if (ago < 86_400_000)   return Math.floor(ago / 3_600_000) + 'h ago';
-      return Math.floor(ago / 86_400_000) + 'd ago';
+      if (ago < 5_000)        return '刚刚';
+      if (ago < 60_000)       return Math.floor(ago / 1_000) + '秒前';
+      if (ago < 3_600_000)    return Math.floor(ago / 60_000) + '分钟前';
+      if (ago < 86_400_000)   return Math.floor(ago / 3_600_000) + '小时前';
+      return Math.floor(ago / 86_400_000) + '天前';
     },
 
     workerTooltip(w) {
       const lines = [
         `${w.name}  ·  ${this.workerStateName(w.state)}`,
-        `Processed: ${w.processed}  ·  Batches: ${w.batches}`,
-        `Last run: ${this.formatWorkerLastRun(w.lastRun)}`,
+        `已处理：${w.processed}  ·  批次：${w.batches}`,
+        `上次运行：${this.formatWorkerLastRun(w.lastRun)}`,
       ];
-      if (w.errors  > 0) lines.push(`Errors: ${w.errors}`);
-      if (w.dropped > 0) lines.push(`Dropped: ${w.dropped}`);
+      if (w.errors  > 0) lines.push(`错误：${w.errors}`);
+      if (w.dropped > 0) lines.push(`丢弃：${w.dropped}`);
       return lines.join('\n');
     },
 
@@ -719,13 +719,13 @@ document.addEventListener('alpine:init', () => {
     },
 
     workersOverallHealthLabel() {
-      if (!this.workerStats.length) return 'Loading';
+      if (!this.workerStats.length) return '加载中';
       const active = this.workerStats.filter(w => w.state === 0).length;
       const idle   = this.workerStats.filter(w => w.state === 1).length;
-      if (active === this.workerStats.length) return 'All Active';
-      if (active > 0) return active + ' Active';
-      if (idle   > 0) return idle + ' Idle';
-      return 'Dormant';
+      if (active === this.workerStats.length) return '全部活跃';
+      if (active > 0) return active + ' 个活跃';
+      if (idle   > 0) return idle + ' 个空闲';
+      return '休眠';
     },
 
     workersOverallHealthStyle() {
@@ -828,7 +828,7 @@ document.addEventListener('alpine:init', () => {
       }).catch(err => {
         if (this._activityFetchId !== fetchId) return;
         this.activityLoading = false;
-        let message = 'Failed to load activity data';
+        let message = '加载活动数据失败';
         if (err && typeof err.message === 'string' && err.message.trim() !== '') {
           message += ': ' + err.message;
         }
@@ -859,7 +859,7 @@ document.addEventListener('alpine:init', () => {
         data: {
           labels,
           datasets: [{
-            label: 'Engrams written',
+            label: '写入记忆数',
             data,
             backgroundColor: 'rgba(6,182,212,0.5)',
             borderColor: '#06b6d4',
@@ -874,7 +874,7 @@ document.addEventListener('alpine:init', () => {
             tooltip: {
               callbacks: {
                 title: function(items) { return items[0] ? items[0].label : ''; },
-                label: function(item) { return item.parsed.y + ' engram' + (item.parsed.y !== 1 ? 's' : ''); },
+                 label: function(item) { return item.parsed.y + ' 条记忆'; },
               },
             },
           },
@@ -909,15 +909,15 @@ document.addEventListener('alpine:init', () => {
     },
 
     _copyActivityTable() {
-      const header = 'Date\tCount';
+      const header = '日期\t数量';
       const rows = this.activityData.map(r => r.date + '\t' + r.count);
       const total = this.activityData.reduce((s, r) => s + r.count, 0);
-      rows.push('Total\t' + total);
+      rows.push('总计\t' + total);
       const text = header + '\n' + rows.join('\n');
 
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(() => {
-          this.addNotification('success', 'Activity data copied to clipboard');
+            this.addNotification('success', '活动数据已复制到剪贴板');
         }).catch(() => {
           this._copyFallback(text);
         });
@@ -936,9 +936,9 @@ document.addEventListener('alpine:init', () => {
         ta.select();
         const ok = document.execCommand('copy');
         document.body.removeChild(ta);
-        this.addNotification(ok ? 'success' : 'error', ok ? 'Activity data copied to clipboard' : 'Copy failed — please copy manually');
+        this.addNotification(ok ? 'success' : 'error', ok ? '活动数据已复制到剪贴板' : '复制失败——请手动复制');
       } catch (_) {
-        this.addNotification('error', 'Copy failed — please copy manually');
+        this.addNotification('error', '复制失败——请手动复制');
       }
     },
 
@@ -955,9 +955,9 @@ document.addEventListener('alpine:init', () => {
       const d = Math.floor(seconds / 86400);
       const h = Math.floor((seconds % 86400) / 3600);
       const m = Math.floor((seconds % 3600) / 60);
-      if (d > 0) return d + 'd ' + h + 'h';
-      if (h > 0) return h + 'h ' + m + 'm';
-      return m + 'm';
+      if (d > 0) return d + '天 ' + h + '小时';
+      if (h > 0) return h + '小时 ' + m + '分';
+      return m + '分';
     },
 
     // ── Memories ───────────────────────────────────────────────────────────
@@ -977,7 +977,7 @@ document.addEventListener('alpine:init', () => {
         this.memories = data.engrams || [];
         this.totalMemories = data.total || 0;
       } catch (err) {
-        this.addNotification('error', 'Load failed: ' + err.message);
+        this.addNotification('error', '加载失败：' + err.message);
       } finally {
         this.memoriesLoading = false;
       }
@@ -1016,7 +1016,7 @@ document.addEventListener('alpine:init', () => {
         this.totalMemories = this.memories.length;
         this.page = 0;
       } catch (err) {
-        this.addNotification('error', 'Search failed: ' + err.message);
+        this.addNotification('error', '搜索失败：' + err.message);
       } finally {
         this.memoriesLoading = false;
       }
@@ -1073,12 +1073,12 @@ document.addEventListener('alpine:init', () => {
           // Open consolidate modal pre-filled with both IDs
           this.multiSelectMode = true;
           this.selectedMemoryIds = [idA, idB];
-          this.consolidateModal = { show: true, mergedContent: '(Merge contradicting memories here)' };
+           this.consolidateModal = { show: true, mergedContent: '（在此合并存在矛盾的记忆）' };
           return; // don't reload contradictions yet
         }
-        this.addNotification('success', 'Contradiction resolved');
+        this.addNotification('success', '矛盾已解决');
       } catch (err) {
-        this.addNotification('error', 'Resolve failed: ' + err.message);
+        this.addNotification('error', '处理失败：' + err.message);
       }
       this.loadContradictions();
     },
@@ -1126,13 +1126,13 @@ document.addEventListener('alpine:init', () => {
           '/api/engrams/' + encodeURIComponent(id) + '?vault=' + encodeURIComponent(this.vault),
           { method: 'DELETE' }
         );
-        this.addNotification('success', 'Memory forgotten');
+        this.addNotification('success', '记忆已遗忘');
         if (this.selectedMemory && this.selectedMemory.id === id) {
           this.selectedMemory = null;
         }
         await this.loadMemories();
       } catch (err) {
-        this.addNotification('error', 'Forget failed: ' + err.message);
+        this.addNotification('error', '遗忘失败：' + err.message);
       }
     },
 
@@ -1153,10 +1153,10 @@ document.addEventListener('alpine:init', () => {
         });
         this.showNewMemoryModal = false;
         this.newMemoryForm = { concept: '', content: '', tagsRaw: '', confidence: 0.8 };
-        this.addNotification('success', 'Memory created');
+        this.addNotification('success', '记忆已创建');
         await this.loadMemories();
       } catch (err) {
-        this.addNotification('error', 'Create failed: ' + err.message);
+        this.addNotification('error', '创建失败：' + err.message);
       }
     },
 
@@ -1175,11 +1175,11 @@ document.addEventListener('alpine:init', () => {
     async saveEditMemory() {
       if (!this.selectedMemory) return;
       if (!this.editMemoryForm.content.trim()) {
-        this.addNotification('error', 'Content cannot be empty');
+        this.addNotification('error', '内容不能为空');
         return;
       }
       if (!this.editMemoryForm.reason.trim()) {
-        this.addNotification('error', 'Reason is required');
+        this.addNotification('error', '必须填写原因');
         return;
       }
       this.editMemorySaving = true;
@@ -1197,11 +1197,11 @@ document.addEventListener('alpine:init', () => {
         this.selectedMemory = { ...this.selectedMemory, content: this.editMemoryForm.content };
         this.editingMemory = false;
         this.editMemoryForm = { content: '', reason: '' };
-        this.addNotification('success', 'Memory updated');
+        this.addNotification('success', '记忆已更新');
         // Refresh the list so the new content shows there too
         await this.loadMemories();
       } catch (err) {
-        this.addNotification('error', 'Evolve failed: ' + err.message);
+        this.addNotification('error', '演化失败：' + err.message);
       } finally {
         this.editMemorySaving = false;
       }
@@ -1242,9 +1242,9 @@ document.addEventListener('alpine:init', () => {
         }
         this.editingTags = false;
         this.editTagsValue = '';
-        this.addNotification('success', 'Tags updated');
+        this.addNotification('success', '标签已更新');
       } catch (err) {
-        this.addNotification('error', 'Tag update failed: ' + err.message);
+        this.addNotification('error', '标签更新失败：' + err.message);
       } finally {
         this.editTagsSaving = false;
       }
@@ -1261,7 +1261,7 @@ document.addEventListener('alpine:init', () => {
 
     async createLink() {
       if (!this.linkModal.targetId.trim()) {
-        this.addNotification('error', 'Target ID is required');
+        this.addNotification('error', '必须填写目标 ID');
         return;
       }
       try {
@@ -1275,9 +1275,9 @@ document.addEventListener('alpine:init', () => {
           }),
         });
         this.closeLinkModal();
-        this.addNotification('success', 'Association created');
+        this.addNotification('success', '关联已创建');
       } catch (err) {
-        this.addNotification('error', 'Link failed: ' + err.message);
+        this.addNotification('error', '关联失败：' + err.message);
       }
     },
 
@@ -1291,7 +1291,7 @@ document.addEventListener('alpine:init', () => {
       if (!name) return;
       const valid = /^[a-z0-9_-]{1,64}$/.test(name);
       if (!valid) {
-        this.newVaultModal.error = 'Lowercase letters, digits, hyphens, underscores only (1-64 chars)';
+        this.newVaultModal.error = '仅允许小写字母、数字、连字符、下划线（1-64 个字符）';
         return;
       }
       this.newVaultModal.loading = true;
@@ -1328,7 +1328,7 @@ document.addEventListener('alpine:init', () => {
         await this.loadVaults();
         this.newVaultModal.loading = false;
         this.newVaultModal.show = false;
-        this.addNotification('success', 'Vault "' + name + '" created');
+        this.addNotification('success', '仓库“' + name + '”已创建');
       } catch (err) {
         this.newVaultModal.error = err.message;
         this.newVaultModal.loading = false;
@@ -1340,7 +1340,7 @@ document.addEventListener('alpine:init', () => {
     graphLimit: 50,
 
     async loadGraph() {
-      this.addNotification('info', 'Loading graph…');
+      this.addNotification('info', '正在加载图谱…');
       try {
         // Use GET /api/engrams for node listing
         const limit = Math.max(1, Math.min(200, parseInt(this.graphLimit, 10) || 50));
@@ -1350,7 +1350,7 @@ document.addEventListener('alpine:init', () => {
         );
         const engrams = data.engrams || [];
         if (!engrams.length) {
-          this.addNotification('error', 'No engrams to graph');
+          this.addNotification('error', '没有可用于绘图的记忆');
           return;
         }
 
@@ -1510,17 +1510,17 @@ document.addEventListener('alpine:init', () => {
           const node = evt.target;
           this.addNotification(
             'info',
-            node.data('label') + ': ' + (node.data('snippet') || '(no content)')
+            node.data('label') + ': ' + (node.data('snippet') || '（无内容）')
           );
         });
 
         this.graphLoaded = true;
         const orphanCount = engrams.length - connectedNodeIds.size;
-        const msg = 'Graph loaded (' + nodesToRender.length + ' nodes' +
-          (orphanCount > 0 && !showOrphans ? ', ' + orphanCount + ' orphans hidden' : '') + ')';
+        const msg = '图谱已加载（' + nodesToRender.length + ' 个节点' +
+          (orphanCount > 0 && !showOrphans ? '，隐藏 ' + orphanCount + ' 个孤立节点' : '') + '）';
         this.addNotification('success', msg);
       } catch (err) {
-        this.addNotification('error', 'Graph failed: ' + err.message);
+        this.addNotification('error', '图谱加载失败：' + err.message);
       }
     },
 
@@ -1558,7 +1558,7 @@ document.addEventListener('alpine:init', () => {
 
     // ── Entity Graph ───────────────────────────────────────────────────────
     async loadEntityGraph() {
-      this.entityGraphStatus = 'Loading entity graph…';
+      this.entityGraphStatus = '正在加载实体图谱…';
       try {
         // Call the REST endpoint directly instead of the MCP server.
         // The previous approach fetched from http://127.0.0.1:8750/mcp which
@@ -1608,7 +1608,7 @@ document.addEventListener('alpine:init', () => {
         });
 
         if (nodes.length === 0) {
-          this.entityGraphStatus = 'No entities found in vault';
+          this.entityGraphStatus = '仓库中未找到实体';
           return;
         }
 
@@ -1700,11 +1700,11 @@ document.addEventListener('alpine:init', () => {
 
         this.entityGraphLoaded = true;
         this._applyEntityGraphLabelStyle();
-        this.entityGraphStatus = 'Loaded ' + nodes.length + ' entities, ' + edges.length + ' relationships';
+        this.entityGraphStatus = '已加载 ' + nodes.length + ' 个实体，' + edges.length + ' 条关系';
         this.addNotification('success', this.entityGraphStatus);
       } catch (err) {
-        this.entityGraphStatus = 'Error: ' + err.message;
-        this.addNotification('error', 'Entity graph failed: ' + err.message);
+        this.entityGraphStatus = '错误：' + err.message;
+        this.addNotification('error', '实体图谱加载失败：' + err.message);
       }
     },
 
@@ -1775,7 +1775,7 @@ document.addEventListener('alpine:init', () => {
         // GetSessionResponse has { entries: [] } or raw array
         this.sessionEntries = data.entries || (Array.isArray(data) ? data : []);
       } catch (err) {
-        this.addNotification('error', 'Session: ' + err.message);
+        this.addNotification('error', '会话：' + err.message);
       }
     },
 
@@ -1789,9 +1789,9 @@ document.addEventListener('alpine:init', () => {
           method: 'POST',
           body: JSON.stringify({ output_dir: outputDir }),
         });
-        this.addNotification('success', 'Backup complete: ' + data.output_dir + ' (' + data.elapsed + ')');
+        this.addNotification('success', '备份完成：' + data.output_dir + '（' + data.elapsed + '）');
       } catch (err) {
-        this.addNotification('error', 'Backup failed: ' + err.message);
+        this.addNotification('error', '备份失败：' + err.message);
       } finally {
         this.backupLoading = false;
       }
@@ -1850,7 +1850,7 @@ document.addEventListener('alpine:init', () => {
     async createApiKey() {
         this.apiKeyError = '';
         if (!this.apiKeyForm.vault || !this.apiKeyForm.label) {
-            this.apiKeyError = 'Vault and label are required.';
+            this.apiKeyError = '仓库和标签为必填项。';
             return;
         }
         this.apiKeyLoading = true;
@@ -1863,18 +1863,18 @@ document.addEventListener('alpine:init', () => {
             this.apiKeyForm = { vault: this.vault, label: '', mode: 'full' };
             await this.loadApiKeys();
         } catch (e) {
-            this.apiKeyError = e.message || 'Failed to create key.';
+            this.apiKeyError = e.message || '创建密钥失败。';
         } finally {
             this.apiKeyLoading = false;
         }
     },
     async revokeApiKey(id) {
-        if (!confirm('Revoke this API key? This cannot be undone.')) return;
+        if (!confirm('要撤销此 API 密钥吗？此操作无法撤销。')) return;
         try {
             await this.apiCall('/api/admin/keys/' + id + '?vault=' + encodeURIComponent(this.vault), { method: 'DELETE' });
             await this.loadApiKeys();
         } catch (e) {
-            this.addNotification('error', 'Failed to revoke key: ' + (e.message || 'unknown error'));
+            this.addNotification('error', '撤销密钥失败：' + (e.message || '未知错误'));
         }
     },
     async loadPlugins() {
@@ -1918,10 +1918,10 @@ document.addEventListener('alpine:init', () => {
             processed: stats ? (stats.processed ?? '—') : '—',
         });
         return [
-            toRow('Hebbian Learning', ws.hebbian),
-            toRow('Temporal Scoring', ws.decay),
-            toRow('Contradiction Detection', ws.contradict),
-            toRow('Confidence Updates', ws.confidence),
+            toRow('赫布学习', ws.hebbian),
+            toRow('时间评分', ws.decay),
+            toRow('矛盾检测', ws.contradict),
+            toRow('置信度更新', ws.confidence),
         ];
     },
 
@@ -1944,7 +1944,7 @@ document.addEventListener('alpine:init', () => {
             this.plasticityForm.recallMode = cfg.recall_mode || data.resolved?.recall_mode || 'balanced';
         } catch (err) {
             console.error('loadPlasticity error:', err);
-            this.plasticitySaveErr = 'Failed to load Plasticity settings';
+            this.plasticitySaveErr = '加载可塑性设置失败';
         }
     },
     onPlasticityPresetChange() {
@@ -1979,7 +1979,7 @@ document.addEventListener('alpine:init', () => {
         new Chart(canvas, {
             type: 'radar',
             data: {
-                labels: ['Memory Lifespan', 'Associative Learning', 'Graph Depth', 'Semantic Match', 'FTS Relevance'],
+                labels: ['记忆寿命', '关联学习', '图深度', '语义匹配', 'FTS 相关性'],
                 datasets: [{
                     data: this._plasticityData[p],
                     borderColor: c.border,
@@ -2040,10 +2040,10 @@ document.addEventListener('alpine:init', () => {
     },
     plasticityPresetDescription(preset) {
         const d = {
-            'default':         'General-purpose. Temporal scoring on, Hebbian on, 2-hop BFS. Balanced weights.',
-            'reference':       'Documentation and facts. Temporal scoring OFF — memories persist indefinitely.',
-            'scratchpad':      'Ephemeral drafts. Aggressive fading (7-day halflife, 0.01 floor). No Hebbian, no hops.',
-            'knowledge-graph': 'Dense interlinked concepts. 4-hop BFS, slow fading (60-day halflife).',
+            'default':         '通用模式。启用时间评分与赫布学习，2 跳 BFS，权重均衡。',
+            'reference':       '文档与事实。关闭时间评分——记忆可长期保留。',
+            'scratchpad':      '临时草稿。激进衰减（7 天半衰期，0.01 下限）。不启用赫布学习、无跳数扩展。',
+            'knowledge-graph': '高密度互联概念。4 跳 BFS，缓慢衰减（60 天半衰期）。',
         };
         return d[preset] || '';
     },
@@ -2083,24 +2083,24 @@ document.addEventListener('alpine:init', () => {
         await navigator.clipboard.writeText(text);
         this.connectCopied = true;
         setTimeout(() => { this.connectCopied = false; }, 2000);
-        this.addNotification('success', 'Copied to clipboard');
+        this.addNotification('success', '已复制到剪贴板');
       } catch (_) {
-        this.addNotification('error', 'Copy failed — select and copy manually');
+        this.addNotification('error', '复制失败——请手动选择并复制');
       }
     },
 
     // ── API key expiry display ──────────────────────────────────────────────
     formatKeyExpiry(expiresAt) {
-      if (!expiresAt) return 'Never';
+      if (!expiresAt) return '永不过期';
       const exp = new Date(expiresAt);
       const now = new Date();
       const diffMs = exp - now;
-      if (diffMs <= 0) return 'Expired';
+      if (diffMs <= 0) return '已过期';
       const diffDays = Math.round(diffMs / 86400000);
-      if (diffDays === 0) return 'Today';
-      if (diffDays === 1) return 'Tomorrow';
-      if (diffDays < 30) return 'in ' + diffDays + ' days';
-      if (diffDays < 365) return 'in ' + Math.round(diffDays / 30) + ' months';
+      if (diffDays === 0) return '今天';
+      if (diffDays === 1) return '明天';
+      if (diffDays < 30) return diffDays + ' 天后';
+      if (diffDays < 365) return Math.round(diffDays / 30) + ' 个月后';
       return exp.toLocaleDateString();
     },
 
@@ -2109,9 +2109,9 @@ document.addEventListener('alpine:init', () => {
     confLabel(v) {
       const CONFIDENCE_HIGH = 0.7;
       const CONFIDENCE_MED  = 0.4;
-      if (v >= CONFIDENCE_HIGH) return 'High';
-      if (v >= CONFIDENCE_MED)  return 'Med';
-      return 'Low';
+      if (v >= CONFIDENCE_HIGH) return '高';
+      if (v >= CONFIDENCE_MED)  return '中';
+      return '低';
     },
 
     confLabelClass(v) {
@@ -2134,7 +2134,7 @@ document.addEventListener('alpine:init', () => {
     // Returns a formatted rate string like "0.7s/embedding", or '' when idle.
     embedSecsPerItem() {
       if (this.pluginCfg.embedRatePerSec > 0) {
-        return (1 / this.pluginCfg.embedRatePerSec).toFixed(1) + 's/embedding';
+        return (1 / this.pluginCfg.embedRatePerSec).toFixed(1) + '秒/条';
       }
       return '';
     },
@@ -2143,12 +2143,12 @@ document.addEventListener('alpine:init', () => {
     embedETADisplay() {
       const secs = this.pluginCfg.embedETASecs;
       if (secs <= 0) return '';
-      if (secs < 60) return '< 1 min';
+      if (secs < 60) return '< 1 分钟';
       const mins = Math.round(secs / 60);
-      if (mins < 60) return '~' + mins + ' min';
+      if (mins < 60) return '约 ' + mins + ' 分钟';
       const hrs = Math.floor(mins / 60);
       const rem = mins % 60;
-      return rem > 0 ? '~' + hrs + ' hr ' + rem + ' min' : '~' + hrs + ' hr';
+      return rem > 0 ? '约 ' + hrs + ' 小时 ' + rem + ' 分钟' : '约 ' + hrs + ' 小时';
     },
 
     // True only when Ollama is the embed provider and hardware_accelerated is explicitly false.
@@ -2263,7 +2263,7 @@ document.addEventListener('alpine:init', () => {
         ts,
         epoch,
         cortexId,
-        label: '[' + ts + '] Epoch ' + epoch + ': ' + cortexId + ' became Cortex',
+        label: '[' + ts + '] 纪元 ' + epoch + '：' + cortexId + ' 成为 Cortex',
       };
       stored.unshift(entry);
       const trimmed = stored.slice(0, 10);
@@ -2278,7 +2278,7 @@ document.addEventListener('alpine:init', () => {
     async enableCluster() {
       this.clusterEnableLoading = true;
       this.clusterEnableError = null;
-      this.clusterEnableProgress = ['Validating settings...'];
+        this.clusterEnableProgress = ['正在校验设置...'];
       try {
         const resp = await fetch('/api/admin/cluster/enable', {
           method: 'POST',
@@ -2292,13 +2292,14 @@ document.addEventListener('alpine:init', () => {
           })
         });
         if (!resp.ok) {
-          const err = await resp.json().catch(() => ({ error: 'Enable failed' }));
-          throw new Error(err.error || 'Enable failed');
+          const err = await resp.json().catch(() => ({ error: {message:'启用解析失败'} }));
+          throw new Error(err.error.message || '启用失败');
         }
-        this.clusterEnableProgress = ['Initializing TLS...', 'Generating join token...', 'Starting heartbeat...'];
+        this.clusterEnableProgress = ['正在初始化 TLS...', '正在生成加入令牌...', '正在启动心跳...'];
         await this._loadClusterInfo();
-        this.clusterEnableProgress = [...this.clusterEnableProgress, 'Cluster active \u2713'];
+        this.clusterEnableProgress = [...this.clusterEnableProgress, '集群已激活 \u2713'];
       } catch (e) {
+        console.error(e)
         this.clusterEnableError = e.message;
       } finally {
         this.clusterEnableLoading = false;
@@ -2327,7 +2328,7 @@ document.addEventListener('alpine:init', () => {
     async addNode() {
       this.addNodeLoading = true;
       this.addNodeError = null;
-      this.addNodeProgress = ['Validating token...'];
+      this.addNodeProgress = ['正在校验令牌...'];
       try {
         const resp = await fetch('/api/admin/cluster/nodes', {
           method: 'POST',
@@ -2336,10 +2337,10 @@ document.addEventListener('alpine:init', () => {
           body: JSON.stringify({ addr: this.addNodeForm.addr, token: this.addNodeForm.token })
         });
         if (!resp.ok) {
-          const err = await resp.json().catch(() => ({ error: 'Add node failed' }));
-          throw new Error(err.error || 'Add node failed');
+          const err = await resp.json().catch(() => ({ error: {message:'添加节点失败' }}));
+          throw new Error(err.error.message || '添加节点失败');
         }
-        this.addNodeProgress = ['Registering peer...', 'Waiting for join handshake...', 'Node added \u2713'];
+        this.addNodeProgress = ['正在注册对等节点...', '等待加入握手...', '节点已添加 \u2713'];
         await new Promise(r => setTimeout(r, 1200));
         this.showAddNodeModal = false;
         this.addNodeForm = { addr: '', token: '' };
@@ -2362,8 +2363,8 @@ document.addEventListener('alpine:init', () => {
           credentials: 'same-origin',
         });
         if (!resp.ok) {
-          const err = await resp.json().catch(() => ({ error: 'Remove failed' }));
-          throw new Error(err.error || 'Remove failed');
+          const err = await resp.json().catch(() => ({ error: {message:'删除失败' }}));
+          throw new Error(err.error.message || '删除失败');
         }
         this.showRemoveNodeModal = false;
         this.removeNodeTarget = null;
@@ -2378,7 +2379,7 @@ document.addEventListener('alpine:init', () => {
     async triggerFailover() {
       this.failoverLoading = true;
       this.failoverError = null;
-      this.failoverProgress = ['Sending handoff request...'];
+      this.failoverProgress = ['正在发送切换请求...'];
       try {
         const resp = await fetch('/api/admin/cluster/failover', {
           method: 'POST',
@@ -2387,10 +2388,10 @@ document.addEventListener('alpine:init', () => {
           body: JSON.stringify({ target_node_id: this.failoverTarget })
         });
         if (!resp.ok) {
-          const err = await resp.json().catch(() => ({ error: 'Failover failed' }));
-          throw new Error(err.error || 'Failover failed');
+          const err = await resp.json().message(() => ({ error: {message:'故障切换失败' }}));
+          throw new Error(err.error.message || '故障切换失败');
         }
-        this.failoverProgress = ['Sending handoff request...', 'New Cortex elected...', 'Handoff acknowledged...', 'Complete \u2713'];
+        this.failoverProgress = ['正在发送切换请求...', '已选出新 Cortex...', '切换已确认...', '完成 \u2713'];
         await new Promise(r => setTimeout(r, 1500));
         this.showFailoverModal = false;
         this.failoverProgress = [];
@@ -2443,7 +2444,7 @@ document.addEventListener('alpine:init', () => {
         });
         if (resp.ok) this.clusterToken = await resp.json();
       } catch (err) {
-        this.addNotification('error', 'Token regeneration failed: ' + err.message);
+        this.addNotification('error', '令牌重新生成失败：' + err.message);
       }
     },
 
@@ -2486,7 +2487,7 @@ document.addEventListener('alpine:init', () => {
           setTimeout(() => { this.clusterSettingsSaved = false; }, 2500);
         }
       } catch (err) {
-        this.addNotification('error', 'Failed to save cluster settings: ' + err.message);
+        this.addNotification('error', '保存集群设置失败：' + err.message);
       } finally { this.clusterSettingsSaving = false; }
     },
 
@@ -2497,12 +2498,12 @@ document.addEventListener('alpine:init', () => {
           credentials: 'same-origin',
         });
         if (!resp.ok) {
-          this.addNotification('error', 'TLS rotation failed');
+          this.addNotification('error', 'TLS 证书轮换失败');
         } else {
-          this.addNotification('success', 'TLS certificate rotated');
+          this.addNotification('success', 'TLS 证书已轮换');
         }
       } catch (_) {
-        this.addNotification('error', 'TLS rotation failed');
+        this.addNotification('error', 'TLS 证书轮换失败');
       }
     },
 
@@ -2515,12 +2516,12 @@ document.addEventListener('alpine:init', () => {
     },
 
     clusterBannerText() {
-      if (!this.clusterHealth) return 'Cluster status unknown';
+      if (!this.clusterHealth) return '集群状态未知';
       const s = this.clusterHealth.status;
       const n = this.clusterNodes.length;
-      if (s === 'ok') return 'Cluster healthy \u2014 ' + n + ' node' + (n !== 1 ? 's' : '');
-      if (s === 'degraded') return 'Cluster degraded \u2014 check replication lag';
-      return 'Cluster down \u2014 no quorum';
+      if (s === 'ok') return '集群健康 \u2014 ' + n + ' 个节点';
+      if (s === 'degraded') return '集群降级 \u2014 请检查复制延迟';
+      return '集群不可用 \u2014 无法形成法定人数';
     },
 
     ccsScore() {
@@ -2577,25 +2578,25 @@ document.addEventListener('alpine:init', () => {
       try {
         await this.apiCall('/api/admin/plugin-config', { method: 'PUT', body: JSON.stringify(payload) });
         this.addNotification('success', section === 'embed'
-          ? 'Embedding provider saved — restart MuninnDB to apply.'
-          : 'Enrichment provider saved — restart MuninnDB to apply.');
+          ? '嵌入提供商已保存——重启 MuninnDB 后生效。'
+          : '增强提供商已保存——重启 MuninnDB 后生效。');
         if (section === 'embed') c.embedShowForm = false;
         if (section === 'enrich') c.enrichShowForm = false;
       } catch (e) {
-        c[errorKey] = e?.message || 'Save failed';
+        c[errorKey] = e?.message || '保存失败';
         setTimeout(() => { c[errorKey] = ''; }, 5000);
       }
     },
 
     async reembedVault() {
-      if (!confirm(`Re-embed vault "${this.vault}"?\n\nThis clears all embeddings and lets the RetroactiveProcessor re-embed every engram with the current model.\n\nThe vault stays queryable during migration (with degraded recall).`)) return;
+      if (!confirm(`要重新嵌入仓库“${this.vault}”吗？\n\n这会清除所有嵌入，并让 RetroactiveProcessor 使用当前模型重新嵌入每条记忆。\n\n迁移期间仓库仍可查询（召回质量会下降）。`)) return;
       try {
         const data = await this.apiCall('/api/admin/vaults/' + encodeURIComponent(this.vault) + '/reembed', { method: 'POST' });
-        this.addNotification('success', `Re-embed started (job ${data.job_id}). Monitor via Embed Status.`);
+        this.addNotification('success', `重新嵌入已开始（任务 ${data.job_id}）。可在嵌入状态中查看进度。`);
         // Refresh embed status to show progress.
         this.loadEmbedStatus();
       } catch (e) {
-        this.addNotification('error', 'Re-embed failed: ' + (e?.message || 'unknown error'));
+        this.addNotification('error', '重新嵌入失败：' + (e?.message || '未知错误'));
       }
     },
 
@@ -2630,25 +2631,25 @@ document.addEventListener('alpine:init', () => {
               this.vault = this.vaults?.[0] || '';
               localStorage.setItem('muninnVault', this.vault);
             }
-            this.addNotification('success', 'Vault deleted');
+            this.addNotification('success', '仓库已删除');
           } else {
-            this.addNotification('success', 'Memories cleared');
+            this.addNotification('success', '记忆已清除');
           }
         } else if (r.status === 401) {
-          this.addNotification('error', 'Not authenticated');
+          this.addNotification('error', '未认证');
         } else if (r.status === 409) {
-          this.addNotification('error', 'Protected vault — cannot modify default');
+          this.addNotification('error', '受保护仓库——无法修改 default');
         } else {
-          this.addNotification('error', 'Error: ' + r.status);
+          this.addNotification('error', '错误：' + r.status);
         }
       } catch (e) {
-        this.addNotification('error', 'Network error');
+        this.addNotification('error', '网络错误');
       }
     },
 
     // ── Rename ─────────────────────────────────────────────────────────────
     openVaultRename() {
-      const newName = prompt('Enter new name for vault "' + this.vault + '":');
+      const newName = prompt('请输入仓库“' + this.vault + '”的新名称：');
       if (!newName || newName === this.vault) return;
       this.renameVault(newName);
     },
@@ -2665,7 +2666,7 @@ document.addEventListener('alpine:init', () => {
           const data = await r.json().catch(() => null);
           if (data && data.code === 'VAULT_NAME_COLLISION') {
             const proceed = confirm(
-              'A vault named "' + data.conflict + '" already exists with a similar name.\n\nCreate "' + newName + '" anyway?'
+              '名为“' + data.conflict + '”的仓库已存在且名称相似。\n\n仍要创建“' + newName + '”吗？'
             );
             if (proceed) {
               this.renameVault(newName, true);
@@ -2676,21 +2677,21 @@ document.addEventListener('alpine:init', () => {
         if (!r.ok) {
           const err = await r.json().catch(() => null);
           const msg = err && err.error && err.error.message ? err.error.message : 'HTTP ' + r.status;
-          this.addNotification('error', 'Rename failed: ' + msg);
+          this.addNotification('error', '重命名失败：' + msg);
           return;
         }
         this.vault = newName;
         this.loadVaults();
-        this.addNotification('success', 'Vault renamed to "' + newName + '"');
+        this.addNotification('success', '仓库已重命名为“' + newName + '”');
       } catch (e) {
-        this.addNotification('error', 'Rename failed: ' + e.message);
+        this.addNotification('error', '重命名失败：' + e.message);
       }
     },
 
     // ── Clone / Merge ───────────────────────────────────────────────────────
     openVaultClone() {
       if (this.activeJob && this.activeJob.status === 'running') {
-        this.addNotification('warning', 'A clone or merge job is still in progress.');
+        this.addNotification('warning', '克隆或合并任务仍在进行中。');
         return;
       }
       this.cloneModal = { show: true, source: this.vault, newName: '' };
@@ -2699,7 +2700,7 @@ document.addEventListener('alpine:init', () => {
 
     openVaultMerge() {
       if (this.activeJob && this.activeJob.status === 'running') {
-        this.addNotification('warning', 'A clone or merge job is still in progress.');
+        this.addNotification('warning', '克隆或合并任务仍在进行中。');
         return;
       }
       this.mergeModal = { show: true, source: this.vault, target: '', deleteSource: false };
@@ -2717,14 +2718,14 @@ document.addEventListener('alpine:init', () => {
         }
       );
       if (!r.ok) {
-        this.addNotification('error', 'Clone failed: ' + r.status);
+        this.addNotification('error', '克隆失败：' + r.status);
         return;
       }
       const { job_id } = await r.json();
       this.startJobPolling(job_id, this.cloneModal.source, () => {
         this.loadVaults();
         this.cloneModal.show = false;
-        this.addNotification('success', 'Vault cloned successfully');
+        this.addNotification('success', '仓库克隆成功');
       });
     },
 
@@ -2739,14 +2740,14 @@ document.addEventListener('alpine:init', () => {
         }
       );
       if (!r.ok) {
-        this.addNotification('error', 'Merge failed: ' + r.status);
+        this.addNotification('error', '合并失败：' + r.status);
         return;
       }
       const { job_id } = await r.json();
       this.startJobPolling(job_id, this.mergeModal.source, () => {
         this.loadVaults();
         this.mergeModal.show = false;
-        this.addNotification('success', 'Vaults merged successfully');
+        this.addNotification('success', '仓库合并成功');
       });
     },
 
@@ -2766,7 +2767,7 @@ document.addEventListener('alpine:init', () => {
             if (snap.status === 'done') {
               onComplete();
             } else {
-              this.addNotification('error', 'Job failed: ' + (snap.error || 'unknown'));
+               this.addNotification('error', '任务失败：' + (snap.error || '未知错误'));
             }
           }
         } catch (e) {
@@ -2801,9 +2802,9 @@ document.addEventListener('alpine:init', () => {
         a.click();
         a.remove();
         URL.revokeObjectURL(url);
-        this.addNotification('success', 'Vault exported: ' + this.vault + '.muninn');
+        this.addNotification('success', '仓库已导出：' + this.vault + '.muninn');
       } catch (e) {
-        this.addNotification('error', 'Export failed: ' + (e?.message || 'unknown error'));
+        this.addNotification('error', '导出失败：' + (e?.message || '未知错误'));
       } finally {
         this.vaultExporting = false;
       }
@@ -2835,16 +2836,16 @@ document.addEventListener('alpine:init', () => {
         this.startJobPolling(jobId, this.importModal.vaultName, () => {
           this.loadVaults();
           this.importModal.show = false;
-          this.addNotification('success', 'Vault imported successfully');
+          this.addNotification('success', '仓库导入成功');
         });
       } catch (e) {
-        this.addNotification('error', 'Import failed: ' + (e?.message || 'unknown error'));
+        this.addNotification('error', '导入失败：' + (e?.message || '未知错误'));
       }
     },
 
     // ── FTS reindex ────────────────────────────────────────────────────────
     async reindexFTS() {
-      if (!confirm('Reindex full-text search for vault "' + this.vault + '"?\n\nThis rebuilds the FTS index for all engrams. The vault stays queryable during reindex.')) return;
+      if (!confirm('要为仓库“' + this.vault + '”重建全文搜索索引吗？\n\n这会为所有记忆重建 FTS 索引。重建期间仓库仍可查询。')) return;
       this.reindexing = true;
       try {
         const res = await fetch(
@@ -2856,9 +2857,9 @@ document.addEventListener('alpine:init', () => {
           throw new Error(res.status + ': ' + text);
         }
         const data = await res.json();
-        this.addNotification('success', 'FTS reindex complete — ' + (data.engrams_reindexed || 0) + ' engrams reindexed');
+        this.addNotification('success', 'FTS 重建索引完成——已重建 ' + (data.engrams_reindexed || 0) + ' 条记忆');
       } catch (e) {
-        this.addNotification('error', 'Reindex failed: ' + (e?.message || 'unknown error'));
+        this.addNotification('error', '重建索引失败：' + (e?.message || '未知错误'));
       } finally {
         this.reindexing = false;
       }
@@ -2874,9 +2875,9 @@ document.addEventListener('alpine:init', () => {
         if (this.selectedMemory && this.selectedMemory.id === id) {
           this.selectedMemory = { ...this.selectedMemory, state };
         }
-        this.addNotification('success', 'Lifecycle state updated to ' + state);
+        this.addNotification('success', '生命周期状态已更新为 ' + state);
       } catch (e) {
-        this.addNotification('error', 'State update failed: ' + (e?.message || 'unknown error'));
+        this.addNotification('error', '状态更新失败：' + (e?.message || '未知错误'));
       }
     },
 
@@ -2927,7 +2928,7 @@ document.addEventListener('alpine:init', () => {
         this.explainModal = { show: true, data, loading: false };
       } catch (err) {
         this.explainModal = { show: false, data: null, loading: false };
-        this.addNotification('error', 'Explain failed: ' + err.message);
+        this.addNotification('error', '解释失败：' + err.message);
       }
     },
 
@@ -2954,7 +2955,7 @@ document.addEventListener('alpine:init', () => {
 
     openConsolidate() {
       if (this.selectedMemoryIds.length < 2) {
-        this.addNotification('error', 'Select at least 2 memories to consolidate');
+        this.addNotification('error', '请至少选择 2 条记忆进行整合');
         return;
       }
       // Pre-fill with combined content from selected memories
@@ -2965,7 +2966,7 @@ document.addEventListener('alpine:init', () => {
 
     async submitConsolidate() {
       if (!this.consolidateModal.mergedContent.trim()) {
-        this.addNotification('error', 'Merged content cannot be empty');
+        this.addNotification('error', '合并内容不能为空');
         return;
       }
       try {
@@ -2979,10 +2980,10 @@ document.addEventListener('alpine:init', () => {
         this.consolidateModal = { show: false, mergedContent: '' };
         this.selectedMemoryIds = [];
         this.multiSelectMode = false;
-        this.addNotification('success', 'Memories consolidated (new ID: ' + data.id.slice(0, 8) + '…)');
+        this.addNotification('success', '记忆已整合（新 ID：' + data.id.slice(0, 8) + '…）');
         await this.loadMemories();
       } catch (err) {
-        this.addNotification('error', 'Consolidate failed: ' + err.message);
+        this.addNotification('error', '整合失败：' + err.message);
       }
     },
 
@@ -2996,7 +2997,7 @@ document.addEventListener('alpine:init', () => {
 
     async submitDecide() {
       if (!this.decideModal.decision.trim()) {
-        this.addNotification('error', 'Decision text is required');
+        this.addNotification('error', '必须填写决策内容');
         return;
       }
       const alternatives = this.decideModal.alternatives
@@ -3018,10 +3019,10 @@ document.addEventListener('alpine:init', () => {
           }),
         });
         this.decideModal = { show: false, decision: '', rationale: '', alternatives: '', evidenceIds: '' };
-        this.addNotification('success', 'Decision recorded (ID: ' + data.id.slice(0, 8) + '…)');
+        this.addNotification('success', '决策已记录（ID：' + data.id.slice(0, 8) + '…）');
         await this.loadMemories();
       } catch (err) {
-        this.addNotification('error', 'Decide failed: ' + err.message);
+        this.addNotification('error', '记录决策失败：' + err.message);
       }
     },
   }));

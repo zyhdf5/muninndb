@@ -1,29 +1,47 @@
 /* theme.css — CSS custom properties */
 :root {
-  --bg-base:    #0a0a0a;
-  --bg-surface: #1a1a2e;
-  --bg-elevated:#16213e;
-  --border:     #2a2a4a;
-  --text-primary:   #e2e8f0;
-  --text-secondary: #94a3b8;
-  --text-muted:     #64748b;
-  --primary:      #06b6d4;
-  --primary-dark: #0891b2;
-  --accent:       #a855f7;
-  --accent-dark:  #9333ea;
-  --yellow:    #eab308;
-  --success:   #22c55e;
-  --danger:    #ef4444;
-  --warning:   #f59e0b;
-  --info:      #3b82f6;
+  --bg-base: #07111f;
+  --bg-surface: rgba(12, 24, 42, 0.58);
+  --bg-elevated: rgba(12, 24, 42, 0.66);
+  --border: rgba(125, 166, 255, 0.14);
+  --text-primary: #e8f1ff;
+  --text-secondary: #9db1cf;
+  --text-muted: #7f93b2;
+  --primary: #4f6bff;
+  --primary-dark: #2563eb;
+  --accent: #60a5fa;
+  --accent-dark: #3b82f6;
+  --yellow: #eab308;
+  --success: #10b981;
+  --danger: #ef4444;
+  --warning: #f59e0b;
+  --info: #3b82f6;
+
+  /* Glassmorphism tokens */
+  --panel-bg: linear-gradient(145deg, rgba(14,28,48,0.7), rgba(18,39,66,0.52));
+  --panel-border: rgba(125, 166, 255, 0.14);
+  --panel-shadow: 0 20px 44px rgba(0,0,0,0.28);
+  --panel-blur: blur(18px);
+  --card-bg: linear-gradient(145deg, rgba(14,28,48,0.75), rgba(18,39,66,0.55));
+  --card-shadow: 0 14px 34px rgba(0,0,0,0.22);
+  --inset-glow: inset 0 1px 0 rgba(255,255,255,0.04);
 }
 
 html.light {
-  --bg-base:    #fafafa;
-  --bg-surface: #ffffff;
-  --bg-elevated:#f1f5f9;
-  --border:     #e2e8f0;
-  --text-primary:   #0f172a;
-  --text-secondary: #475569;
-  --text-muted:     #94a3b8;
+  --bg-base: #f5f7fb;
+  --bg-surface: rgba(255, 255, 255, 0.88);
+  --bg-elevated: rgba(239, 246, 255, 0.56);
+  --border: rgba(148, 163, 184, 0.22);
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --text-muted: #94a3b8;
+
+  /* Glassmorphism tokens */
+  --panel-bg: linear-gradient(145deg, rgba(255,255,255,0.86), rgba(239,246,255,0.64));
+  --panel-border: rgba(191, 219, 254, 0.38);
+  --panel-shadow: 0 18px 44px rgba(15,23,42,0.06);
+  --panel-blur: blur(18px);
+  --card-bg: linear-gradient(145deg, rgba(255,255,255,0.9), rgba(239,246,255,0.7));
+  --card-shadow: 0 14px 34px rgba(15,23,42,0.05);
+  --inset-glow: inset 0 1px 0 rgba(255,255,255,0.55);
 }
