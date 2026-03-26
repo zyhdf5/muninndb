@@ -6,31 +6,3 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-@layer components {
-  /* Reference tailwind classes */
-  .card {
-    @apply bg-white/5 border border-white/10 rounded-xl shadow-lg backdrop-blur-md transition-all duration-200;
-  }
-  .input {
-    @apply w-full bg-black/20 border border-white/10 rounded-lg px-4 py-2 text-white placeholder-white/40 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all duration-200;
-  }
-  .btn-primary-tw {
-    @apply bg-blue-600 hover:bg-blue-500 text-white font-medium py-2 px-4 rounded-lg shadow-[0_4px_12px_rgba(37,99,235,0.3)] hover:shadow-[0_6px_16px_rgba(37,99,235,0.4)] hover:-translate-y-px transition-all duration-200 border border-white/10;
-  }
-  .badge {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border;
-  }
-  .badge-green {
-    @apply bg-emerald-500/15 text-emerald-500 border-emerald-500/20;
-  }
-  .badge-red {
-    @apply bg-red-500/15 text-red-500 border-red-500/20;
-  }
-  .badge-blue {
-    @apply bg-blue-500/15 text-blue-500 border-blue-500/20;
-  }
-  .badge-yellow {
-    @apply bg-amber-500/15 text-amber-500 border-amber-500/20;
-  }
-}
