@@ -23,6 +23,7 @@ internal/plugin/embed/assets/tokenizer.json
 *.dll
 *.onnx
 *.exe
+.idea
 
 # Local data directories
 muninndb-data/

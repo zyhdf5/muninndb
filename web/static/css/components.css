@@ -677,7 +677,7 @@ html.light .vault-picker-search { background: rgba(255,255,255,0.5); }
 .app-main {
   flex: 1;
   padding: 2rem;
-  max-width: 1400px;
+  /*max-width: 1400px;*/
   overflow-y: auto;
   min-height: 100vh;
 }
