@@ -1,0 +1,17 @@
+package consolidation
+
+import "time"
+
+// ConsolidationReport summarizes the results of a single consolidation pass.
+type ConsolidationReport struct {
+	Vault          string        // vault name
+	StartedAt      time.Time     // when consolidation started
+	Duration       time.Duration // wall-clock time elapsed
+	DedupClusters  int           // number of deduplication clusters formed
+	MergedEngrams  int           // total engrams merged via deduplication
+	PromotedNodes  int           // engrams promoted to schema nodes
+	DecayedEngrams int           // engrams aged and decayed
+	InferredEdges  int           // new transitive associations inferred
+	DryRun         bool          // true if no mutations occurred
+	Errors         []string      // non-fatal errors encountered per phase
+}

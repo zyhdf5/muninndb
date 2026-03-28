@@ -1,0 +1,78 @@
+# Compiled binaries
+/muninn
+/muninndb
+/muninndb-server
+/bench
+/bench-test
+/eval
+/eval-semantic
+/diag
+/muninndb-test
+
+# Embed assets — downloaded via `make fetch-assets`, not committed (too large)
+internal/plugin/embed/assets/*.dylib
+internal/plugin/embed/assets/*.so
+internal/plugin/embed/assets/*.dll
+internal/plugin/embed/assets/*.onnx
+internal/plugin/embed/assets/tokenizer.json
+
+# Binary artifacts — never commit
+*.muninn
+*.dylib
+*.so
+*.dll
+*.onnx
+*.exe
+.idea/
+
+# Local data directories
+muninndb-data/
+**/muninndb-data/
+/tmp/
+
+# Dependencies — install locally, never commit
+**/node_modules/
+**/.venv/
+**/venv/
+**/__pycache__/
+*.pyc
+*.bak
+
+# macOS
+.DS_Store
+
+# Go test cache
+*.test
+*.out
+
+# Worktrees
+.worktrees/
+.claude/worktrees/
+
+# Bible eval testdata (downloaded via scripts/eval-bible-setup.sh)
+testdata/bible/kjv.json
+testdata/bible/cross-refs.tsv
+testdata/bible/cross-refs.csv
+testdata/bible/*.muninn
+
+# Planning and design docs — not committed
+docs/plans/
+docs/superpowers/
+.superpowers/
+
+# Evaluation tools and results — internal development only
+cmd/eval*/
+eval-results/
+scripts/eval-*
+/eval-bible
+/eval-temporal
+/eval-expert
+/eval-paraphrase
+/eval
+sdk/node/node_modules/
+sdk/node/dist/
+sdk/python/dist/
+sdk/python/*.egg-info/
+sdk/muninndb/dist/
+sdk/muninndb/*.egg-info/
+sdk/php/vendor/
