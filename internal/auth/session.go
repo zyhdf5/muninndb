@@ -1,0 +1,63 @@
+package auth
+
+import (
+	"crypto/hmac"
+	"crypto/rand"
+	"crypto/sha256"
+	"encoding/base64"
+	"strconv"
+	"strings"
+	"time"
+)
+
+const sessionTTL = 24 * time.Hour
+
+// NewSessionToken creates a signed session token for an admin user.
+// Format: base64url(username + "|" + expiry_unix) + "." + base64url(HMAC)
+func NewSessionToken(username string, secret []byte) (string, error) {
+	expiry := time.Now().Add(sessionTTL).Unix()
+	payload := username + "|" + strconv.FormatInt(expiry, 10)
+	encoded := base64.RawURLEncoding.EncodeToString([]byte(payload))
+	sig := computeHMAC(encoded, secret)
+	return encoded + "." + sig, nil
+}
+
+// validateSessionToken verifies the HMAC and expiry. Returns true if valid.
+func validateSessionToken(token string, secret []byte) bool {
+	parts := strings.SplitN(token, ".", 2)
+	if len(parts) != 2 {
+		return false
+	}
+	encoded, sig := parts[0], parts[1]
+	computed := computeHMAC(encoded, secret)
+	if !hmac.Equal([]byte(computed), []byte(sig)) {
+		return false
+	}
+	payload, err := base64.RawURLEncoding.DecodeString(encoded)
+	if err != nil {
+		return false
+	}
+	username, expiryStr, ok := strings.Cut(string(payload), "|")
+	if !ok || username == "" {
+		return false
+	}
+	expiry, err := strconv.ParseInt(expiryStr, 10, 64)
+	if err != nil {
+		return false
+	}
+	return time.Now().Unix() < expiry
+}
+
+func computeHMAC(data string, secret []byte) string {
+	mac := hmac.New(sha256.New, secret)
+	mac.Write([]byte(data))
+	return base64.RawURLEncoding.EncodeToString(mac.Sum(nil))
+}
+
+// GenerateSecret creates a 32-byte random secret for session signing.
+// Call once at startup and persist to the data directory.
+func GenerateSecret() ([]byte, error) {
+	b := make([]byte, 32)
+	_, err := rand.Read(b)
+	return b, err
+}
