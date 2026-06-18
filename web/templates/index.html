@@ -576,7 +576,7 @@
 
       <!-- Detail panel (slide-in) -->
       <div x-show="selectedMemory !== null"
-        style="position:fixed;right:0;top:0;height:100vh;width:400px;background:var(--bg-surface);border-left:1px solid var(--border);padding:1.5rem;overflow-y:auto;z-index:40;"
+        style="position:fixed;right:0;top:0;height:100vh;width:600px;background:var(--bg-surface);border-left:1px solid var(--border);padding:1.5rem;overflow-y:auto;z-index:40;"
         x-transition:enter="transition ease-out duration-200"
         x-transition:enter-start="transform translate-x-full"
         x-transition:enter-end="transform translate-x-0"
@@ -1860,11 +1860,12 @@
                 </div>
                 <div class="form-group">
                   <label>模型</label>
-                  <select class="input-field" x-model="pluginCfg.enrichModel">
-                    <option value="gpt-4o-mini">gpt-4o-mini（推荐）</option>
-                    <option value="gpt-4o">gpt-4o</option>
-                    <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
-                  </select>
+                  <input class="input-field" type="text" x-model="pluginCfg.enrichModel" placeholder="gpt-4o-mini（推荐）" autocomplete="off" />
+<!--                  <select class="input-field" x-model="pluginCfg.enrichModel">-->
+<!--                    <option value="gpt-4o-mini">gpt-4o-mini（推荐）</option>-->
+<!--                    <option value="gpt-4o">gpt-4o</option>-->
+<!--                    <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>-->
+<!--                  </select>-->
                 </div>
               </div>
 

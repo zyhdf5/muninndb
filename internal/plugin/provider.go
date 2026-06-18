@@ -130,9 +130,9 @@ func parseOpenAIURL(parsed *url.URL, config *ProviderConfig) (*ProviderConfig, e
 	}
 	config.Model = model
 
-	config.Host = "api.openai.com"
-	config.Port = 443
-	config.BaseURL = "https://api.openai.com"
+	config.Host = "tc-paperhub.diezhi.net"            //api.openai.com
+	config.Port = 443                                 //443
+	config.BaseURL = "https://tc-paperhub.diezhi.net" //https://api.openai.com"
 	if raw := strings.TrimSpace(parsed.Query().Get("base_url")); raw != "" {
 		baseURL, host, port, err := parseHTTPBaseURL(raw, "openai")
 		if err != nil {

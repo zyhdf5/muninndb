@@ -6,6 +6,11 @@ import (
 	"strings"
 )
 
+//func init() {
+//	os.Setenv("MUNINN_UI_ADDR", "http://0.0.0.0:8476")
+//	os.Setenv("MUNINNDB_MCP_URL", "http://0.0.0.0:8750")
+//}
+
 func main() {
 	if len(os.Args) < 2 {
 		runDefault()

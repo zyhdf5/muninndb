@@ -1,0 +1,1672 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeDB</title>
+
+  <!-- FOUC prevention: apply theme before paint -->
+  <script>
+    (function() {
+      var t = localStorage.getItem('muninnTheme');
+      if (t === 'light') document.documentElement.classList.add('light');
+    })();
+  </script>
+
+  <!-- Compiled Tailwind CSS -->
+  <link rel="stylesheet" href="/static/dist/app.css" />
+
+  <!-- Vendored JS (order matters: layout-base → cose-base → fcose) -->
+  <script src="/static/vendor/cytoscape-3.30.4.min.js"></script>
+  <script src="/static/vendor/layout-base-2.0.1.js"></script>
+  <script src="/static/vendor/cose-base-2.2.0.js"></script>
+  <script src="/static/vendor/cytoscape-fcose-2.2.0.js"></script>
+  <script src="/static/vendor/chart-4.4.0.min.js"></script>
+
+  <!-- App JS (must load before Alpine deferred init) -->
+  <script src="/static/js/app.js"></script>
+  <!-- plugin-config-utils: loaded as module after app.js sync execution,
+       before Alpine's deferred init — sets globalThis.MuninnPluginCfg -->
+  <script type="module" src="/static/js/plugin-config-utils.js"></script>
+
+  <!-- Alpine.js (deferred — initializes after DOM + app.js registers components) -->
+  <script defer src="/static/vendor/alpine-3.14.9.min.js"></script>
+</head>
+<body>
+<div x-data="muninnApp" x-init="init()" :class="{ 'light': !isDarkMode }" x-cloak>
+<div class="app-layout" x-show="isAuthenticated" x-cloak>
+
+  <!-- Left Sidebar -->
+  <aside class="app-sidebar" :class="{ expanded: sidebarExpanded }">
+
+    <!-- Logo (top of sidebar, replaces toggle) -->
+    <div class="sidebar-logo">
+      <img src="/static/logo.jpg" alt="MuninnDB" />
+      <span class="sidebar-label font-bold text-[0.9375rem] tracking-[0.01em]">MuninnDB</span>
+    </div>
+
+    <!-- Nav items -->
+    <nav class="sidebar-nav">
+      <button class="sidebar-item" :class="{ active: currentView==='dashboard' }" @click="navigateTo('dashboard')">
+        <!-- Dashboard: grid icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+        </svg>
+        <span class="sidebar-label">概览</span>
+      </button>
+
+      <button class="sidebar-item" :class="{ active: currentView==='graph' }" @click="navigateTo('graph')">
+        <!-- Graph: network nodes icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <circle cx="5" cy="12" r="2" stroke-width="2"/>
+          <circle cx="19" cy="5" r="2" stroke-width="2"/>
+          <circle cx="19" cy="19" r="2" stroke-width="2"/>
+          <line x1="7" y1="11" x2="17" y2="6" stroke-width="2" stroke-linecap="round"/>
+          <line x1="7" y1="13" x2="17" y2="18" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <span class="sidebar-label">图谱</span>
+      </button>
+
+      <button class="sidebar-item" :class="{ active: currentView==='settings' }" @click="navigateTo('settings')">
+        <!-- Settings: gear icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        </svg>
+        <span class="sidebar-label">设置</span>
+      </button>
+
+      <button class="sidebar-item" :class="{ active: currentView==='cluster' }" @click="navigateTo('cluster')">
+        <!-- Cluster: server/nodes icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 12h14M5 12a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2M5 12a2 2 0 00-2 2v4a2 2 0 002 2h14a2 2 0 002-2v-4a2 2 0 00-2-2" />
+          <circle cx="17" cy="9" r="1" fill="currentColor" stroke="none"/>
+          <circle cx="17" cy="17" r="1" fill="currentColor" stroke="none"/>
+        </svg>
+        <span class="sidebar-label">集群</span>
+      </button>
+
+      <button class="sidebar-item" :class="{ active: currentView==='logs' }" @click="navigateTo('logs')">
+        <!-- Logs: terminal icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5 0h3M5 20h14a2 2 0 002-2V6a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <span class="sidebar-label">日志</span>
+      </button>
+    </nav>
+
+    <!-- Footer controls -->
+    <div class="sidebar-footer">
+      <!-- Vault switcher (expanded only) -->
+      <button class="sidebar-vault-btn" @click="vaultModalOpen=true" title="Switch vault">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0018 0V5"/><path d="M3 12a9 3 0 0018 0"/></svg>
+        <span class="vault-item-name" x-text="vault"></span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="shrink-0 opacity-[0.35]"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <!-- New Vault button (icon only when collapsed, full label when expanded) -->
+      <button class="sidebar-newvault-btn" @click="createVault()" title="New Vault">
+        <svg class="sidebar-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <span class="sidebar-newvault-label">新建仓库</span>
+      </button>
+
+      <!-- Live dot + theme toggle (always visible) -->
+      <div class="sidebar-footer-row">
+        <button class="btn-ghost text-[1.125rem] px-1.5 py-1 leading-none" @click="toggleTheme()" title="切换风格">◐</button>
+        <button x-show="sidebarExpanded" class="btn-ghost text-[0.8125rem] px-1.5 py-1 leading-none opacity-60" @click="showShortcutsHelp=true" title="快捷键说明">?</button>
+      </div>
+      <!-- Version label -->
+      <div class="sidebar-footer-row">
+        <span x-show="appVersion" x-text="appVersion" class="u-text-muted mx-1 text-[0.625rem] opacity-60 select-none"></span>
+        <span class="ws-dot" :class="liveConnected ? 'connected' : 'disconnected'" :title="liveConnected ? '在线中' : '正在连接...'"></span>
+      </div>
+      <!-- Sign out (visible when authenticated) -->
+      <button class="sidebar-item" x-show="isAuthenticated" @click="showSignOutConfirm = true" title="Sign out">
+        <svg xmlns="http://www.w3.org/2000/svg" class="sidebar-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+        </svg>
+        <span class="sidebar-label">退出登录</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Sidebar toggle — floats on the border between sidebar and main -->
+  <button class="sidebar-toggle"
+    @click="toggleSidebar()"
+    :style="'left:' + (sidebarExpanded ? 220 : 56) + 'px'"
+    :title="sidebarExpanded ? 'Collapse sidebar' : 'Expand sidebar'">
+    <template x-if="!sidebarExpanded">
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
+      </svg>
+    </template>
+    <template x-if="sidebarExpanded">
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7" />
+      </svg>
+    </template>
+  </button>
+
+  <!-- Main content area -->
+  <main class="app-main">
+
+    <!-- ── Dashboard View ───────────────────────────────────────────── -->
+    <div x-show="currentView==='dashboard'">
+      <div class="flex flex-col h-[calc(100vh-7rem)] min-h-[600px]">
+      <!-- Dashboard header -->
+      <div class="flex items-baseline gap-3.5 mb-6 flex-wrap">
+        <h2 class="page-title">概览</h2>
+        <div class="vault-chip" @click="vaultModalOpen=true" class="cursor-pointer">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0 opacity-70"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0018 0V5"/><path d="M3 12a9 3 0 0018 0"/></svg>
+          <span class="vault-chip-btn" x-text="vault"></span>
+        </div>
+      </div>
+
+      <!-- Connect banner: shown only when no memories yet -->
+      <div x-show="stats.engramCount === 0 && isAuthenticated">
+       <div class="hero-gradient border border-[rgba(6,182,212,0.25)] rounded-2xl px-7 py-6 mb-6 flex items-center gap-6 flex-wrap shadow-[0_4px_24px_rgba(6,182,212,0.1)]">
+        <div class="flex-1 min-w-0">
+          <div class="font-semibold u-text-primary mb-1.5 text-[1.125rem]">开始构建记忆</div>
+          <div class="text-sm u-text-secondary leading-[1.6]">通过 MCP 连接 AI 工具，或直接通过 SDK 写入 — 记忆将被自动存储和检索。</div>
+        </div>
+        <button class="btn-primary whitespace-nowrap" @click="navigateTo('settings')">
+          开始使用 →
+        </button>
+       </div>
+      </div>
+
+      <!-- Stat cards -->
+      <div class="grid gap-4 mb-6 items-start [grid-template-columns:repeat(auto-fit,minmax(180px,1fr))]">
+        <div class="stat-card" title="该仓库中存储的记忆总数">
+          <div class="stat-value" data-testid="stat-engram-count" x-text="stats.engramCount.toLocaleString()">0</div>
+          <div class="stat-label">记忆数</div>
+        </div>
+        <div class="stat-card" title="独立的记忆命名空间 — 为不同项目或场景使用不同仓库">
+          <div class="stat-value" x-text="stats.vaultCount">0</div>
+          <div class="stat-label">仓库数</div>
+        </div>
+        <div class="stat-card" :title="`'${vault}' 仓库占用的磁盘空间`">
+          <div class="stat-value" x-text="formatBytes(stats.storageBytes)">0 B</div>
+          <div class="stat-label">存储空间</div>
+        </div>
+        <div class="stat-card" title="语义相似度索引（HNSW 向量索引）占用的磁盘空间">
+          <div class="stat-value" x-text="formatBytes(stats.indexSize)">0 B</div>
+          <div class="stat-label">索引大小</div>
+        </div>
+        <!-- Cognitive Workers card -->
+        <div class="stat-card min-w-0 gap-1">
+          <!-- Header -->
+          <div class="flex items-center justify-between pb-1 border-b border-[color:var(--border)]">
+            <div class="stat-label mb-0">认知工作进程</div>
+            <div class="flex items-center gap-1">
+              <span x-show="workerStats.some(w => w.state !== 2)" :style="workersOverallHealthStyle()" x-text="workersOverallHealthLabel()"></span>
+              <button @click="cognitiveInfoModal = true"
+                title="了解认知工作进程"
+                class="bg-transparent border border-[color:var(--border)] rounded-full w-[1.375rem] h-[1.375rem] text-xs cursor-pointer text-[color:var(--text-muted)] flex items-center justify-center p-0 leading-none shrink-0">?</button>
+            </div>
+          </div>
+          <!-- Per-worker rows -->
+          <div class="flex flex-col gap-0">
+            <template x-for="w in workerStats" :key="w.name">
+              <div class="tip flex items-center justify-between flex-nowrap py-[0.4375rem] border-b border-[color:var(--border)]" :data-tip="workerTooltip(w)">
+                <!-- Left: dot + name -->
+                <div class="flex items-center gap-[0.4375rem] min-w-0">
+                    <div :style="workerDotStyle(w.state)" class="w-[6px] h-[6px] rounded-full shrink-0"></div>
+                    <span class="text-[0.8125rem] u-text-secondary truncate" x-text="w.name"></span>
+                </div>
+                <!-- Right: optional count + errors + state text -->
+                <div class="flex items-center gap-1.5 shrink-0">
+                  <span x-show="w.processed > 0"
+                    class="text-[0.6875rem] u-text-muted tabular-nums"
+                    x-text="formatWorkerProcessed(w.processed)"></span>
+                  <span x-show="w.errors > 0"
+                    class="text-[0.625rem] px-1.5 py-[0.0625rem] rounded-full bg-[#ef444422] text-[#ef4444] font-semibold"
+                    x-text="w.errors + 'e'"></span>
+                  <span x-show="w.dropped > 0"
+                    class="text-[0.625rem] px-1.5 py-[0.0625rem] rounded-full bg-[#f9731622] text-[#f97316] font-semibold"
+                    x-text="w.dropped + 'd'"></span>
+                  <span :style="workerStateStyle(w.state)" class="text-[0.6875rem] font-medium" x-text="workerStateName(w.state)"></span>
+                </div>
+              </div>
+            </template>
+          </div>
+          <!-- Last-run footer -->
+          <div x-show="workerStats.length > 0"
+            class="text-[0.6875rem] u-text-muted pt-1 text-right">
+            上次运行: <span x-text="workersLastRunSummary()"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity chart + live feed -->
+      <div class="activity-grid grid gap-6 flex-1 min-h-[320px] [grid-template-columns:2fr_1fr]">
+        <div class="card-polished glass-card flex flex-col min-w-0 overflow-hidden">
+          <!-- Activity header with controls -->
+          <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
+            <h3 class="m-0 u-text-secondary text-sm font-semibold uppercase tracking-[0.05em]">活动趋势</h3>
+            <div class="flex items-center gap-2 flex-wrap">
+              <!-- Preset buttons -->
+              <template x-for="p in activityPresets" :key="p.days">
+                <button type="button"
+                  @click="activityDays = p.days; activityUntil = ''; _initChart()"
+                  :class="activityDays === p.days && !activityUntil ? 'badge-info' : ''"
+                  :aria-pressed="(activityDays === p.days && !activityUntil).toString()"
+                  class="activity-chip"
+                  x-text="p.label"></button>
+              </template>
+              <!-- Custom days input -->
+              <label class="sr-only" for="activityDaysInput">天数</label>
+              <input id="activityDaysInput" type="number" min="1" max="180" x-model.number="activityDays"
+                @change="if(activityDays<1)activityDays=1;if(activityDays>180)activityDays=180;_initChart()"
+                class="activity-input w-12 text-center"
+                aria-label="天数 (1-180)">
+              <span class="text-[0.6875rem] u-text-muted">天</span>
+              <!-- End date picker -->
+              <label class="sr-only" for="activityUntilInput">结束日期</label>
+              <input id="activityUntilInput" type="date" x-model="activityUntil"
+                @change="_initChart()"
+                class="activity-input"
+                aria-label="结束日期 (默认: 今天)">
+              <!-- Toggle data table -->
+              <button type="button" @click="activityShowTable = !activityShowTable"
+                :class="activityShowTable ? 'badge-info' : ''"
+                :aria-pressed="activityShowTable.toString()"
+                class="activity-chip"
+                aria-label="切换数据表格">📊 表格</button>
+            </div>
+          </div>
+          <!-- Loading indicator -->
+          <div x-show="activityLoading" class="text-center p-4 u-text-muted text-[0.8125rem]">正在加载活动数据…</div>
+          <!-- Error state with retry -->
+          <div x-show="activityError && !activityLoading" class="text-center p-4 text-[color:var(--danger,#ef4444)] text-[0.8125rem]">
+            <span x-text="activityError"></span>
+            <button type="button" @click="_initChart()" class="ml-2 text-xs px-2 py-0.5 rounded cursor-pointer border border-[color:var(--border)] bg-[color:var(--bg-elevated)] text-[color:var(--text-secondary)]">重试</button>
+          </div>
+          <!-- Empty state -->
+          <div x-show="!activityLoading && !activityError && activityData.length > 0 && activityData.every(r => r.count === 0)" class="text-center p-4 u-text-muted text-[0.8125rem]">该时段暂无记忆写入。</div>
+          <div x-show="!activityLoading && !activityError" class="relative w-full flex-1 min-h-[200px] overflow-hidden"><canvas id="activityChart" class="absolute inset-0 w-full h-full"></canvas></div>
+        </div>
+        <div class="card-polished glass-card flex flex-col min-w-0">
+          <h3 class="m-0 mb-4 u-text-secondary text-sm font-semibold uppercase tracking-[0.05em]">实时动态</h3>
+          <div class="flex flex-col gap-2 flex-1 overflow-y-auto">
+            <template x-for="item in liveFeed" :key="item.id">
+              <div class="text-[0.8125rem] p-2 bg-[color:var(--bg-elevated)] rounded-md">
+                <span class="badge-info" x-text="item.vault"></span>
+                <span class="u-text-primary ml-2" x-text="item.concept"></span>
+                <div class="u-text-muted text-xs mt-1" x-text="new Date(item.createdAt * 1000).toLocaleTimeString()"></div>
+              </div>
+            </template>
+            <div x-show="liveFeed.length === 0" class="u-text-muted text-sm p-2">
+              暂无事件。连接 AI 工具或通过 SDK 写入以开始查看记忆。<br>
+              <a href="#" class="text-[color:var(--accent)] text-xs" @click.prevent="navigateTo('settings')">→ 开始使用</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Activity data table modal -->
+      <div x-cloak x-show="activityShowTable" x-transition.opacity class="modal-backdrop z-[70]" @click.self="activityShowTable = false" @keydown.escape.window="activityShowTable = false">
+        <div class="modal-box max-w-[480px] max-h-[80vh] flex flex-col" @click.stop>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="m-0 text-[0.9375rem] u-text-primary font-semibold">活动数据</h3>
+            <div class="flex items-center gap-2">
+              <button type="button" @click="_copyActivityTable()"
+                class="text-[0.6875rem] px-2.5 py-1 rounded cursor-pointer border border-[color:var(--border)] bg-[color:var(--bg-elevated)] text-[color:var(--text-secondary)]"
+                aria-label="复制活动数据为 TSV">📋 复制</button>
+              <button type="button" @click="activityShowTable = false"
+                class="text-base px-2 py-0.5 cursor-pointer border-0 bg-transparent u-text-muted"
+                aria-label="关闭表格">✕</button>
+            </div>
+          </div>
+          <div class="flex-1 overflow-y-auto">
+            <table class="w-full border-collapse text-xs">
+              <thead>
+                <tr class="border-b border-[color:var(--border)] sticky top-0 bg-[color:var(--bg-surface)]">
+                  <th scope="col" class="text-left px-2 py-1.5 u-text-muted">日期</th>
+                  <th scope="col" class="text-right px-2 py-1.5 u-text-muted">数量</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template x-for="row in activityData" :key="row.date">
+                  <tr class="border-b border-[color:var(--border-subtle,rgba(42,42,74,0.3))]">
+                    <td class="px-2 py-1.5 u-text-primary" x-text="row.date"></td>
+                    <td class="text-right px-2 py-1.5 u-text-primary" x-text="row.count"></td>
+                  </tr>
+                </template>
+              </tbody>
+              <tfoot>
+                <tr class="border-t-2 border-[color:var(--border)]">
+                  <td class="px-2 py-1.5 u-text-secondary font-semibold">总计</td>
+                  <td class="text-right px-2 py-1.5 u-text-secondary font-semibold" x-text="activityData.reduce((s,r)=>s+r.count,0)"></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      </div>
+    </div>
+
+    <!-- ── Graph View ───────────────────────────────────────────────── -->
+    <div x-show="currentView==='graph'">
+    <div class="graph-view-wrapper">
+      <!-- Graph header -->
+      <div class="flex items-baseline gap-3.5 mb-6 flex-wrap">
+        <h2 class="page-title">关系图</h2>
+        <div class="vault-chip" @click="vaultModalOpen=true" class="cursor-pointer">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0 opacity-70"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0018 0V5"/><path d="M3 12a9 3 0 0018 0"/></svg>
+          <span class="vault-chip-btn" x-text="vault"></span>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="u-underline-tabs">
+        <button :class="graphTab==='memory' ? 'active' : ''"
+                class="u-underline-tab"
+                @click="graphTab='memory'">记忆图</button>
+        <button :class="graphTab==='entity' ? 'active' : ''"
+                class="u-underline-tab"
+                @click="graphTab='entity'">实体图</button>
+      </div>
+
+      <!-- Memory Graph Tab -->
+      <template x-if="graphTab==='memory'">
+        <div class="graph-tab-content">
+          <p class="graph-description">
+            记忆图展示了你的记忆如何相连。每个节点是一条记忆；
+            边代表关联 — <em>支持</em>、<em>矛盾</em>、<em>依赖</em>等。
+            点击节点可预览其内容。
+          </p>
+          <div class="graph-toolbar">
+            <button class="btn-primary" @click="loadGraph()">加载图</button>
+            <label class="flex items-center gap-1.5 text-[0.8125rem] text-[color:var(--text-muted)]" title="要加载的记忆数量">
+              限制
+              <input type="number" x-model.number="graphLimit" min="1" max="200" step="10" class="input-field w-[4.5rem] py-1 px-1.5 text-center" />
+            </label>
+            <!-- Orphan toggle -->
+            <label class="flex items-center gap-1.5 text-[0.8125rem] text-[color:var(--text-muted)] cursor-pointer" title="显示没有关联的记忆（孤立节点）">
+              <input type="checkbox" x-model="graphShowOrphans" @change="graphLoaded && loadGraph()" />
+              显示孤立
+            </label>
+            <span x-show="graphLoaded" class="badge-success">已加载</span>
+            <!-- Zoom controls -->
+            <div x-show="graphLoaded">
+             <div class="flex gap-1.5 ml-auto items-center">
+              <button class="btn-secondary u-action-btn-sm" title="循环标签显示：完整 → 简短 → 无" @click="graphCycleLabel()" x-text="graphLabelMode === 'full' ? '标签：完整' : graphLabelMode === 'short' ? '标签：简短' : '标签：无'"></button>
+              <button class="btn-secondary py-1 px-2.5 text-sm" title="放大" @click="graphZoomIn()">+</button>
+              <button class="btn-secondary py-1 px-2.5 text-sm" title="缩小" @click="graphZoomOut()">−</button>
+              <button class="btn-secondary u-action-btn-sm" title="适应所有节点到视图" @click="graphFit()">适应</button>
+             </div>
+            </div>
+          </div>
+          <div x-show="!graphLoaded">
+           <div class="graph-placeholder">
+            <div class="text-center">
+              <div class="text-[2rem] mb-3">⬡</div>
+              <div>点击 <strong>加载图</strong> 来可视化记忆连接</div>
+              <div class="text-[0.8125rem] mt-2">需要至少2条有关联的记忆</div>
+            </div>
+           </div>
+          </div>
+          <div id="cy" x-show="graphLoaded" class="graph-placeholder"></div>
+        </div>
+      </template>
+
+      <!-- Entity Graph Tab -->
+      <template x-if="graphTab==='entity'">
+        <div class="graph-tab-content">
+          <p class="graph-description">
+            实体图显示命名实体（人物、组织、技术等）及其类型化关系。
+            每个节点代表一个实体；边显示从记忆中提取的关系类型。
+          </p>
+          <div class="graph-toolbar">
+            <button class="btn-primary" @click="loadEntityGraph()">加载实体图</button>
+            <span class="text-sm u-text-muted" x-text="entityGraphStatus || '点击加载来可视化实体'"></span>
+            <span x-show="entityGraphLoaded" class="badge-success">已加载</span>
+            <!-- Zoom controls -->
+            <div x-show="entityGraphLoaded">
+             <div class="flex gap-1.5 ml-auto items-center">
+              <button class="btn-secondary u-action-btn-sm" title="循环标签显示：完整 → 简短 → 无" @click="entityGraphCycleLabel()" x-text="entityGraphLabelMode === 'full' ? '标签：完整' : entityGraphLabelMode === 'short' ? '标签：简短' : '标签：无'"></button>
+              <button class="btn-secondary py-1 px-2.5 text-sm" title="放大" @click="entityGraphZoomIn()">+</button>
+              <button class="btn-secondary py-1 px-2.5 text-sm" title="缩小" @click="entityGraphZoomOut()">−</button>
+              <button class="btn-secondary u-action-btn-sm-md" title="适应所有节点到视图" @click="entityGraphFit()">适应</button>
+             </div>
+            </div>
+          </div>
+          <div x-show="!entityGraphLoaded">
+           <div class="graph-placeholder">
+            <div class="text-center">
+              <div class="text-[2rem] mb-3">⬡</div>
+              <div>点击 <strong>加载实体图</strong> 来可视化实体关系</div>
+              <div class="text-[0.8125rem] mt-2">需要从记忆中提取的实体</div>
+            </div>
+           </div>
+          </div>
+          <div id="cy-entity" x-show="entityGraphLoaded" class="graph-placeholder"></div>
+        </div>
+      </template>
+    </div></div>
+
+    <!-- ── Settings View ────────────────────────────────────────────── -->
+    <div x-show="currentView==='settings'">
+      <div class="flex items-baseline gap-3.5 mb-6 flex-wrap">
+        <h2 class="page-title">设置</h2>
+      </div>
+
+      <!-- Sub-navigation tabs -->
+      <div class="tab-bar">
+        <button class="tab-btn" :class="{ active: settingsTab==='vault' }" @click="settingsTab='vault'; loadEmbedStatus(); loadWorkers(); loadPlasticity(); navigateTo('settings/vault')">仓库</button>
+      </div>
+
+      <!-- ── Vault tab ─────────────────────────────────────────────── -->
+      <div x-show="settingsTab==='vault'">
+        <p class="u-text-muted text-sm m-0 mb-5">
+          仓库的配置和认知引擎状态：<strong class="u-text-secondary" x-text="vault"></strong>
+        </p>
+
+        <!-- Top row: Vault config + Semantic Search + Cognitive workers -->
+        <div class="grid grid-cols-3 gap-6 mb-6">
+
+          <!-- Vault config card -->
+          <div class="card-polished">
+            <h3 class="m-0 mb-4 text-base">仓库配置</h3>
+            <div class="form-group">
+              <label>仓库名称</label>
+              <input class="input-field opacity-60 cursor-not-allowed" :value="vault" readonly />
+            </div>
+            <button class="btn-ghost text-[0.8125rem] mt-3 w-full" @click="createVault()">+ 新仓库</button>
+          </div>
+
+          <!-- Semantic Search card -->
+          <div class="card-polished">
+            <div class="flex items-center justify-between mb-3.5">
+              <h3 class="m-0 text-base">语义搜索</h3>
+              <span x-show="embedStatus && embedStatus.enabled"
+                    class="badge-active">激活</span>
+              <span x-show="!embedStatus || !embedStatus.enabled"
+                    class="badge-dormant">未激活</span>
+            </div>
+            <template x-if="embedStatus && embedStatus.enabled">
+              <div>
+                <div class="flex items-center gap-2 mb-2">
+                  <span class="text-[0.8125rem] font-medium capitalize" x-text="embedStatus.provider"></span>
+                  <span class="text-xs u-text-muted" x-text="embedStatus.model ? '· ' + embedStatus.model : ''"></span>
+                </div>
+                <p class="text-xs u-text-muted m-0 mb-3.5">按含义而不是关键词查找记忆。</p>
+                <a href="#" @click.prevent="settingsTab='vault'; navigateTo('settings/vault')"
+                   class="text-xs text-[var(--primary)] no-underline">升级提供商 →</a>
+              </div>
+            </template>
+            <template x-if="!embedStatus || !embedStatus.enabled">
+              <div>
+                <p class="text-xs u-text-muted m-0 mb-3.5">语义搜索已禁用。记忆仅按关键词查找。</p>
+                <a href="#" @click.prevent="settingsTab='vault'; navigateTo('settings/vault')"
+                   class="text-xs text-[var(--primary)] no-underline">配置嵌入器 →</a>
+              </div>
+            </template>
+          </div>
+
+          <!-- Cognitive workers card -->
+          <div class="card-polished">
+            <h3 class="section-label">认知引擎工作线程</h3>
+            <p class="u-text-muted text-sm m-0 mb-5">
+              应用赫布学习、时间评分、矛盾检测和置信度更新的后台工作线程。
+              通过服务器启动标志配置。
+            </p>
+            <table class="w-full border-collapse text-sm">
+              <thead>
+                <tr class="border-b border-[var(--border)] text-left">
+                  <th class="py-2 pr-3 pl-0 u-text-muted font-medium">工作线程</th>
+                  <th class="py-2 px-3 u-text-muted font-medium">状态</th>
+                  <th class="py-2 pl-0 u-text-muted font-medium">已处理</th>
+                </tr>
+              </thead>
+              <tbody>
+                <template x-for="w in workerRows()" :key="w.name">
+                  <tr class="border-b border-[var(--border)]">
+                    <td class="py-2.5 pr-3 pl-0 font-medium" x-text="w.name"></td>
+                    <td class="py-2.5 px-3">
+                      <span :class="w.active ? 'badge-active' : 'badge-dormant'"
+                            x-text="w.active ? '激活' : '未激活'"></span>
+                    </td>
+                    <td class="py-2.5 pl-0 u-text-secondary" x-text="w.processed"></td>
+                  </tr>
+                </template>
+              </tbody>
+            </table>
+            <div class="mt-4 pt-4 border-t border-[var(--border)]">
+              <p class="text-[0.8125rem] u-text-muted m-0 mb-2 font-medium">写入时处理</p>
+              <div class="flex items-center gap-3">
+                <span class="text-[0.8125rem] font-medium">自动关联</span>
+                <span class="badge-active">激活</span>
+                <span class="text-sm u-text-muted">标签在写入时自动链接</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vault Actions -->
+        <div class="card-polished mt-6">
+          <h3 class="m-0 mb-3 text-base">仓库操作</h3>
+          <p class="text-[0.8125rem] u-text-muted m-0 mb-4">
+            对仓库 <strong class="u-text-secondary" x-text="vault"></strong> 的破坏性操作。执行后无法撤销。
+          </p>
+          <div class="flex gap-3 flex-wrap">
+            <button @click="openVaultAction('clear')"
+                    class="vault-action-btn vault-action-btn-amber">
+              清除记忆
+            </button>
+            <button @click="openVaultAction('delete')"
+                    class="vault-action-btn vault-action-btn-red">
+              删除仓库
+            </button>
+            <button @click="openVaultRename()"
+                    class="vault-action-btn vault-action-btn-sky">
+              重命名仓库
+            </button>
+            <button @click="openVaultClone()"
+                    class="vault-action-btn vault-action-btn-indigo">
+              克隆仓库
+            </button>
+            <button @click="openVaultMerge()"
+                    class="vault-action-btn vault-action-btn-purple">
+              合并到…
+            </button>
+            <button @click="exportVault()" :disabled="vaultExporting"
+                    class="btn-outline btn-outline-success">
+              <span x-text="vaultExporting ? '导出中…' : '导出仓库'"></span>
+            </button>
+            <button @click="openImportModal()"
+                    class="vault-action-btn vault-action-btn-amber">
+              导入仓库…
+            </button>
+            <button @click="reindexFTS()" :disabled="reindexing"
+                    class="btn-outline btn-outline-info">
+              <span x-text="reindexing ? '重建索引中…' : '重建 FTS 索引'"></span>
+            </button>
+          </div>
+        </div>
+
+        <!-- ── Plasticity Configuration — full width ── -->
+        <div class="card-polished mt-6" x-init="$nextTick(() => initPlasticityChart())">
+          <h3 class="section-label">可塑性</h3>
+          <p class="u-text-muted text-[0.8125rem] m-0 mb-6">
+            控制此仓库中记忆的行为 — 时间评分、关联学习和检索权重。
+          </p>
+
+          <div class="grid grid-cols-2 gap-10 items-start">
+
+            <!-- Left: preset selector + save -->
+            <div>
+              <p class="section-label m-0 mb-3">选择预设</p>
+              <div class="grid grid-cols-2 gap-2.5 mb-5">
+
+                <!-- Default -->
+                <div @click="plasticityForm.showAdvanced=false; plasticityForm.preset='default'; onPlasticityPresetChange()"
+                     :style="(plasticityForm.preset==='default' && !plasticityForm.showAdvanced ? 'border:2px solid #6366f1;background:rgba(99,102,241,0.12);' : 'border:1px solid var(--border);background:var(--bg-elevated);') + 'border-radius:0.625rem;padding:0.875rem;cursor:pointer;transition:all 0.15s;'">
+                  <div class="font-semibold text-sm mb-1">默认</div>
+                  <div class="text-xs u-text-muted mb-2">常规使用</div>
+                  <div class="flex gap-[0.3rem] flex-wrap">
+                    <span class="preset-pill preset-pill-indigo">2-跳</span>
+                    <span class="preset-pill preset-pill-indigo">赫布</span>
+                    <span class="preset-pill preset-pill-indigo">时间</span>
+                  </div>
+                </div>
+
+                <!-- Reference -->
+                <div @click="plasticityForm.showAdvanced=false; plasticityForm.preset='reference'; onPlasticityPresetChange()"
+                     :style="(plasticityForm.preset==='reference' && !plasticityForm.showAdvanced ? 'border:2px solid #10b981;background:rgba(16,185,129,0.12);' : 'border:1px solid var(--border);background:var(--bg-elevated);') + 'border-radius:0.625rem;padding:0.875rem;cursor:pointer;transition:all 0.15s;'">
+                  <div class="font-semibold text-sm mb-1">参考</div>
+                  <div class="text-xs u-text-muted mb-2">文档和事实</div>
+                  <div class="flex gap-[0.3rem] flex-wrap">
+                    <span class="preset-pill preset-pill-green">3-跳</span>
+                    <span class="preset-pill preset-pill-green">无衰退</span>
+                  </div>
+                </div>
+
+                <!-- Scratchpad -->
+                <div @click="plasticityForm.showAdvanced=false; plasticityForm.preset='scratchpad'; onPlasticityPresetChange()"
+                     :style="(plasticityForm.preset==='scratchpad' && !plasticityForm.showAdvanced ? 'border:2px solid #f59e0b;background:rgba(245,158,11,0.12);' : 'border:1px solid var(--border);background:var(--bg-elevated);') + 'border-radius:0.625rem;padding:0.875rem;cursor:pointer;transition:all 0.15s;'">
+                  <div class="font-semibold text-sm mb-1">记事本</div>
+                  <div class="text-xs u-text-muted mb-2">短期草稿</div>
+                  <div class="flex gap-[0.3rem] flex-wrap">
+                    <span class="preset-pill preset-pill-amber">快速衰退</span>
+                    <span class="preset-pill preset-pill-amber">无关联</span>
+                  </div>
+                </div>
+
+                <!-- Knowledge Graph -->
+                <div @click="plasticityForm.showAdvanced=false; plasticityForm.preset='knowledge-graph'; onPlasticityPresetChange()"
+                     :style="(plasticityForm.preset==='knowledge-graph' && !plasticityForm.showAdvanced ? 'border:2px solid #ec4899;background:rgba(236,72,153,0.12);' : 'border:1px solid var(--border);background:var(--bg-elevated);') + 'border-radius:0.625rem;padding:0.875rem;cursor:pointer;transition:all 0.15s;'">
+                  <div class="font-semibold text-sm mb-1">知识图谱</div>
+                  <div class="text-xs u-text-muted mb-2">密集概念</div>
+                  <div class="flex gap-[0.3rem] flex-wrap">
+                    <span class="preset-pill preset-pill-pink">4-跳</span>
+                    <span class="preset-pill preset-pill-pink">强关联</span>
+                    <span class="preset-pill preset-pill-pink">缓慢衰退</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Default Recall Mode -->
+              <p class="section-label m-0 mb-3">默认回忆模式</p>
+              <div class="grid grid-cols-2 gap-2.5 mb-5">
+                <template x-for="rm in [
+                  {id:'balanced', label:'平衡',  desc:'引擎默认',    icon:'⚖', color:'#6366f1', bg:'rgba(99,102,241,0.12)',  border:'#6366f1'},
+                  {id:'semantic', label:'语义',  desc:'纯向量匹配',  icon:'✦', color:'#06b6d4', bg:'rgba(6,182,212,0.12)',   border:'#06b6d4'},
+                  {id:'recent',   label:'最近',  desc:'偏向近期',    icon:'◷', color:'#f59e0b', bg:'rgba(245,158,11,0.12)',  border:'#f59e0b'},
+                  {id:'deep',     label:'深度',  desc:'4-跳图遍历',  icon:'⬡', color:'#a855f7', bg:'rgba(168,85,247,0.12)',  border:'#a855f7'}
+                ]" :key="rm.id">
+                  <div @click="plasticityForm.recallMode = rm.id"
+                       :style="(plasticityForm.recallMode === rm.id
+                         ? 'border:2px solid ' + rm.border + ';background:' + rm.bg + ';box-shadow:0 0 0 3px ' + rm.bg + ';'
+                         : 'border:1px solid var(--border);background:var(--bg-elevated);') + 'border-radius:0.75rem;padding:0.875rem 0.75rem;cursor:pointer;transition:all 0.18s ease;'">
+                    <div class="flex items-center gap-1.5 mb-1">
+                      <span :style="'font-size:0.9rem;line-height:1;color:' + rm.color" x-text="rm.icon"></span>
+                      <div class="font-semibold text-sm" :style="plasticityForm.recallMode === rm.id ? 'color:' + rm.color : ''" x-text="rm.label"></div>
+                    </div>
+                    <div class="text-[0.7rem] u-text-muted leading-snug" x-text="rm.desc"></div>
+                  </div>
+                </template>
+              </div>
+
+              <!-- Advanced overrides -->
+              <div class="mb-5">
+                <label class="text-[0.8125rem] font-medium cursor-pointer flex items-center gap-2">
+                  <input type="checkbox" x-model="plasticityForm.showAdvanced" @change="_updatePlasticityChart()" />
+                  高级覆盖
+                </label>
+              </div>
+
+              <div x-show="plasticityForm.showAdvanced" class="border border-[var(--border)] rounded-lg p-4 mb-5">
+                <p class="text-xs u-text-muted m-0 mb-4">
+                  覆盖单个预设值。留空以使用预设默认值。
+                </p>
+                <div class="flex gap-6 mb-4 flex-wrap">
+                  <label class="text-[0.8125rem] flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" x-model="plasticityForm.hebbianEnabled" @change="_updatePlasticityChart()" />
+                    赫布学习
+                  </label>
+                  <label class="text-[0.8125rem] flex items-center gap-2 cursor-pointer">
+                    <input type="checkbox" x-model="plasticityForm.temporalEnabled" @change="_updatePlasticityChart()" />
+                    时间评分
+                  </label>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                  <div class="form-group">
+                    <label class="text-xs" title="How many association edges to traverse during recall (0-8)">BFS 跳数深度 (0–8)</label>
+                    <input class="input-field" type="number" min="0" max="8" x-model.number="plasticityForm.hopDepth" placeholder="preset" @input="$nextTick(() => _updatePlasticityChart())" />
+                  </div>
+                  <div class="form-group">
+                    <label class="text-xs" title="Influence of vector similarity in scoring (0-1)">语义权重 (0–1)</label>
+                    <input class="input-field" type="number" step="0.01" min="0" max="1" x-model.number="plasticityForm.semanticWeight" placeholder="preset" @input="$nextTick(() => _updatePlasticityChart())" />
+                  </div>
+                  <div class="form-group">
+                    <label class="text-xs" title="Influence of keyword matching in scoring (0-1)">全文搜索权重 (0–1)</label>
+                    <input class="input-field" type="number" step="0.01" min="0" max="1" x-model.number="plasticityForm.ftsWeight" placeholder="preset" @input="$nextTick(() => _updatePlasticityChart())" />
+                  </div>
+                  <div class="form-group">
+                    <label class="text-xs" title="Minimum score threshold to include a memory in results">相关性下限 (0–1)</label>
+                    <input class="input-field" type="number" step="0.01" min="0" max="1" x-model.number="plasticityForm.relevanceFloor" placeholder="preset" @input="$nextTick(() => _updatePlasticityChart())" />
+                  </div>
+                  <div class="form-group">
+                    <label class="text-xs" title="Days until memory relevance decays to 50%">时间半衰期（天）</label>
+                    <input class="input-field" type="number" step="1" min="1" x-model.number="plasticityForm.temporalHalflife" placeholder="preset" @input="$nextTick(() => _updatePlasticityChart())" />
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-4">
+                <button class="btn-primary" @click="savePlasticity()" :disabled="plasticitySaving">
+                  <span x-text="plasticitySaving ? '保存中…' : '保存可塑性'"></span>
+                </button>
+                <span x-show="plasticitySaveOk" class="text-[var(--success)] text-[0.8125rem]">已保存</span>
+                <span x-show="plasticitySaveErr" class="text-[var(--danger)] text-[0.8125rem]" x-text="plasticitySaveErr"></span>
+              </div>
+            </div>
+
+            <!-- Right: radar chart -->
+            <div>
+              <p class="section-label m-0 mb-3">预设对比</p>
+              <canvas id="plasticityChart" class="max-h-80"></canvas>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── Logs View ────────────────────────────────────────────────── -->
+    <div x-show="currentView==='logs'" x-data="logsTab()" x-init="init()"
+         style="display:flex;flex-direction:column;height:calc(100vh - 7rem);">
+      <!-- Toolbar -->
+      <div class="flex items-baseline gap-3.5 mb-6 flex-wrap">
+        <h2 class="page-title">服务器日志</h2>
+        <select x-model="levelFilter" class="filter-select">
+          <option value="">全部级别</option>
+          <option value="DEBUG">DEBUG</option>
+          <option value="INFO">INFO</option>
+          <option value="WARN">WARN</option>
+          <option value="ERROR">ERROR</option>
+        </select>
+        <input
+          type="text"
+          placeholder="搜索日志…"
+          :value="searchRaw"
+          @input="onSearchInput($event.target.value)"
+          class="input-field-sm"
+        />
+        <span class="text-[0.7rem] u-text-muted" x-show="filtered.length !== entries.length" x-text="filtered.length + (filtered.length===1 ? ' 条匹配' : ' 条匹配')"></span>
+        <label class="flex items-center gap-1 text-xs u-text-muted cursor-pointer whitespace-nowrap">
+          <input type="checkbox" x-model="autoScroll" class="accent-blue-500">
+          自动滚动
+        </label>
+        <button @click="clearLogs()" class="clear-btn">清除</button>
+      </div>
+      <!-- Log container — fills remaining height, newest entry at top -->
+      <div id="log-container" class="log-container">
+        <template x-for="e in displayed" :key="e._seq">
+          <div class="log-entry" :style="levelStyle(e.level)">
+            <span class="u-text-muted flex-shrink-0" x-text="formatTime(e.time)"></span>
+            <span class="font-semibold flex-shrink-0 w-12" x-text="e.level"></span>
+            <span class="flex-1 u-text-primary" x-text="e.msg"></span>
+            <span x-show="Object.keys(e.attrs||{}).length > 0" class="u-text-muted overflow-hidden text-ellipsis whitespace-nowrap max-w-[40%]" x-text="formatAttrs(e.attrs)"></span>
+          </div>
+        </template>
+        <div x-show="displayed.length === 0" class="u-text-muted text-center p-8">暂无日志条目</div>
+      </div>
+    </div>
+
+    <!-- ── Cluster View ─────────────────────────────────────────────── -->
+    <div x-show="currentView==='cluster'" x-init="loadClusterEvents()">
+      <!-- Cluster header -->
+      <div class="flex items-baseline gap-3.5 mb-6 flex-wrap">
+        <h2 class="page-title">集群</h2>
+      </div>
+      <!-- Cluster disabled state: Enable Cluster card -->
+      <div x-show="clusterEnabled === false">
+       <div class="flex items-center justify-center min-h-64">
+        <div class="card-polished p-8 max-w-[28rem] w-full">
+          <h2 class="modal-title mb-1.5">启用集群模式</h2>
+          <p class="m-0 mb-6 text-sm u-text-muted">
+            将此节点连接到 MuninnDB 集群以实现高可用与复制。
+          </p>
+
+          <!-- Error banner -->
+          <div x-show="clusterEnableError" class="error-banner mb-4" x-text="clusterEnableError"></div>
+
+          <!-- Progress stream -->
+          <div x-show="clusterEnableLoading && clusterEnableProgress.length" class="mb-4">
+            <template x-for="step in clusterEnableProgress" :key="step">
+              <div class="text-sm u-text-secondary mb-1" x-text="'→ ' + step"></div>
+            </template>
+          </div>
+
+          <!-- Form -->
+          <div x-show="!clusterEnableLoading">
+           <div class="flex flex-col gap-4">
+            <div>
+              <label class="u-label">角色</label>
+              <select x-model="clusterEnableForm.role" class="input-field w-full" >
+                <option value="primary">主节点 (Cortex)</option>
+                <option value="replica">副本节点 (Lobe)</option>
+                <option value="sentinel">哨兵</option>
+                <option value="observer">观察者</option>
+              </select>
+            </div>
+            <div>
+              <label class="u-label">绑定地址</label>
+              <input x-model="clusterEnableForm.bindAddr" class="input-field w-full" type="text" placeholder="10.0.0.1:7777" >
+            </div>
+            <div x-show="clusterEnableForm.role !== 'primary'">
+              <label class="u-label">主节点地址</label>
+              <input x-model="clusterEnableForm.cortexAddr" type="text" placeholder="10.0.0.1:7777"
+                class="input-field w-full">
+            </div>
+            <div>
+              <label class="u-label">
+                集群密钥 <span class="font-normal u-text-muted">（推荐）</span>
+              </label>
+              <input x-model="clusterEnableForm.clusterSecret" type="password" placeholder="留空表示开放集群" class="input-field w-full">
+              <p x-show="!clusterEnableForm.clusterSecret" class="m-0 mt-1 text-xs text-yellow-500">
+                &#9888; 无密钥时，任意节点都可加入此集群
+              </p>
+            </div>
+            <button @click="showEnableClusterConfirm = true"
+              class="btn-solid btn-solid-accent w-full">
+              启用集群模式
+            </button>
+           </div>
+          </div>
+        </div>
+       </div>
+      </div>
+
+      <!-- Enable Cluster confirmation modal -->
+      <div x-show="showEnableClusterConfirm">
+       <div class="u-modal-overlay" @click.self="showEnableClusterConfirm = false">
+        <div class="card-polished p-6 max-w-96 w-full">
+          <h3 class="m-0 mb-2 font-semibold u-text-primary">启用集群模式？</h3>
+          <p class="m-0 mb-4 text-sm u-text-muted">
+            这将重启复制子系统。现有数据不会受影响。
+          </p>
+          <div class="flex gap-3 justify-end">
+            <button @click="showEnableClusterConfirm = false" class="u-action-btn">取消</button>
+            <button @click="showEnableClusterConfirm = false; enableCluster()" class="u-action-btn-primary">确认</button>
+          </div>
+        </div>
+       </div>
+      </div>
+
+      <!-- Cluster enabled content with sub-tabs -->
+      <div x-show="clusterEnabled === true">
+
+        <!-- Sub-tab nav -->
+        <div class="flex gap-1 mb-6 border-b border-[var(--border)]">
+          <button @click="clusterSubTab = 'overview'; stopClusterFeed()"
+            :style="clusterSubTab === 'overview' ? 'border-bottom:2px solid var(--accent);font-weight:600;opacity:1;' : 'opacity:0.6;'"
+            class="u-text-btn">概览</button>
+          <button @click="clusterSubTab = 'management'; startClusterFeed()"
+            :style="clusterSubTab === 'management' ? 'border-bottom:2px solid var(--accent);font-weight:600;opacity:1;' : 'opacity:0.6;'"
+            class="u-text-btn">管理</button>
+          <button @click="clusterSubTab = 'settings'; loadClusterToken(); loadClusterSettings(); stopClusterFeed()"
+            :style="clusterSubTab === 'settings' ? 'border-bottom:2px solid var(--accent);font-weight:600;opacity:1;' : 'opacity:0.6;'"
+            class="u-text-btn">设置</button>
+        </div>
+
+        <!-- ── Overview sub-tab ── -->
+        <div x-show="clusterSubTab === 'overview'">
+
+          <!-- Health banner -->
+          <div :style="'display:flex;align-items:center;padding:0.75rem 1rem;border-radius:0.5rem;margin-bottom:1.5rem;font-weight:600;font-size:0.9375rem;' +
+            (clusterHealth && clusterHealth.status === 'ok' ? 'background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.35);color:#22c55e;' :
+             clusterHealth && clusterHealth.status === 'degraded' ? 'background:rgba(234,179,8,0.12);border:1px solid rgba(234,179,8,0.35);color:#eab308;' :
+             'background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.35);color:#ef4444;')"
+            x-text="clusterBannerText()">
+          </div>
+
+          <!-- Two-column top row: Nodes table + CCS gauge -->
+          <div class="grid grid-cols-[2fr_1fr] gap-6 mb-6">
+
+            <!-- Cluster Members Table -->
+            <div class="card-polished">
+              <h3 class="m-0 mb-4 u-text-secondary text-sm font-semibold uppercase tracking-[0.05em]">集群成员</h3>
+              <div x-show="clusterNodes.length === 0" class="u-text-muted text-sm py-2">
+                未找到节点。
+              </div>
+              <table x-show="clusterNodes.length > 0" class="w-full border-collapse text-sm">
+                <thead>
+                  <tr class="border-b border-[var(--border)] text-left">
+                    <th class="py-2 pr-3 pl-0 u-text-muted font-medium">节点</th>
+                    <th class="py-2 px-3 u-text-muted font-medium">角色</th>
+                    <th class="py-2 px-3 u-text-muted font-medium">状态</th>
+                    <th class="py-2 px-3 u-text-muted font-medium">纪元</th>
+                    <th class="py-2 pl-0 u-text-muted font-medium">复制延迟</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <template x-for="n in clusterNodes" :key="n.nodeId">
+                    <tr class="border-b border-[var(--border)]">
+                      <td class="py-2.5 pr-3 pl-0 font-mono text-xs u-text-secondary" x-text="n.nodeId"></td>
+                      <td class="py-2.5 px-3">
+                        <span class="badge-info capitalize" x-text="n.role"></span>
+                      </td>
+                      <td class="py-2.5 px-3">
+                        <span :class="nodeStatusBadgeClass(n.status)"
+                          class="rounded-full py-0.5 px-2.5 text-xs font-semibold capitalize"
+                          x-text="n.status"></span>
+                      </td>
+                      <td class="py-2.5 px-3 u-text-secondary" x-text="n.epoch"></td>
+                      <td class="py-2.5 pl-0 u-text-secondary" x-text="n.lag"></td>
+                    </tr>
+                  </template>
+                </tbody>
+              </table>
+              <p class="u-text-muted text-xs m-0 mt-3">每 5 秒自动刷新</p>
+            </div>
+
+            <!-- Cognitive Consistency Score gauge -->
+            <div class="card-polished">
+              <h3 class="m-0 mb-4 u-text-secondary text-sm font-semibold uppercase tracking-[0.05em]" title="认知一致性评分 —— 反映集群节点在记忆权重上的一致程度">认知一致性</h3>
+              <div class="text-center mb-5">
+                <div class="text-[2.5rem] font-bold leading-none" :style="'color:' + ccsBarColor()" x-text="ccsScore() + '%'">&#8212;</div>
+                <div class="text-[0.8125rem] u-text-muted mt-1.5 capitalize" x-text="clusterCCS ? clusterCCS.assessment : '加载中…'"></div>
+              </div>
+              <div class="bg-[var(--bg-elevated)] rounded-full h-2.5 overflow-hidden mb-3">
+                <div :style="'height:100%;border-radius:9999px;transition:width 0.6s ease;background:' + ccsBarColor() + ';width:' + ccsScore() + '%'"></div>
+              </div>
+              <div class="flex justify-between text-xs u-text-muted">
+                <span>0%</span>
+                <span class="text-yellow-500">90%</span>
+                <span class="text-emerald-500">99%</span>
+              </div>
+              <div x-show="clusterCCS && clusterCCS.sampled_at" class="mt-4 text-xs u-text-muted">
+                采样时间：<span x-text="clusterCCS ? new Date(clusterCCS.sampled_at).toLocaleTimeString() : ''"></span>
+              </div>
+              <p class="u-text-muted text-xs m-0 mt-2">每 30 秒自动刷新</p>
+            </div>
+          </div>
+
+          <!-- Failover Event Timeline -->
+          <div class="card-polished mb-6">
+            <h3 class="m-0 mb-4 u-text-secondary text-sm font-semibold uppercase tracking-[0.05em]">故障切换事件时间线</h3>
+            <div class="max-h-56 overflow-y-auto flex flex-col gap-2">
+              <template x-for="(ev, idx) in clusterEvents" :key="idx">
+                <div class="text-[0.8125rem] py-2 px-3 bg-[var(--bg-elevated)] rounded-md font-mono u-text-secondary" x-text="ev.label"></div>
+              </template>
+              <div x-show="clusterEvents.length === 0" class="u-text-muted text-sm py-2">
+                尚无故障切换事件记录。纪元变化会自动显示在这里。
+              </div>
+            </div>
+          </div>
+
+          <!-- Security Posture -->
+          <div class="card-polished p-5">
+            <h3 class="section-label m-0 mb-3">安全态势</h3>
+            <div class="grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 text-sm items-center">
+              <div class="u-text-muted">mTLS</div>
+              <div>
+                <span x-show="clusterHealth && clusterHealth.tls_enabled" class="badge-success">已启用</span>
+                <span x-show="!clusterHealth || !clusterHealth.tls_enabled" class="badge-warning">已禁用</span>
+              </div>
+              <div class="u-text-muted">加入令牌</div>
+              <div class="u-text-secondary" x-text="clusterSecurityPosture ? '有效期 ' + Math.floor((clusterSecurityPosture.ttl_seconds || 0) / 60) + ' 分钟' : '\u2014'"></div>
+              <div class="u-text-muted">集群密钥</div>
+              <div>
+                <span x-show="clusterSecurityPosture && clusterSecurityPosture.token" class="badge-success">已配置</span>
+                <span x-show="!clusterSecurityPosture || !clusterSecurityPosture.token" class="badge-warning">未设置</span>
+              </div>
+              <div class="u-text-muted">传输中加密</div>
+              <div class="u-text-secondary">TLS 1.3</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Management sub-tab ── -->
+        <div x-show="clusterSubTab === 'management'">
+
+          <!-- Action bar -->
+          <div class="flex gap-3 mb-6">
+            <button @click="showAddNodeModal = true"
+              class="u-action-btn-primary">
+              + 添加节点
+            </button>
+            <button @click="showFailoverModal = true"
+              :disabled="!clusterHealth || !clusterHealth.is_leader"
+              :style="(!clusterHealth || !clusterHealth.is_leader) ? 'opacity:0.4;cursor:not-allowed;' : 'opacity:1;cursor:pointer;'"
+              class="py-2 px-4 text-sm rounded-md bg-[var(--bg-elevated)] u-text-primary border border-[var(--border)]">
+              触发故障切换
+            </button>
+          </div>
+
+          <!-- Nodes list with remove buttons -->
+          <div class="card-polished mb-6 overflow-hidden">
+            <table class="w-full border-collapse text-sm">
+              <thead>
+                <tr class="border-b border-[var(--border)]">
+                  <th class="py-3 px-4 text-left font-medium u-text-muted">节点</th>
+                  <th class="py-3 px-4 text-left font-medium u-text-muted">角色</th>
+                  <th class="py-3 px-4 text-left font-medium u-text-muted">延迟</th>
+                  <th class="py-3 px-4"></th>
+                </tr>
+              </thead>
+              <tbody>
+                <template x-for="n in clusterNodes" :key="n.nodeId">
+                  <tr class="border-b border-[var(--border)]">
+                    <td class="py-3 px-4 font-mono text-xs u-text-primary" x-text="n.nodeId"></td>
+                    <td class="py-3 px-4">
+                      <span class="badge-info capitalize" x-text="n.role"></span>
+                    </td>
+                    <td class="py-3 px-4 text-xs u-text-muted" x-text="n.lag ?? '\u2014'"></td>
+                    <td class="py-3 px-4 text-right">
+                      <button @click="removeNodeTarget = n; removeNodeError = null; showRemoveNodeModal = true"
+                        class="py-1 px-3 text-xs rounded-md cursor-pointer" style="background:rgba(239,68,68,0.1);color:#ef4444;border:1px solid rgba(239,68,68,0.3);">
+                        删除
+                      </button>
+                    </td>
+                  </tr>
+                </template>
+                <tr x-show="clusterNodes.length === 0">
+                  <td colspan="4" class="p-4 text-center u-text-muted text-sm">无节点</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Live Activity Feed -->
+          <div class="card-polished p-5">
+            <div class="flex justify-between items-center mb-3">
+              <h3 class="m-0 u-text-primary text-sm font-semibold">实时活动</h3>
+              <button @click="clusterFeedPaused = !clusterFeedPaused"
+                class="u-action-btn-sm py-1 px-2"
+                x-text="clusterFeedPaused ? '继续' : '暂停'"></button>
+            </div>
+            <div class="font-mono text-xs max-h-64 overflow-y-auto"
+                 @mouseenter="clusterFeedPaused = true"
+                 @mouseleave="clusterFeedPaused = false">
+              <template x-for="evt in clusterFeed" :key="evt.seq + '-' + evt.ts">
+                <div class="flex gap-3 u-text-muted mb-1">
+                  <span class="flex-shrink-0" x-text="evt.ts"></span>
+                  <span x-text="`seq=${evt.seq} op=${evt.op} key=${evt.key}`"></span>
+                </div>
+              </template>
+              <div x-show="clusterFeed.length === 0" class="u-text-muted">
+                等待复制活动...
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Settings sub-tab ── -->
+        <div x-show="clusterSubTab === 'settings'">
+
+          <!-- Join Token -->
+          <div class="card-polished p-5 mb-5">
+            <h3 class="m-0 mb-4 u-text-secondary text-sm font-semibold uppercase tracking-[0.05em]">加入令牌</h3>
+            <div x-show="clusterTokenLoading" class="text-sm u-text-muted">加载中...</div>
+            <div x-show="!clusterTokenLoading && clusterToken">
+              <div class="flex gap-2 mb-2">
+                <input type="text" :value="clusterToken && clusterToken.token" readonly
+                  class="input-mono flex-1">
+                <button @click="copyToken()"
+                  class="u-action-btn py-2 px-3 text-xs flex-shrink-0">
+                  <span x-show="!clusterTokenCopied">复制</span>
+                  <span x-show="clusterTokenCopied" class="text-emerald-500">已复制 &#10003;</span>
+                </button>
+              </div>
+              <p class="m-0 mb-3 text-xs u-text-muted">
+                有效期 <span x-text="Math.floor(((clusterToken && clusterToken.ttl_seconds) || 0) / 60)"></span> 分钟
+              </p>
+              <button @click="showRegenerateTokenConfirm = true"
+                class="u-action-btn-sm-md">
+                重新生成令牌
+              </button>
+            </div>
+            <div x-show="!clusterTokenLoading && !clusterToken" class="text-sm u-text-muted">
+              无可用令牌（集群可能未配置密钥）。
+            </div>
+          </div>
+
+          <!-- TLS Certificate -->
+          <div class="card-polished p-5 mb-5">
+            <h3 class="m-0 mb-4 u-text-secondary text-sm font-semibold uppercase tracking-[0.05em]">TLS 证书</h3>
+            <div class="flex justify-between items-center">
+              <div>
+                <p class="m-0 mb-1 text-sm u-text-secondary">mTLS</p>
+                <p class="m-0 text-xs u-text-muted">TLS 1.3, ECDSA P-256</p>
+              </div>
+              <button @click="rotateTLS()"
+                class="u-action-btn-sm-md">
+                轮换证书
+              </button>
+            </div>
+          </div>
+
+          <!-- Cluster Behavior -->
+          <div class="card-polished p-5">
+            <h3 class="m-0 mb-4 u-text-secondary text-sm font-semibold uppercase tracking-[0.05em]">集群行为</h3>
+            <div class="flex flex-col gap-4">
+              <div class="flex justify-between items-center">
+                <div>
+                  <p class="m-0 mb-1 text-sm u-text-secondary">心跳间隔</p>
+                  <p class="m-0 text-xs u-text-muted">PING 消息之间的毫秒数</p>
+                </div>
+                <input type="number" x-model.number="clusterSettings.heartbeat_ms" min="100" max="10000"
+                  data-testid="input-cluster-heartbeat-ms"
+                  class="cluster-input-sm">
+              </div>
+              <div class="flex justify-between items-center">
+                <div>
+                  <p class="m-0 mb-1 text-sm u-text-secondary">SDOWN 阈值</p>
+                  <p class="m-0 text-xs u-text-muted">标记为 SDOWN 前允许丢失的心跳次数</p>
+                </div>
+                <input type="number" x-model.number="clusterSettings.sdown_beats" min="1" max="20"
+                  data-testid="input-cluster-sdown-beats"
+                  class="cluster-input-sm">
+              </div>
+              <div class="flex justify-between items-center">
+                <div>
+                  <p class="m-0 mb-1 text-sm u-text-secondary">CCS 探测间隔</p>
+                  <p class="m-0 text-xs u-text-muted">一致性检查之间的秒数</p>
+                </div>
+                <input type="number" x-model.number="clusterSettings.ccs_interval_seconds" min="5" max="300"
+                  data-testid="input-cluster-ccs-interval"
+                  class="cluster-input-sm">
+              </div>
+              <div class="flex justify-between items-center">
+                <div>
+                  <p class="m-0 mb-1 text-sm u-text-secondary">恢复后对账</p>
+                  <p class="m-0 text-xs u-text-muted">网络分区恢复后执行对账</p>
+                </div>
+                <div @click="clusterSettings.reconcile_on_heal = !clusterSettings.reconcile_on_heal"
+                  data-testid="toggle-cluster-reconcile-heal"
+                  :style="clusterSettings.reconcile_on_heal ? 'background:var(--accent);' : 'background:var(--bg-elevated);border:1px solid var(--border);'"
+                  class="w-12 h-6 rounded-full cursor-pointer relative transition-colors duration-150 flex-shrink-0">
+                  <div :style="clusterSettings.reconcile_on_heal ? 'left:calc(100% - 1.25rem);' : 'left:0.25rem;'"
+                    class="w-4 h-4 rounded-full bg-white absolute top-1 transition-[left] duration-150"></div>
+                </div>
+              </div>
+            </div>
+            <div class="mt-4 flex items-center gap-3">
+              <button @click="saveClusterSettings()" :disabled="clusterSettingsSaving"
+                data-testid="btn-save-cluster-settings"
+                class="u-action-btn-primary">
+                <span x-show="!clusterSettingsSaving">保存</span>
+                <span x-show="clusterSettingsSaving">保存中...</span>
+              </button>
+              <span x-show="clusterSettingsSaved" data-testid="cluster-settings-saved-msg" class="text-xs text-emerald-500">已保存 &#10003;</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Modals (inside enabled cluster div) -->
+
+        <!-- Add Node Modal -->
+        <div x-show="showAddNodeModal">
+         <div class="u-modal-overlay" @click.self="showAddNodeModal = false">
+          <div class="card-polished p-6 max-w-[28rem] w-full">
+            <h3 class="m-0 mb-4 font-semibold u-text-primary">添加节点</h3>
+            <div x-show="addNodeError" class="error-banner mb-3" x-text="addNodeError"></div>
+            <div x-show="addNodeLoading" class="mb-3">
+              <template x-for="step in addNodeProgress" :key="step">
+                <div class="text-sm u-text-secondary mb-1" x-text="'→ ' + step"></div>
+              </template>
+            </div>
+            <div x-show="!addNodeLoading">
+             <div class="flex flex-col gap-4">
+              <div>
+                <label class="u-label">节点地址</label>
+                <div class="flex gap-2">
+                  <input x-model="addNodeForm.addr" type="text" placeholder="10.0.0.2:7777"
+                    class="input-field flex-1">
+                  <button @click="testNodeReachability()" :disabled="!addNodeForm.addr || addNodeTesting"
+                    class="u-action-btn py-2 px-3 text-xs flex-shrink-0"
+                    :style="(!addNodeForm.addr || addNodeTesting) ? 'opacity:0.5;cursor:not-allowed;' : ''">
+                    <span x-show="!addNodeTesting">测试</span>
+                    <span x-show="addNodeTesting">...</span>
+                  </button>
+                </div>
+                <div x-show="addNodeTestResult" class="mt-1.5 text-xs">
+                  <span x-show="addNodeTestResult && addNodeTestResult.reachable" class="text-emerald-500">&#10003; 可达（<span x-text="addNodeTestResult && addNodeTestResult.latency_ms"></span>ms）</span>
+                  <span x-show="addNodeTestResult && !addNodeTestResult.reachable" class="text-red-500">&#10007; <span x-text="addNodeTestResult && (addNodeTestResult.error || '不可达')"></span></span>
+                </div>
+              </div>
+              <div>
+                <label class="u-label">加入令牌</label>
+                <input x-model="addNodeForm.token" type="text" placeholder="粘贴新节点的令牌"
+                  class="input-mono w-full text-sm box-border" style="color:var(--text-primary);">
+              </div>
+              <div class="flex gap-3 justify-end">
+                <button @click="showAddNodeModal = false; addNodeError = null" class="u-action-btn">取消</button>
+                <button @click="addNode()" class="u-action-btn-primary">添加节点</button>
+              </div>
+             </div>
+            </div>
+           </div>
+          </div>
+         </div>
+        </div>
+
+        <!-- Remove Node Modal -->
+        <div x-show="showRemoveNodeModal">
+         <div class="u-modal-overlay" @click.self="showRemoveNodeModal = false">
+          <div class="card-polished p-6 max-w-96 w-full">
+            <h3 class="m-0 mb-2 font-semibold u-text-primary">删除节点</h3>
+            <p class="m-0 mb-4 text-sm u-text-muted">
+              要从集群中删除 <span class="font-mono text-xs" x-text="removeNodeTarget && removeNodeTarget.nodeId"></span> 吗？
+            </p>
+            <div x-show="removeNodeError" class="error-banner mb-3" x-text="removeNodeError"></div>
+            <label class="flex items-center gap-2 mb-4 text-sm cursor-pointer u-text-secondary">
+              <input type="checkbox" x-model="removeNodeDrain">
+              删除前先排空（等待复制追平）
+            </label>
+            <div class="flex gap-3 justify-end">
+              <button @click="showRemoveNodeModal = false; removeNodeTarget = null; removeNodeError = null" class="u-action-btn">取消</button>
+              <button @click="removeNode()" :disabled="removeNodeLoading"
+                class="btn-solid btn-solid-danger">
+                <span x-show="!removeNodeLoading">删除</span>
+                <span x-show="removeNodeLoading">删除中...</span>
+              </button>
+            </div>
+          </div>
+         </div>
+        </div>
+
+        <!-- Failover Modal -->
+        <div x-show="showFailoverModal">
+         <div class="u-modal-overlay" @click.self="showFailoverModal = false">
+          <div class="card-polished p-6 max-w-96 w-full">
+            <h3 class="m-0 mb-2 font-semibold u-text-primary">触发故障切换</h3>
+            <div x-show="failoverError" class="error-banner mb-3" x-text="failoverError"></div>
+            <div x-show="failoverLoading" class="mb-3">
+              <template x-for="step in failoverProgress" :key="step">
+                <div class="text-sm u-text-secondary mb-1" x-text="'→ ' + step"></div>
+              </template>
+            </div>
+            <div x-show="!failoverLoading">
+              <label class="u-label">目标节点</label>
+              <select x-model="failoverTarget" class="input-field mb-4">
+                <option value="">选择目标...</option>
+                <template x-for="n in clusterNodes.filter(node => node.role === 'replica')" :key="n.nodeId">
+                  <option :value="n.nodeId" x-text="`${n.nodeId} (lag: ${n.lag ?? '?'})`"></option>
+                </template>
+              </select>
+              <div class="flex gap-3 justify-end">
+                <button @click="showFailoverModal = false; failoverError = null" class="u-action-btn">取消</button>
+                  <button @click="triggerFailover()" :disabled="!failoverTarget"
+                  :style="!failoverTarget ? 'opacity:0.5;cursor:not-allowed;' : ''"
+                  class="btn-solid btn-solid-yellow">触发</button>
+              </div>
+            </div>
+          </div>
+         </div>
+        </div>
+
+        <!-- Regenerate Token confirmation modal -->
+        <div x-show="showRegenerateTokenConfirm">
+         <div class="u-modal-overlay" @click.self="showRegenerateTokenConfirm = false">
+          <div class="card-polished p-6 max-w-96 w-full">
+            <h3 class="m-0 mb-2 font-semibold u-text-primary">重新生成加入令牌？</h3>
+            <p class="m-0 mb-4 text-sm u-text-muted">旧令牌将立即失效。</p>
+            <div class="flex gap-3 justify-end">
+              <button @click="showRegenerateTokenConfirm = false" class="u-action-btn">取消</button>
+              <button @click="regenerateToken()" class="u-action-btn-primary">重新生成</button>
+            </div>
+          </div>
+         </div>
+        </div>
+
+      <!-- Unknown state (still loading) -->
+      <div x-show="clusterEnabled === null" class="u-text-muted text-sm p-4">
+        正在加载集群状态&#8230;
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ── Vault Picker Modal ───────────────────────────────────────── -->
+  <div x-show="vaultModalOpen" x-cloak class="modal-backdrop" @click.self="vaultModalOpen=false; vaultPickerSearch=''" @keydown.escape.window="vaultModalOpen=false; vaultPickerSearch=''">
+    <div class="modal-box max-w-[380px] p-0 overflow-hidden">
+      <!-- Header -->
+      <div class="vault-picker-header">
+        <span class="vault-picker-heading">切换仓库</span>
+        <button class="btn-ghost py-0.5 px-1.5 leading-none text-sm" @click="vaultModalOpen=false; vaultPickerSearch=''">✕</button>
+      </div>
+      <!-- Search -->
+      <div class="vault-picker-search-row">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="flex-shrink-0 opacity-40"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" class="vault-modal-input" placeholder="搜索仓库…" x-model="vaultPickerSearch" x-effect="if(vaultModalOpen) $nextTick(()=>$el.focus())" @keydown.escape="vaultModalOpen=false; vaultPickerSearch=''">
+      </div>
+      <!-- Vault list -->
+      <div class="vault-picker-scroll">
+        <template x-for="v in vaults.filter(v => v.toLowerCase().includes(vaultPickerSearch.toLowerCase()))" :key="v">
+          <div class="vault-modal-item" :class="{'is-active': v===vault}" @click="pickVault(v)">
+            <svg class="vault-item-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0018 0V5"/><path d="M3 12a9 3 0 0018 0"/></svg>
+            <span class="vault-item-name" x-text="v"></span>
+            <span class="vault-item-count" x-show="vaultStats[v] !== undefined" x-text="vaultStats[v] + ' 条记忆'"></span>
+            <svg x-show="v===vault" class="vault-item-check" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+          </div>
+        </template>
+        <div x-show="vaults.filter(v => v.toLowerCase().includes(vaultPickerSearch.toLowerCase())).length===0" class="p-5 text-center u-text-muted text-sm">未找到仓库</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── New Vault Modal ──────────────────────────────────────────── -->
+  <div x-show="newVaultModal.show" x-cloak class="modal-backdrop" @click.self="newVaultModal.show=false" @keydown.escape.window="newVaultModal.show=false">
+    <div class="modal-box max-w-[400px]">
+      <div class="flex items-center justify-between mb-5">
+        <h2 class="modal-title">新建仓库</h2>
+        <button class="btn-ghost py-1 px-1.5 leading-none" @click="newVaultModal.show=false">✕</button>
+      </div>
+      <form @submit.prevent="submitNewVault(false)">
+        <div class="form-group mb-4">
+          <label>仓库名称</label>
+          <input class="input-field mt-1.5" type="text" placeholder="my-vault" x-model="newVaultModal.name" x-effect="if(newVaultModal.show) $nextTick(()=>$el.focus())" @input="newVaultModal.error='';newVaultModal.collision=null" autocomplete="off" spellcheck="false">
+          <span x-show="newVaultModal.error" x-text="newVaultModal.error" class="text-[0.8125rem] text-[var(--danger)] mt-1.5"></span>
+          <span class="text-xs u-text-muted mt-1.5">小写字母、数字、连字符、下划线 · 1–64 个字符</span>
+        </div>
+        <!-- Collision warning banner — shown only when backend returns VAULT_NAME_COLLISION -->
+        <div x-show="newVaultModal.collision" class="bg-[var(--warning-bg,#fffbeb)] border border-[var(--warning-border,#f59e0b)] rounded-md p-3 mb-4 text-sm">
+          <div class="font-semibold mb-1">检测到相似仓库名称</div>
+          <div>名为 <strong x-text="newVaultModal.collision && newVaultModal.collision.conflict"></strong> 的仓库已存在且名称相似。仍要创建吗？</div>
+          <div class="flex gap-2 mt-3">
+            <button type="button" class="btn-secondary text-sm py-1 px-2.5" @click="newVaultModal.collision=null">取消</button>
+            <button type="button" class="btn-primary text-sm py-1 px-2.5" @click="submitNewVault(true)">仍然创建</button>
+          </div>
+        </div>
+        <div class="flex gap-3 justify-end">
+          <button type="button" class="btn-secondary" @click="newVaultModal.show=false">取消</button>
+          <button type="submit" class="btn-primary" :disabled="newVaultModal.loading || !newVaultModal.name.trim()" x-text="newVaultModal.loading ? '创建中…' : '创建仓库'"></button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ── Sign out confirmation modal ─────────────────────────────── -->
+  <div x-show="showSignOutConfirm" class="modal-backdrop" @click.self="showSignOutConfirm=false">
+    <div class="modal-box max-w-[360px] text-center">
+      <h2 class="modal-title mb-4">要退出登录吗？</h2>
+      <p class="u-text-secondary mb-6">确认要退出登录吗？</p>
+      <div class="flex gap-3 justify-center">
+        <button class="btn-secondary" @click="showSignOutConfirm=false">取消</button>
+        <button class="btn-danger" @click="showSignOutConfirm=false; logout()">退出登录</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Vault action confirmation modal ─────────────────────────────── -->
+  <div x-show="vaultActionModal.show" x-cloak
+       class="modal-backdrop" @click.self="vaultActionModal.show = false"
+       @keydown.escape.window="vaultActionModal.show = false">
+    <div class="modal-box max-w-[440px]">
+      <h2 class="modal-title"
+          :style="'margin-bottom:0.75rem;color:' + (vaultActionModal.action === 'delete' ? '#ef4444' : '#d97706')"
+          x-text="vaultActionModal.action === 'delete' ? '删除仓库' : '清除记忆'">
+      </h2>
+      <p class="u-text-secondary text-sm m-0 mb-3">
+        这将永久删除仓库
+        <strong x-text="vaultActionModal.vault"></strong>
+        的全部记忆（<span x-text="vaultActionModal.memCount"></span> 条）。
+        <span x-show="vaultActionModal.action === 'delete'">仓库本身也会被删除。</span>
+        此操作无法撤销。
+      </p>
+      <p class="text-sm font-medium m-0 mb-2 u-text-primary">
+        输入 <strong x-text="vaultActionModal.vault"></strong> 以确认：
+      </p>
+      <input type="text" x-model="vaultActionModal.confirmText"
+             @keydown.enter="vaultActionModal.confirmText === vaultActionModal.vault && confirmVaultAction()"
+             class="input-field mb-5"
+             placeholder="仓库名称" />
+      <div class="flex justify-end gap-3">
+        <button class="btn-secondary" @click="vaultActionModal.show = false">取消</button>
+        <button @click="confirmVaultAction()"
+                :disabled="vaultActionModal.confirmText !== vaultActionModal.vault"
+                :style="vaultActionModal.action === 'delete'
+                    ? (vaultActionModal.confirmText !== vaultActionModal.vault ? 'background:#ef4444;opacity:0.45;cursor:not-allowed;color:#fff;border:none;padding:0.5rem 1rem;border-radius:0.5rem;font-size:0.875rem;font-weight:500;' : 'background:#ef4444;cursor:pointer;color:#fff;border:none;padding:0.5rem 1rem;border-radius:0.5rem;font-size:0.875rem;font-weight:500;')
+                    : (vaultActionModal.confirmText !== vaultActionModal.vault ? 'background:#f59e0b;opacity:0.45;cursor:not-allowed;color:#fff;border:none;padding:0.5rem 1rem;border-radius:0.5rem;font-size:0.875rem;font-weight:500;' : 'background:#f59e0b;cursor:pointer;color:#fff;border:none;padding:0.5rem 1rem;border-radius:0.5rem;font-size:0.875rem;font-weight:500;')"
+                x-text="vaultActionModal.action === 'delete' ? '删除仓库' : '清除记忆'">
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Vault clone modal ────────────────────────────────────────── -->
+  <div x-show="cloneModal.show" x-cloak
+       class="modal-backdrop" @click.self="cloneModal.show = false"
+       @keydown.escape.window="cloneModal.show = false">
+    <div class="modal-box max-w-[440px]">
+      <h2 class="modal-title mb-3 text-indigo-500">克隆仓库</h2>
+      <p class="u-text-secondary text-sm m-0 mb-3">
+        为仓库 <strong x-text="cloneModal.source"></strong> 创建一个新名称的副本。
+        克隆后的记忆访问计数将重置。
+      </p>
+      <label class="block text-sm font-medium mb-1.5 u-text-primary">新仓库名称</label>
+      <input type="text" x-model="cloneModal.newName"
+             @keydown.enter="cloneModal.newName && startClone()"
+             class="input-field mb-4"
+             placeholder="my-vault-clone" />
+      <div x-show="activeJob" class="mb-4">
+        <p class="text-xs u-text-muted m-0 mb-1"
+           x-text="activeJob?.phase === 'indexing' ? '重建索引中...' : '复制中...'"></p>
+        <div class="job-progress-bar">
+          <div style="height:100%;background:#6366f1;border-radius:9999px;transition:width 0.5s ease;"
+               :style="'width:' + (activeJob?.pct || 0) + '%'"></div>
+        </div>
+        <p class="text-xs u-text-muted m-0 mt-1"
+           x-text="(activeJob?.pct || 0).toFixed(0) + '% (' + (activeJob?.copy_current || 0) + '/' + (activeJob?.copy_total || 0) + ')'">
+        </p>
+      </div>
+      <div class="flex justify-end gap-3">
+        <button class="btn-secondary" @click="cloneModal.show = false; clearActiveJob()">取消</button>
+        <button @click="startClone()"
+                :disabled="!cloneModal.newName || activeJob?.status === 'running'"
+                class="btn-solid btn-solid-indigo"
+                :style="(!cloneModal.newName || activeJob?.status === 'running') ? 'opacity:0.45;cursor:not-allowed;' : 'opacity:1;cursor:pointer;'">
+          克隆
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Vault merge modal ─────────────────────────────────────────── -->
+  <div x-show="mergeModal.show" x-cloak
+       class="modal-backdrop" @click.self="mergeModal.show = false"
+       @keydown.escape.window="mergeModal.show = false">
+    <div class="modal-box max-w-[440px]">
+      <h2 class="modal-title mb-3 text-purple-500">将仓库合并到…</h2>
+      <p class="u-text-secondary text-sm m-0 mb-3">
+        将 <strong x-text="mergeModal.source"></strong> 中的全部记忆合并到另一个仓库。
+      </p>
+      <label class="block text-sm font-medium mb-1.5 u-text-primary">目标仓库</label>
+      <select x-model="mergeModal.target"
+              class="input-field mb-3">
+        <option value="">选择目标仓库…</option>
+        <template x-for="v in vaults.filter(v => v !== mergeModal.source)" :key="v">
+          <option :value="v" x-text="v"></option>
+        </template>
+      </select>
+      <label class="flex items-center gap-2 text-sm u-text-primary mb-4 cursor-pointer">
+        <input type="checkbox" x-model="mergeModal.deleteSource" />
+        合并后删除源仓库
+      </label>
+      <div x-show="activeJob" class="mb-4">
+        <p class="text-xs u-text-muted m-0 mb-1"
+           x-text="activeJob?.phase === 'indexing' ? '重建索引中...' : '合并中...'"></p>
+        <div class="job-progress-bar">
+          <div style="height:100%;background:#a855f7;border-radius:9999px;transition:width 0.5s ease;"
+               :style="'width:' + (activeJob?.pct || 0) + '%'"></div>
+        </div>
+        <p class="text-xs u-text-muted m-0 mt-1"
+           x-text="(activeJob?.pct || 0).toFixed(0) + '%'"></p>
+      </div>
+      <div class="flex justify-end gap-3">
+        <button class="btn-secondary" @click="mergeModal.show = false; clearActiveJob()">取消</button>
+        <button @click="startMerge()"
+                :disabled="!mergeModal.target || activeJob?.status === 'running'"
+                class="btn-solid btn-solid-purple"
+                :style="(!mergeModal.target || activeJob?.status === 'running') ? 'opacity:0.45;cursor:not-allowed;' : 'opacity:1;cursor:pointer;'">
+          合并
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Vault import modal ───────────────────────────────────────── -->
+  <div x-show="importModal.show" x-cloak
+       class="modal-backdrop" @click.self="importModal.show = false"
+       @keydown.escape.window="importModal.show = false">
+    <div class="modal-box max-w-[440px]">
+      <h2 class="modal-title mb-3 text-amber-600">导入仓库</h2>
+      <p class="u-text-secondary text-sm m-0 mb-4">
+        将 <code>.muninn</code> 导出文件导入到新建或已有仓库。
+      </p>
+      <div class="form-group mb-3">
+        <label class="block text-sm font-medium mb-1.5 u-text-primary">目标仓库名称</label>
+        <input type="text" x-model="importModal.vaultName"
+               class="input-field"
+               placeholder="my-imported-vault" />
+      </div>
+      <div class="form-group mb-3">
+        <label class="block text-sm font-medium mb-1.5 u-text-primary">文件</label>
+        <input type="file" accept=".muninn"
+               @change="importModal.file = $event.target.files[0]"
+               class="text-sm u-text-primary" />
+      </div>
+      <label class="flex items-center gap-2 text-sm u-text-primary mb-4 cursor-pointer">
+        <input type="checkbox" x-model="importModal.resetMeta" />
+        重置元数据（时间戳、访问计数）
+      </label>
+      <div x-show="activeJob" class="mb-4">
+        <p class="text-xs u-text-muted m-0 mb-1"
+           x-text="activeJob?.phase === 'indexing' ? '重建索引中...' : '导入中...'"></p>
+        <div class="job-progress-bar">
+          <div style="height:100%;background:#f59e0b;border-radius:9999px;transition:width 0.5s ease;"
+               :style="'width:' + (activeJob?.pct || 0) + '%'"></div>
+        </div>
+        <p class="text-xs u-text-muted m-0 mt-1"
+           x-text="(activeJob?.pct || 0).toFixed(0) + '%'"></p>
+      </div>
+      <div class="flex justify-end gap-3">
+        <button class="btn-secondary" @click="importModal.show = false; clearActiveJob()">取消</button>
+        <button @click="startImport()"
+                :disabled="!importModal.vaultName || !importModal.file || activeJob?.status === 'running'"
+                class="btn-solid btn-solid-amber"
+                :style="(!importModal.vaultName || !importModal.file || activeJob?.status === 'running') ? 'opacity:0.45;cursor:not-allowed;' : 'opacity:1;cursor:pointer;'">
+          导入
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Notification toasts ──────────────────────────────────────── -->
+  <div class="notification-toast">
+    <template x-for="n in notifications" :key="n.id">
+      <div class="toast flex items-center gap-3 min-w-[280px]" :class="n.type">
+        <span class="flex-1" x-text="n.msg"></span>
+        <button @click="removeNotification(n.id)" class="bg-transparent border-none u-text-muted cursor-pointer text-base">✕</button>
+      </div>
+    </template>
+  </div>
+
+</div><!-- /.app-layout -->
+
+<!-- ── Login page (standalone — nothing visible behind it) ──────── -->
+<div x-show="!isAuthenticated" x-cloak class="login-page">
+  <div class="login-center">
+  <div class="login-box">
+    <div class="text-center mb-8">
+      <div class="login-logo-row">
+        <img src="/static/logo.jpg" class="h-11 rounded-lg" alt="MuninnDB" />
+        <h1 class="m-0 text-2xl font-bold">MuninnDB</h1>
+      </div>
+      <p class="m-0 text-sm u-text-muted">登录以继续</p>
+    </div>
+    <form @submit.prevent="login()" class="login-form-card">
+      <div class="form-group mb-4">
+        <label>用户名</label>
+        <input class="input-field" x-model="loginForm.username" autocomplete="username" required autofocus />
+      </div>
+      <div class="form-group mb-6">
+        <label>密码</label>
+        <input class="input-field" type="password" x-model="loginForm.password" autocomplete="current-password" required />
+      </div>
+      <button type="submit" class="btn-primary w-full py-3">登录</button>
+      <p x-show="loginError" class="text-center mt-3.5 text-sm text-[var(--danger)]" x-text="loginError"></p>
+    </form>
+    <p class="u-text-muted text-center mt-4 text-xs">
+      默认凭据：<strong>root</strong> / <strong>password</strong>
+    </p>
+    <p x-show="appVersion" x-text="appVersion" class="u-text-muted text-center mt-6 text-[0.6875rem] opacity-50"></p>
+  </div>
+  </div>
+</div>
+</div>
+
+<script>
+function logsTab() {
+    return {
+        entries: [],
+        filtered: [],   // level+search filtered, oldest-first
+        displayed: [],  // filtered reversed — newest at top
+        levelFilter: '',
+        searchRaw: '',
+        searchQuery: '',
+        _searchTimer: null,
+        autoScroll: true,
+        _seq: 0,
+
+        _applyFilters() {
+            let list = this.entries;
+            if (this.levelFilter) {
+                list = list.filter(e => e.level === this.levelFilter);
+            }
+            if (this.searchQuery) {
+                const q = this.searchQuery.toLowerCase();
+                list = list.filter(e =>
+                    (e.msg || '').toLowerCase().includes(q) ||
+                    _fmtAttrs(e.attrs).toLowerCase().includes(q)
+                );
+            }
+            this.filtered = list;
+            this.displayed = [...list].reverse();
+        },
+
+        onSearchInput(val) {
+            this.searchRaw = val;
+            clearTimeout(this._searchTimer);
+            this._searchTimer = setTimeout(() => {
+                this.searchQuery = val;
+                this._applyFilters();
+            }, 300);
+        },
+
+        init() {
+            this.$watch('levelFilter', () => this._applyFilters());
+
+            fetch('/logs')
+                .then(r => r.json())
+                .then(data => {
+                    this.entries = (data || []).map(e => ({ ...e, _seq: this._seq++ }));
+                    this._applyFilters();
+                    this.$nextTick(() => this.scrollToTop());
+                })
+                .catch(() => {});
+
+            if (window._muninnSSE) {
+                window._muninnSSE.addEventListener('message', (ev) => {
+                    try {
+                        const d = JSON.parse(ev.data);
+                        if (d.type === 'log_entry') {
+                            this.entries.push({ ...d, _seq: this._seq++ });
+                            if (this.entries.length > 2000) {
+                                this.entries.splice(0, this.entries.length - 2000);
+                            }
+                            this._applyFilters();
+                            if (this.autoScroll) this.$nextTick(() => this.scrollToTop());
+                        }
+                    } catch (_) {}
+                });
+            }
+        },
+
+        clearLogs() {
+            fetch('/logs', { method: 'DELETE', credentials: 'same-origin' })
+                .catch(() => {})
+                .finally(() => {
+                    this.entries = [];
+                    this._applyFilters();
+                });
+        },
+
+        scrollToTop() {
+            const el = document.getElementById('log-container');
+            if (el) el.scrollTop = 0;
+        },
+
+        formatTime(iso) {
+            if (!iso) return '';
+            const d = new Date(iso);
+            return d.toLocaleTimeString('en-US', { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        },
+
+        formatAttrs(attrs) { return _fmtAttrs(attrs); },
+
+        levelStyle(level) {
+            switch (level) {
+                case 'DEBUG': return 'color:#64748b;';
+                case 'INFO':  return 'color:#4ade80;';
+                case 'WARN':  return 'color:#facc15;background:rgba(234,179,8,0.08);';
+                case 'ERROR': return 'color:#f87171;background:rgba(239,68,68,0.12);';
+                default:      return 'color:var(--text-secondary);';
+            }
+        }
+    };
+}
+
+function _fmtAttrs(attrs) {
+    return Object.entries(attrs || {}).map(([k, v]) => `${k}=${v}`).join(' ');
+}
+</script>
+</body>
+</html>

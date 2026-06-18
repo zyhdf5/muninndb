@@ -40,43 +40,6 @@ document.addEventListener('alpine:init', () => {
     _prevEngramCount: 0,
     _prevVaultCount: 0,
 
-    // Memories
-    memories: [],
-    totalMemories: 0,
-    searchQuery: '',
-    searchMode: 'balanced',
-    page: 0,
-    memoriesLoading: false,
-    memoryFilters: { sort: 'created', tags: '', state: '', minConf: 0, maxConf: 0 },
-    selectedMemory: null,
-    showNewMemoryModal: false,
-    newMemoryForm: { concept: '', content: '', tagsRaw: '', confidence: 0.8 },
-    confirmForgetId: null,
-
-    // Edit/Evolve
-    editingMemory: false,
-    editMemoryForm: { content: '', reason: '' },
-    editMemorySaving: false,
-
-    // Tag editing
-    editingTags: false,
-    editTagsValue: '',
-    editTagsSaving: false,
-
-    // Link modal
-    linkModal: { show: false, sourceId: '', targetId: '', relType: 5, weight: 0.8 },
-
-    // Explain modal
-    explainModal: { show: false, data: null, loading: false },
-
-    // Multi-select / consolidate
-    multiSelectMode: false,
-    selectedMemoryIds: [],
-    consolidateModal: { show: false, mergedContent: '' },
-
-    // Decide modal
-    decideModal: { show: false, decision: '', rationale: '', alternatives: '', evidenceIds: '' },
-
     // Graph
     graphLoaded: false,
     graphTab: 'memory',
@@ -86,10 +49,6 @@ document.addEventListener('alpine:init', () => {
     entityGraphStatus: '',
     entityGraphLabelMode: 'full',
     _entityCy: null,
-
-    // Session
-    sessionRange: '24h',
-    sessionEntries: [],
 
     // Cluster
     clusterEnabled: null,  // null=unknown, true=enabled, false=disabled
@@ -153,42 +112,11 @@ document.addEventListener('alpine:init', () => {
     showSignOutConfirm: false,
     loginForm: { username: '', password: '' },
     loginError: '',
-    changePassForm: { username: 'root', newPassword: '', confirmPassword: '' },
-    changePassError: '',
-    changePassSuccess: false,
-
-    // Observability
-    obs: null,
-    _obsInterval: null,
-
-    // Contradictions
-    contradictions: [],
-    contradictionsLoaded: false,
-    memoriesSubTab: 'list', // 'list' | 'contradictions'
-
-    // Backup
-    backupLoading: false,
-
-    // Keyboard shortcuts help
-    showShortcutsHelp: false,
 
     // Settings
-    settingsTab: 'connect', // 'connect' | 'vault' | 'plugins' | 'keys' | 'admin'
-    embedStatus: null,       // loaded from GET /api/admin/embed/status
-    mcpInfo: null,           // loaded from GET /api/admin/mcp-info
-    connectCopied: false,    // feedback for copy button
-    connectPlatform: (() => {
-        const p = (navigator.userAgent || '').toLowerCase();
-        if (p.includes('win')) return 'windows';
-        if (p.includes('linux')) return 'linux';
-        return 'macos'; // default
-    })(),
-    apiKeys: [],
-    apiKeyForm: { vault: '', label: '', mode: 'full' },
-    apiKeyToken: null,
-    apiKeyError: '',
-    apiKeyLoading: false,
-    plugins: [],
+    settingsTab: 'vault',
+    embedStatus: null,
+    connectCopied: false,
     cogWorkerStats: null,
 
     // Plasticity (vault cognitive pipeline config)
@@ -208,15 +136,15 @@ document.addEventListener('alpine:init', () => {
     plasticitySaveOk: false,
     plasticitySaveErr: '',
 
-    // Plugin configuration wizard state
+    // Plugin configuration state (used by embed status UI)
     pluginCfg: {
-      embedProvider: 'none',  // 'none' | 'ollama' | 'openai' | 'voyage'
+      embedProvider: 'none',
       embedOllamaModel: 'nomic-embed-text',
       embedApiKey: '',
-      embedUrl: '',           // custom base URL for openai-compatible endpoints
+      embedUrl: '',
       embedShowForm: false,
       embedError: '',
-      enrichProvider: 'none', // 'none' | 'ollama' | 'openai' | 'anthropic' | 'google'
+      enrichProvider: 'none',
       enrichOllamaModel: 'llama3.2',
       enrichModel: 'claude-haiku-4-5-20251001',
       enrichApiKey: '',
@@ -224,11 +152,11 @@ document.addEventListener('alpine:init', () => {
       enrichError: '',
       ollamaModels: [],
       ollamaEmbedModels: [],
-      ollamaDetected: null,   // null=unchecked, true=running, false=not found
+      ollamaDetected: null,
       ollamaChecking: false,
-      embedRatePerSec: 0,       // from embed-status API: engrams/sec, 0 when idle
-      embedETASecs: 0,          // from embed-status API: seconds until complete, 0 when idle
-      embedHardwareGPU: null,   // null = unknown/cloud; true = GPU; false = CPU-only Ollama
+      embedRatePerSec: 0,
+      embedETASecs: 0,
+      embedHardwareGPU: null,
     },
 
     // Vault actions
@@ -243,6 +171,11 @@ document.addEventListener('alpine:init', () => {
 
     // Sidebar
     sidebarExpanded: localStorage.getItem('muninnSidebar') === 'expanded',
+    showShortcutsHelp: false,
+
+    // Graph
+    graphShowOrphans: false,
+    graphLimit: 50,
 
     // SSE
     _es: null,
@@ -263,12 +196,12 @@ document.addEventListener('alpine:init', () => {
         const parts = hash.split('/');
         const raw = parts[0];
         // Only use known views
-        const known = ['dashboard', 'memories', 'graph', 'session', 'observability', 'settings', 'logs', 'cluster'];
+        const known = ['dashboard', 'graph', 'settings', 'logs', 'cluster'];
         this.currentView = known.includes(raw) ? raw : 'dashboard';
 
         // Parse settings sub-tab if entering settings view
         if (raw === 'settings' && parts[1]) {
-          const validTabs = ['connect', 'vault', 'plugins', 'keys', 'admin'];
+          const validTabs = ['vault'];
           if (validTabs.includes(parts[1])) {
             this.settingsTab = parts[1];
           }
@@ -278,43 +211,6 @@ document.addEventListener('alpine:init', () => {
       };
       window.addEventListener('hashchange', onHash);
       onHash();
-
-      // Keyboard shortcuts
-      document.addEventListener('keydown', (e) => {
-        // Ignore when typing in an input/textarea/select
-        const tag = (e.target.tagName || '').toLowerCase();
-        const inField = tag === 'input' || tag === 'textarea' || tag === 'select' || e.target.isContentEditable;
-
-        if (e.key === 'Escape') {
-          // Close any open modal/panel
-          if (this.showNewMemoryModal)  { this.showNewMemoryModal = false; return; }
-          if (this.explainModal.show)   { this.closeExplainModal(); return; }
-          if (this.consolidateModal.show) { this.consolidateModal.show = false; return; }
-          if (this.decideModal.show)    { this.decideModal.show = false; return; }
-          if (this.selectedMemory)      { this.selectedMemory = null; return; }
-          if (this.confirmForgetId)     { this.confirmForgetId = null; return; }
-          if (this.showSignOutConfirm)  { this.showSignOutConfirm = false; return; }
-          if (this.vaultActionModal.show) { this.vaultActionModal.show = false; return; }
-          if (this.cloneModal.show)     { this.cloneModal.show = false; return; }
-          if (this.mergeModal.show)     { this.mergeModal.show = false; return; }
-          if (this.importModal.show)    { this.importModal.show = false; return; }
-          if (this.showShortcutsHelp)   { this.showShortcutsHelp = false; return; }
-        }
-
-        if (inField) return;
-
-        if (e.key === '/' && this.currentView === 'memories') {
-          e.preventDefault();
-          const input = document.getElementById('memory-search-input');
-          if (input) input.focus();
-        } else if (e.key === 'n' && this.currentView === 'memories') {
-          e.preventDefault();
-          this.showNewMemoryModal = true;
-        } else if (e.key === '?') {
-          e.preventDefault();
-          this.showShortcutsHelp = !this.showShortcutsHelp;
-        }
-      });
 
       // Fetch version from public health endpoint
       try {
@@ -377,36 +273,7 @@ document.addEventListener('alpine:init', () => {
       history.replaceState(null, '', location.pathname);
     },
 
-    async changePassword() {
-      this.changePassError = '';
-      this.changePassSuccess = false;
-      if (this.changePassForm.newPassword !== this.changePassForm.confirmPassword) {
-        this.changePassError = '两次输入的密码不一致。';
-        return;
-      }
-      try {
-        await this.apiCall('/api/admin/password', {
-          method: 'PUT',
-          body: JSON.stringify({
-            username: this.changePassForm.username,
-            new_password: this.changePassForm.newPassword,
-          }),
-        });
-        this.changePassSuccess = true;
-        this.changePassForm.newPassword = '';
-        this.changePassForm.confirmPassword = '';
-      } catch (err) {
-        this.changePassError = '更新密码失败。请检查用户名后重试。';
-      }
-    },
-
     async _onViewEnter(view) {
-      // Stop observability polling when leaving the tab
-      if (this._obsInterval) {
-        clearInterval(this._obsInterval);
-        this._obsInterval = null;
-      }
-
       // Clean up activity chart resources when leaving dashboard.
       if (view !== 'dashboard') {
         const canvas = document.getElementById('activityChart');
@@ -424,45 +291,24 @@ document.addEventListener('alpine:init', () => {
         this.loadStats();
         // Chart init happens after DOM renders
         this.$nextTick(() => this._initChart());
-      } else if (view === 'memories') {
-        this.page = 0;
-        this.loadMemories();
-        this.loadContradictions();
-      } else if (view === 'session') {
-        this.loadSession();
-      } else if (view === 'observability') {
-        this.loadObservability();
-        this._obsInterval = setInterval(() => this.loadObservability(), 5000);
       } else if (view === 'settings') {
         // Check current hash to determine which sub-tab to activate
         const hash = location.hash.replace(/^#\/?/, '');
         const parts = hash.split('/');
         if (parts[0] === 'settings' && parts[1]) {
-          const validTabs = ['connect', 'vault', 'plugins', 'keys', 'admin'];
+          const validTabs = ['vault'];
           if (validTabs.includes(parts[1])) {
             this.settingsTab = parts[1];
           }
         }
 
-        // Load data based on current sub-tab
-        if (this.settingsTab === 'connect') {
-          this.loadMCPInfo();
-        } else if (this.settingsTab === 'vault') {
+        if (this.settingsTab === 'vault') {
           this.loadEmbedStatus();
           this.loadWorkers();
           this.loadPlasticity();
-        } else if (this.settingsTab === 'plugins') {
-          this.loadPlugins();
-          this.loadEmbedStatus();
-          await this.loadSavedPluginConfig();  // must resolve before probeOllama reads model state
-          this.probeOllama();
-        } else if (this.settingsTab === 'keys') {
-          this.loadApiKeys();
-          this.loadVaults();
+          this.$nextTick(() => this.initPlasticityChart());
         }
-        // Admin tab doesn't need special loading
 
-        // Always load these for settings
         this.loadVaults();
       } else if (view === 'graph') {
         // Clear graph state on vault change so stale nodes from the previous
@@ -755,10 +601,6 @@ document.addEventListener('alpine:init', () => {
           // Vault changed — refresh current view so charts/lists use the new vault.
           this.$nextTick(() => this._onViewEnter(this.currentView));
         }
-        // Keep API key form vault in sync with available vaults
-        if (!this.apiKeyForm.vault || !this.vaults.includes(this.apiKeyForm.vault)) {
-          this.apiKeyForm.vault = this.vault;
-        }
       } catch (_) {
         this.vaults = ['default'];
       }
@@ -960,385 +802,7 @@ document.addEventListener('alpine:init', () => {
       return m + '分';
     },
 
-    // ── Memories ───────────────────────────────────────────────────────────
-    async loadMemories() {
-      this.memoriesLoading = true;
-      try {
-        const offset = this.page * 20;
-        let url = '/api/engrams?vault=' + encodeURIComponent(this.vault) +
-          '&limit=20&offset=' + offset;
-        const f = this.memoryFilters;
-        if (f.sort && f.sort !== 'created') url += '&sort=' + encodeURIComponent(f.sort);
-        if (f.tags && f.tags.trim()) url += '&tags=' + encodeURIComponent(f.tags.trim());
-        if (f.state && f.state.trim()) url += '&state=' + encodeURIComponent(f.state.trim());
-        if (f.minConf > 0) url += '&min_confidence=' + f.minConf;
-        if (f.maxConf > 0) url += '&max_confidence=' + f.maxConf;
-        const data = await this.apiCall(url);
-        this.memories = (data.engrams || []).map(e => ({ ...e, createdAt: e.created_at }));
-        this.totalMemories = data.total || 0;
-      } catch (err) {
-        this.addNotification('error', '加载失败：' + err.message);
-      } finally {
-        this.memoriesLoading = false;
-      }
-    },
-
-    async searchMemories() {
-      if (!this.searchQuery.trim()) {
-        this.page = 0;
-        this.loadMemories();
-        return;
-      }
-      this.memoriesLoading = true;
-      try {
-        // ActivateRequest uses context:[]string, max_results:int
-        const body = {
-            context: [this.searchQuery.trim()],
-            max_results: 20,
-        };
-        if (this.searchMode && this.searchMode !== 'balanced') {
-            body.mode = this.searchMode;
-        }
-        const data = await this.apiCall('/api/activate?vault=' + encodeURIComponent(this.vault), {
-          method: 'POST',
-          body: JSON.stringify(body),
-        });
-        // ActivateResponse has activations: [{id, concept, content, confidence, score}]
-        const items = data.activations || data.results || [];
-        this.memories = items.map(a => ({
-          id: a.id,
-          concept: a.concept,
-          content: a.content,
-          confidence: a.confidence || a.score || 0,
-          vault: this.vault,
-          createdAt: a.created_at || 0,
-        }));
-        this.totalMemories = this.memories.length;
-        this.page = 0;
-      } catch (err) {
-        this.addNotification('error', '搜索失败：' + err.message);
-      } finally {
-        this.memoriesLoading = false;
-      }
-    },
-
-    async loadContradictions() {
-      try {
-        const data = await this.apiCall('/api/contradictions?vault=' + encodeURIComponent(this.vault));
-        this.contradictions = data.contradictions || [];
-        this.contradictionsLoaded = true;
-      } catch (_) {
-        this.contradictions = [];
-        this.contradictionsLoaded = true;
-      }
-    },
-
-    async resolveContradiction(idA, idB, action) {
-      const vault = this.vault;
-      try {
-        if (action === 'keep_a') {
-          // A supersedes B; archive B
-          await this.apiCall('/api/link?vault=' + encodeURIComponent(vault), {
-            method: 'POST',
-            body: JSON.stringify({ source_id: idA, target_id: idB, rel_type: 4, weight: 1.0 }),
-          });
-          await this.apiCall('/api/engrams/' + encodeURIComponent(idB) + '/state?vault=' + encodeURIComponent(vault), {
-            method: 'PUT',
-            body: JSON.stringify({ state: 'archived' }),
-          });
-          await this.apiCall('/api/admin/contradictions/resolve?vault=' + encodeURIComponent(vault), {
-            method: 'POST',
-            body: JSON.stringify({ id_a: idA, id_b: idB }),
-          });
-        } else if (action === 'keep_b') {
-          // B supersedes A; archive A
-          await this.apiCall('/api/link?vault=' + encodeURIComponent(vault), {
-            method: 'POST',
-            body: JSON.stringify({ source_id: idB, target_id: idA, rel_type: 4, weight: 1.0 }),
-          });
-          await this.apiCall('/api/engrams/' + encodeURIComponent(idA) + '/state?vault=' + encodeURIComponent(vault), {
-            method: 'PUT',
-            body: JSON.stringify({ state: 'archived' }),
-          });
-          await this.apiCall('/api/admin/contradictions/resolve?vault=' + encodeURIComponent(vault), {
-            method: 'POST',
-            body: JSON.stringify({ id_a: idA, id_b: idB }),
-          });
-        } else if (action === 'dismiss') {
-          await this.apiCall('/api/admin/contradictions/resolve?vault=' + encodeURIComponent(vault), {
-            method: 'POST',
-            body: JSON.stringify({ id_a: idA, id_b: idB }),
-          });
-        } else if (action === 'merge') {
-          // Open consolidate modal pre-filled with both IDs
-          this.multiSelectMode = true;
-          this.selectedMemoryIds = [idA, idB];
-           this.consolidateModal = { show: true, mergedContent: '（在此合并存在矛盾的记忆）' };
-          return; // don't reload contradictions yet
-        }
-        this.addNotification('success', '矛盾已解决');
-      } catch (err) {
-        this.addNotification('error', '处理失败：' + err.message);
-      }
-      this.loadContradictions();
-    },
-
-    async openMemory(m) {
-      // Session entries only have id/concept/createdAt — fetch full engram if content is missing.
-      if (!m.content && m.id) {
-        try {
-          const resp = await fetch('/api/engrams/' + encodeURIComponent(m.id) + '?vault=' + encodeURIComponent(this.vault));
-          if (resp.ok) {
-            const full = await resp.json();
-            m = { ...m, ...full, createdAt: full.created_at || m.createdAt };
-          }
-        } catch (e) { /* fall through with partial data */ }
-      }
-      this.selectedMemory = m;
-      // Navigate to memories view and update URL
-      if (this.currentView !== 'memories') {
-        this.navigateTo('memories');
-      }
-    },
-
-    selectedMemoryIndex() {
-      if (!this.selectedMemory || !this.memories.length) return -1;
-      return this.memories.findIndex(m => m.id === this.selectedMemory.id);
-    },
-
-    navigateMemory(delta) {
-      const idx = this.selectedMemoryIndex();
-      if (idx === -1) return;
-      const next = idx + delta;
-      if (next < 0 || next >= this.memories.length) return;
-      this.selectedMemory = this.memories[next];
-    },
-
-    forgetMemory(id) {
-      this.confirmForgetId = id;
-    },
-
-    async doForget() {
-      const id = this.confirmForgetId;
-      this.confirmForgetId = null;
-      try {
-        await this.apiCall(
-          '/api/engrams/' + encodeURIComponent(id) + '?vault=' + encodeURIComponent(this.vault),
-          { method: 'DELETE' }
-        );
-        this.addNotification('success', '记忆已遗忘');
-        if (this.selectedMemory && this.selectedMemory.id === id) {
-          this.selectedMemory = null;
-        }
-        await this.loadMemories();
-      } catch (err) {
-        this.addNotification('error', '遗忘失败：' + err.message);
-      }
-    },
-
-    async createMemory(form) {
-      const tags = form.tagsRaw
-        ? form.tagsRaw.split(',').map(t => t.trim()).filter(Boolean)
-        : [];
-      try {
-        // POST /api/engrams → WriteRequest: { concept, content, tags, vault, confidence }
-        await this.apiCall('/api/engrams?vault=' + encodeURIComponent(this.vault), {
-          method: 'POST',
-          body: JSON.stringify({
-            concept: form.concept,
-            content: form.content,
-            tags,
-            confidence: parseFloat(form.confidence) || 0.8,
-          }),
-        });
-        this.showNewMemoryModal = false;
-        this.newMemoryForm = { concept: '', content: '', tagsRaw: '', confidence: 0.8 };
-        this.addNotification('success', '记忆已创建');
-        await this.loadMemories();
-      } catch (err) {
-        this.addNotification('error', '创建失败：' + err.message);
-      }
-    },
-
-    // ── Edit / Evolve ─────────────────────────────────────────────────────
-    startEditMemory() {
-      this.editingMemory = true;
-      this.editMemoryForm.content = this.selectedMemory ? this.selectedMemory.content : '';
-      this.editMemoryForm.reason = '';
-    },
-
-    cancelEditMemory() {
-      this.editingMemory = false;
-      this.editMemoryForm = { content: '', reason: '' };
-    },
-
-    async saveEditMemory() {
-      if (!this.selectedMemory) return;
-      if (!this.editMemoryForm.content.trim()) {
-        this.addNotification('error', '内容不能为空');
-        return;
-      }
-      if (!this.editMemoryForm.reason.trim()) {
-        this.addNotification('error', '必须填写原因');
-        return;
-      }
-      this.editMemorySaving = true;
-      try {
-        const resp = await this.apiCall(
-          '/api/engrams/' + encodeURIComponent(this.selectedMemory.id) + '/evolve?vault=' + encodeURIComponent(this.vault),
-          {
-            method: 'POST',
-            body: JSON.stringify({
-              new_content: this.editMemoryForm.content,
-              reason: this.editMemoryForm.reason,
-            }),
-          }
-        );
-        this.selectedMemory = { ...this.selectedMemory, content: this.editMemoryForm.content };
-        this.editingMemory = false;
-        this.editMemoryForm = { content: '', reason: '' };
-        this.addNotification('success', '记忆已更新');
-        // Refresh the list so the new content shows there too
-        await this.loadMemories();
-      } catch (err) {
-        this.addNotification('error', '演化失败：' + err.message);
-      } finally {
-        this.editMemorySaving = false;
-      }
-    },
-
-    // ── Tag editing ────────────────────────────────────────────────────────
-    startEditTags() {
-      if (!this.selectedMemory) return;
-      this.editTagsValue = (this.selectedMemory.tags || []).join(', ');
-      this.editingTags = true;
-    },
-
-    cancelEditTags() {
-      this.editingTags = false;
-      this.editTagsValue = '';
-    },
-
-    async saveTags() {
-      if (!this.selectedMemory) return;
-      const tags = this.editTagsValue
-        .split(',')
-        .map(t => t.trim())
-        .filter(Boolean);
-      this.editTagsSaving = true;
-      try {
-        const resp = await this.apiCall(
-          '/api/engrams/' + encodeURIComponent(this.selectedMemory.id) + '/tags?vault=' + encodeURIComponent(this.vault),
-          {
-            method: 'PUT',
-            body: JSON.stringify({ tags }),
-          }
-        );
-        this.selectedMemory = { ...this.selectedMemory, tags: resp.tags };
-        // Refresh list so tag chips update there too.
-        const idx = this.memories.findIndex(m => m.id === this.selectedMemory.id);
-        if (idx !== -1) {
-          this.memories[idx] = { ...this.memories[idx], tags: resp.tags };
-        }
-        this.editingTags = false;
-        this.editTagsValue = '';
-        this.addNotification('success', '标签已更新');
-      } catch (err) {
-        this.addNotification('error', '标签更新失败：' + err.message);
-      } finally {
-        this.editTagsSaving = false;
-      }
-    },
-
-    // ── Link creation ──────────────────────────────────────────────────────
-    openLinkModal(sourceId) {
-      this.linkModal = { show: true, sourceId: sourceId, targetId: '', relType: 5, weight: 0.8 };
-    },
-
-    closeLinkModal() {
-      this.linkModal = { show: false, sourceId: '', targetId: '', relType: 5, weight: 0.8 };
-    },
-
-    async createLink() {
-      if (!this.linkModal.targetId.trim()) {
-        this.addNotification('error', '必须填写目标 ID');
-        return;
-      }
-      try {
-        await this.apiCall('/api/link?vault=' + encodeURIComponent(this.vault), {
-          method: 'POST',
-          body: JSON.stringify({
-            source_id: this.linkModal.sourceId,
-            target_id: this.linkModal.targetId.trim(),
-            rel_type: parseInt(this.linkModal.relType, 10),
-            weight: parseFloat(this.linkModal.weight),
-          }),
-        });
-        this.closeLinkModal();
-        this.addNotification('success', '关联已创建');
-      } catch (err) {
-        this.addNotification('error', '关联失败：' + err.message);
-      }
-    },
-
-    // ── Create vault ───────────────────────────────────────────────────────
-    createVault() {
-      this.newVaultModal = { show: true, name: '', error: '', loading: false, collision: null };
-    },
-
-    async submitNewVault(force) {
-      const name = this.newVaultModal.name.trim();
-      if (!name) return;
-      const valid = /^[a-z0-9_-]{1,64}$/.test(name);
-      if (!valid) {
-        this.newVaultModal.error = '仅允许小写字母、数字、连字符、下划线（1-64 个字符）';
-        return;
-      }
-      this.newVaultModal.loading = true;
-      this.newVaultModal.error = '';
-      this.newVaultModal.collision = null;
-      try {
-        const url = force ? '/api/admin/vaults/config?force=true' : '/api/admin/vaults/config';
-        const r = await fetch(url, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name }),
-        });
-        if (r.status === 409) {
-          const data = await r.json().catch(() => null);
-          if (data && data.code === 'VAULT_NAME_COLLISION') {
-            this.newVaultModal.collision = data;
-            this.newVaultModal.loading = false;
-            return;
-          }
-          const text = await r.text().catch(() => r.statusText);
-          throw new Error(r.status + ': ' + text);
-        }
-        if (!r.ok) {
-          const text = await r.text().catch(() => r.statusText);
-          throw new Error(r.status + ': ' + text);
-        }
-        await fetch('/api/hello', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ version: '1', vault: name }),
-        }).catch(() => {});
-        this.vault = name;
-        localStorage.setItem('muninnVault', name);
-        await this.loadVaults();
-        this.newVaultModal.loading = false;
-        this.newVaultModal.show = false;
-        this.addNotification('success', '仓库“' + name + '”已创建');
-      } catch (err) {
-        this.newVaultModal.error = err.message;
-        this.newVaultModal.loading = false;
-      }
-    },
-
     // ── Graph ──────────────────────────────────────────────────────────────
-    graphShowOrphans: false,
-    graphLimit: 50,
-
     async loadGraph() {
       this.addNotification('info', '正在加载图谱…');
       try {
@@ -1618,7 +1082,7 @@ document.addEventListener('alpine:init', () => {
         const elements = nodes.concat(edges);
 
         this._entityCy = cytoscape({
-          container: document.getElementById('entity-cy'),
+          container: document.getElementById('cy-entity'),
           elements: elements,
           style: [
             {
@@ -1710,20 +1174,20 @@ document.addEventListener('alpine:init', () => {
 
     getEntityTypeColor(entityType) {
       const colors = {
-        'person': '#3b82f6',           // blue
-        'organization': '#8b5cf6',     // purple
-        'technology': '#10b981',       // emerald
-        'project': '#f59e0b',          // amber
-        'location': '#ec4899',         // pink
-        'concept': '#6366f1',          // indigo
-        'tool': '#14b8a6',             // teal
-        'database': '#8b5cf6',         // purple
-        'service': '#06b6d4',          // cyan
-        'framework': '#10b981',        // emerald
-        'language': '#f59e0b',         // amber
-        'product': '#ef4444',          // red
-        'event': '#84cc16',            // lime
-        'other': '#64748b'             // slate
+        'person': '#3b82f6',
+        'organization': '#8b5cf6',
+        'technology': '#10b981',
+        'project': '#f59e0b',
+        'location': '#ec4899',
+        'concept': '#6366f1',
+        'tool': '#14b8a6',
+        'database': '#8b5cf6',
+        'service': '#06b6d4',
+        'framework': '#10b981',
+        'language': '#f59e0b',
+        'product': '#ef4444',
+        'event': '#84cc16',
+        'other': '#64748b'
       };
       return colors[entityType] || colors['other'];
     },
@@ -1762,52 +1226,7 @@ document.addEventListener('alpine:init', () => {
       });
     },
 
-    // ── Session ────────────────────────────────────────────────────────────
-    async loadSession() {
-      const ranges = { '24h': 24, '7d': 168, '30d': 720 };
-      const hours = ranges[this.sessionRange] || 24;
-      const since = new Date(Date.now() - hours * 3600 * 1000).toISOString();
-      try {
-        const data = await this.apiCall(
-          '/api/session?vault=' + encodeURIComponent(this.vault) +
-          '&since=' + encodeURIComponent(since) + '&limit=100'
-        );
-        // GetSessionResponse has { entries: [] } or raw array
-        const raw = data.entries || (Array.isArray(data) ? data : []);
-        this.sessionEntries = raw.map(e => ({ ...e, createdAt: e.created_at }));
-      } catch (err) {
-        this.addNotification('error', '会话：' + err.message);
-      }
-    },
-
-    // ── Backup ─────────────────────────────────────────────────────────────
-    async triggerBackup() {
-      this.backupLoading = true;
-      try {
-        const ts = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
-        const outputDir = './backups/muninn-backup-' + ts;
-        const data = await this.apiCall('/api/admin/backup', {
-          method: 'POST',
-          body: JSON.stringify({ output_dir: outputDir }),
-        });
-        this.addNotification('success', '备份完成：' + data.output_dir + '（' + data.elapsed + '）');
-      } catch (err) {
-        this.addNotification('error', '备份失败：' + err.message);
-      } finally {
-        this.backupLoading = false;
-      }
-    },
-
-    // ── Observability ─────────────────────────────────────────────────────
-    async loadObservability() {
-      try {
-        this.obs = await this.apiCall('/api/admin/observability');
-      } catch (e) {
-        console.error('Failed to load observability:', e);
-      }
-    },
-
-    // ── Settings ───────────────────────────────────────────────────────────
+    // ── Settings / Vault ───────────────────────────────────────────────────
     async loadEmbedStatus() {
       try {
         const data = await this.apiCall('/api/admin/embed/status');
@@ -1831,79 +1250,6 @@ document.addEventListener('alpine:init', () => {
       }
     },
 
-    async loadMCPInfo() {
-      try {
-        this.mcpInfo = await this.apiCall('/api/admin/mcp-info');
-      } catch (_) {
-        // Fallback to defaults if endpoint not available
-        this.mcpInfo = { url: 'http://localhost:8750/mcp', token_configured: false };
-      }
-    },
-
-    async loadApiKeys() {
-        try {
-            const data = await this.apiCall('/api/admin/keys?vault=' + encodeURIComponent(this.vault));
-            this.apiKeys = Array.isArray(data?.keys) ? data.keys : [];
-        } catch (e) {
-            this.apiKeys = [];
-        }
-    },
-    async createApiKey() {
-        this.apiKeyError = '';
-        if (!this.apiKeyForm.vault || !this.apiKeyForm.label) {
-            this.apiKeyError = '仓库和标签为必填项。';
-            return;
-        }
-        this.apiKeyLoading = true;
-        try {
-            const data = await this.apiCall('/api/admin/keys', {
-                method: 'POST',
-                body: JSON.stringify(this.apiKeyForm),
-            });
-            this.apiKeyToken = data?.token || null;
-            this.apiKeyForm = { vault: this.vault, label: '', mode: 'full' };
-            await this.loadApiKeys();
-        } catch (e) {
-            this.apiKeyError = e.message || '创建密钥失败。';
-        } finally {
-            this.apiKeyLoading = false;
-        }
-    },
-    async revokeApiKey(id) {
-        if (!confirm('要撤销此 API 密钥吗？此操作无法撤销。')) return;
-        try {
-            await this.apiCall('/api/admin/keys/' + id + '?vault=' + encodeURIComponent(this.vault), { method: 'DELETE' });
-            await this.loadApiKeys();
-        } catch (e) {
-            this.addNotification('error', '撤销密钥失败：' + (e.message || '未知错误'));
-        }
-    },
-    async loadPlugins() {
-        try {
-            const data = await this.apiCall('/api/admin/plugins');
-            this.plugins = Array.isArray(data) ? data : [];
-        } catch (e) {
-            this.plugins = [];
-        }
-    },
-    async loadSavedPluginConfig() {
-        try {
-            const data = await this.apiCall('/api/admin/plugin-config');
-            const parsed = MuninnPluginCfg.parsePluginConfigResponse(data);
-            if (!parsed) return;
-            const c = this.pluginCfg;
-            c.embedProvider  = parsed.embedProvider;
-            if (parsed.embedOllamaModel  !== null) c.embedOllamaModel  = parsed.embedOllamaModel;
-            if (parsed.embedUrl          !== null) c.embedUrl          = parsed.embedUrl;
-            if (parsed.embedApiKey       !== null) c.embedApiKey       = parsed.embedApiKey;
-            c.enrichProvider = parsed.enrichProvider;
-            if (parsed.enrichOllamaModel !== null) c.enrichOllamaModel = parsed.enrichOllamaModel;
-            if (parsed.enrichModel       !== null) c.enrichModel       = parsed.enrichModel;
-            if (parsed.enrichApiKey      !== null) c.enrichApiKey      = parsed.enrichApiKey;
-        } catch (e) {
-            console.warn('loadSavedPluginConfig failed:', e);
-        }
-    },
     async loadWorkers() {
         try {
             this.cogWorkerStats = await this.apiCall('/api/workers');
@@ -1943,6 +1289,7 @@ document.addEventListener('alpine:init', () => {
             this.plasticityForm.relevanceFloor     = cfg.relevance_floor     ?? null;
             this.plasticityForm.temporalHalflife = cfg.temporal_halflife ?? null;
             this.plasticityForm.recallMode = cfg.recall_mode || data.resolved?.recall_mode || 'balanced';
+            this.$nextTick(() => this._updatePlasticityChart());
         } catch (err) {
             console.error('loadPlasticity error:', err);
             this.plasticitySaveErr = '加载可塑性设置失败';
@@ -2090,23 +1437,6 @@ document.addEventListener('alpine:init', () => {
       }
     },
 
-    // ── API key expiry display ──────────────────────────────────────────────
-    formatKeyExpiry(expiresAt) {
-      if (!expiresAt) return '永不过期';
-      const exp = new Date(expiresAt);
-      const now = new Date();
-      const diffMs = exp - now;
-      if (diffMs <= 0) return '已过期';
-      const diffDays = Math.round(diffMs / 86400000);
-      if (diffDays === 0) return '今天';
-      if (diffDays === 1) return '明天';
-      if (diffDays < 30) return diffDays + ' 天后';
-      if (diffDays < 365) return Math.round(diffDays / 30) + ' 个月后';
-      return exp.toLocaleDateString();
-    },
-
-    // ── Confidence helpers ─────────────────────────────────────────────────
-    // Thresholds are defined once here and used in templates.
     confLabel(v) {
       const CONFIDENCE_HIGH = 0.7;
       const CONFIDENCE_MED  = 0.4;
@@ -2123,7 +1453,6 @@ document.addEventListener('alpine:init', () => {
       return 'badge-dormant';
     },
 
-    // Returns the progress percentage (0-100) for the embed progress bar.
     embedProgressPct() {
       if (!this.embedStatus) return 0;
       const total = this.embedStatus.total_count;
@@ -2132,7 +1461,6 @@ document.addEventListener('alpine:init', () => {
       return Math.min(100, Math.round((embedded / total) * 100));
     },
 
-    // Returns a formatted rate string like "0.7s/embedding", or '' when idle.
     embedSecsPerItem() {
       if (this.pluginCfg.embedRatePerSec > 0) {
         return (1 / this.pluginCfg.embedRatePerSec).toFixed(1) + '秒/条';
@@ -2140,7 +1468,6 @@ document.addEventListener('alpine:init', () => {
       return '';
     },
 
-    // Returns a human-readable ETA string like "~3 min", or '' when idle.
     embedETADisplay() {
       const secs = this.pluginCfg.embedETASecs;
       if (secs <= 0) return '';
@@ -2152,9 +1479,332 @@ document.addEventListener('alpine:init', () => {
       return rem > 0 ? '约 ' + hrs + ' 小时 ' + rem + ' 分钟' : '约 ' + hrs + ' 小时';
     },
 
-    // True only when Ollama is the embed provider and hardware_accelerated is explicitly false.
     get embedIsCPU() {
       return this.pluginCfg.embedHardwareGPU === false;
+    },
+
+    async reembedVault() {
+      if (!confirm(`要重新嵌入仓库“${this.vault}”吗？\n\n这会清除所有嵌入，并让 RetroactiveProcessor 使用当前模型重新嵌入每条记忆。\n\n迁移期间仓库仍可查询（召回质量会下降）。`)) return;
+      try {
+        const data = await this.apiCall('/api/admin/vaults/' + encodeURIComponent(this.vault) + '/reembed', { method: 'POST' });
+        this.addNotification('success', `重新嵌入已开始（任务 ${data.job_id}）。可在嵌入状态中查看进度。`);
+        // Refresh embed status to show progress.
+        this.loadEmbedStatus();
+      } catch (e) {
+        this.addNotification('error', '重新嵌入失败：' + (e?.message || '未知错误'));
+      }
+    },
+
+    openVaultAction(action) {
+      this.vaultActionModal = {
+        show: true,
+        action,
+        vault: this.vault,
+        confirmText: '',
+        memCount: this.stats?.engramCount || 0,
+      };
+    },
+
+    async confirmVaultAction() {
+      const { action, vault } = this.vaultActionModal;
+      this.vaultActionModal.show = false;
+      const method = action === 'delete' ? 'DELETE' : 'POST';
+      const path = action === 'delete'
+        ? '/api/admin/vaults/' + encodeURIComponent(vault)
+        : '/api/admin/vaults/' + encodeURIComponent(vault) + '/clear';
+      const headers = { 'Content-Type': 'application/json' };
+      if (vault === 'default') {
+        headers['X-Allow-Default'] = 'true';
+      }
+      try {
+        const r = await fetch(path, { method, headers });
+        if (r.ok) {
+          if (action === 'delete') {
+            await this.loadVaults();
+            if (this.vault === vault) {
+              this.vault = this.vaults?.[0] || '';
+              localStorage.setItem('muninnVault', this.vault);
+            }
+            this.addNotification('success', '仓库已删除');
+          } else {
+            this.addNotification('success', '记忆已清除');
+          }
+        } else if (r.status === 401) {
+          this.addNotification('error', '未认证');
+        } else if (r.status === 409) {
+          this.addNotification('error', '受保护仓库——无法修改 default');
+        } else {
+          this.addNotification('error', '错误：' + r.status);
+        }
+      } catch (e) {
+        this.addNotification('error', '网络错误');
+      }
+    },
+
+    openVaultRename() {
+      const newName = prompt('请输入仓库“' + this.vault + '”的新名称：');
+      if (!newName || newName === this.vault) return;
+      this.renameVault(newName);
+    },
+
+    async renameVault(newName, force) {
+      try {
+        const url = '/api/admin/vaults/' + encodeURIComponent(this.vault) + '/rename' + (force ? '?force=true' : '');
+        const r = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ new_name: newName }),
+        });
+        if (r.status === 409) {
+          const data = await r.json().catch(() => null);
+          if (data && data.code === 'VAULT_NAME_COLLISION') {
+            const proceed = confirm(
+              '名为“' + data.conflict + '”的仓库已存在且名称相似。\n\n仍要创建“' + newName + '”吗？'
+            );
+            if (proceed) {
+              this.renameVault(newName, true);
+            }
+            return;
+          }
+        }
+        if (!r.ok) {
+          const err = await r.json().catch(() => null);
+          const msg = err && err.error && err.error.message ? err.error.message : 'HTTP ' + r.status;
+          this.addNotification('error', '重命名失败：' + msg);
+          return;
+        }
+        this.vault = newName;
+        this.loadVaults();
+        this.addNotification('success', '仓库已重命名为“' + newName + '”');
+      } catch (e) {
+        this.addNotification('error', '重命名失败：' + e.message);
+      }
+    },
+
+    openVaultClone() {
+      if (this.activeJob && this.activeJob.status === 'running') {
+        this.addNotification('warning', '克隆或合并任务仍在进行中。');
+        return;
+      }
+      this.cloneModal = { show: true, source: this.vault, newName: '' };
+      this.clearActiveJob();
+    },
+
+    openVaultMerge() {
+      if (this.activeJob && this.activeJob.status === 'running') {
+        this.addNotification('warning', '克隆或合并任务仍在进行中。');
+        return;
+      }
+      this.mergeModal = { show: true, source: this.vault, target: '', deleteSource: false };
+      this.clearActiveJob();
+    },
+
+    async startClone() {
+      if (!this.cloneModal.newName) return;
+      const r = await fetch(
+        '/api/admin/vaults/' + encodeURIComponent(this.cloneModal.source) + '/clone',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ new_name: this.cloneModal.newName }),
+        }
+      );
+      if (!r.ok) {
+        this.addNotification('error', '克隆失败：' + r.status);
+        return;
+      }
+      const { job_id } = await r.json();
+      this.startJobPolling(job_id, this.cloneModal.source, () => {
+        this.loadVaults();
+        this.cloneModal.show = false;
+        this.addNotification('success', '仓库克隆成功');
+      });
+    },
+
+    async startMerge() {
+      if (!this.mergeModal.target) return;
+      const r = await fetch(
+        '/api/admin/vaults/' + encodeURIComponent(this.mergeModal.source) + '/merge-into',
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ target: this.mergeModal.target, delete_source: this.mergeModal.deleteSource }),
+        }
+      );
+      if (!r.ok) {
+        this.addNotification('error', '合并失败：' + r.status);
+        return;
+      }
+      const { job_id } = await r.json();
+      this.startJobPolling(job_id, this.mergeModal.source, () => {
+        this.loadVaults();
+        this.mergeModal.show = false;
+        this.addNotification('success', '仓库合并成功');
+      });
+    },
+
+    startJobPolling(jobId, vaultName, onComplete) {
+      this.clearActiveJob();
+      this.activeJob = { status: 'running', pct: 0, phase: 'copying', copy_current: 0, copy_total: 0 };
+      this.jobPollInterval = setInterval(async () => {
+        try {
+          const s = await fetch(
+            '/api/admin/vaults/' + encodeURIComponent(vaultName) + '/job-status?job_id=' + jobId
+          );
+          if (!s.ok) return;
+          const snap = await s.json();
+          this.activeJob = snap;
+          if (snap.status !== 'running') {
+            this.clearActiveJob();
+            if (snap.status === 'done') {
+              onComplete();
+            } else {
+               this.addNotification('error', '任务失败：' + (snap.error || '未知错误'));
+            }
+          }
+        } catch (e) {
+          // network hiccup — keep polling
+        }
+      }, 1000);
+    },
+
+    clearActiveJob() {
+      if (this.jobPollInterval) {
+        clearInterval(this.jobPollInterval);
+        this.jobPollInterval = null;
+      }
+      this.activeJob = null;
+    },
+
+    async exportVault() {
+      this.vaultExporting = true;
+      try {
+        const res = await fetch('/api/admin/vaults/' + encodeURIComponent(this.vault) + '/export');
+        if (!res.ok) {
+          const text = await res.text().catch(() => res.statusText);
+          throw new Error(res.status + ': ' + text);
+        }
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = this.vault + '.muninn';
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+        this.addNotification('success', '仓库已导出：' + this.vault + '.muninn');
+      } catch (e) {
+        this.addNotification('error', '导出失败：' + (e?.message || '未知错误'));
+      } finally {
+        this.vaultExporting = false;
+      }
+    },
+
+    openImportModal() {
+      this.importModal = { show: true, vaultName: '', file: null, resetMeta: false };
+    },
+
+    async startImport() {
+      if (!this.importModal.vaultName || !this.importModal.file) return;
+      const params = new URLSearchParams({
+        vault: this.importModal.vaultName,
+        reset_metadata: this.importModal.resetMeta ? 'true' : 'false',
+      });
+      try {
+        const res = await fetch('/api/admin/vaults/import?' + params.toString(), {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/octet-stream' },
+          body: this.importModal.file,
+        });
+        if (!res.ok) {
+          const text = await res.text().catch(() => res.statusText);
+          throw new Error(res.status + ': ' + text);
+        }
+        const data = await res.json();
+        const jobId = data.job_id;
+        this.startJobPolling(jobId, this.importModal.vaultName, () => {
+          this.loadVaults();
+          this.importModal.show = false;
+          this.addNotification('success', '仓库导入成功');
+        });
+      } catch (e) {
+        this.addNotification('error', '导入失败：' + (e?.message || '未知错误'));
+      }
+    },
+
+    async reindexFTS() {
+      if (!confirm('要为仓库“' + this.vault + '”重建全文搜索索引吗？\n\n这会为所有记忆重建 FTS 索引。重建期间仓库仍可查询。')) return;
+      this.reindexing = true;
+      try {
+        const res = await fetch(
+          '/api/admin/vaults/' + encodeURIComponent(this.vault) + '/reindex-fts',
+          { method: 'POST' }
+        );
+        if (!res.ok) {
+          const text = await res.text().catch(() => res.statusText);
+          throw new Error(res.status + ': ' + text);
+        }
+        const data = await res.json();
+        this.addNotification('success', 'FTS 重建索引完成——已重建 ' + (data.engrams_reindexed || 0) + ' 条记忆');
+      } catch (e) {
+        this.addNotification('error', '重建索引失败：' + (e?.message || '未知错误'));
+      } finally {
+        this.reindexing = false;
+      }
+    },
+
+    createVault() {
+      this.newVaultModal = { show: true, name: '', error: '', loading: false, collision: null };
+    },
+
+    async submitNewVault(force) {
+      const name = this.newVaultModal.name.trim();
+      if (!name) return;
+      const valid = /^[a-z0-9_-]{1,64}$/.test(name);
+      if (!valid) {
+        this.newVaultModal.error = '仅允许小写字母、数字、连字符、下划线（1-64 个字符）';
+        return;
+      }
+      this.newVaultModal.loading = true;
+      this.newVaultModal.error = '';
+      this.newVaultModal.collision = null;
+      try {
+        const url = force ? '/api/admin/vaults/config?force=true' : '/api/admin/vaults/config';
+        const r = await fetch(url, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name }),
+        });
+        if (r.status === 409) {
+          const data = await r.json().catch(() => null);
+          if (data && data.code === 'VAULT_NAME_COLLISION') {
+            this.newVaultModal.collision = data;
+            this.newVaultModal.loading = false;
+            return;
+          }
+          const text = await r.text().catch(() => r.statusText);
+          throw new Error(r.status + ': ' + text);
+        }
+        if (!r.ok) {
+          const text = await r.text().catch(() => r.statusText);
+          throw new Error(r.status + ': ' + text);
+        }
+        await fetch('/api/hello', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ version: '1', vault: name }),
+        }).catch(() => {});
+        this.vault = name;
+        localStorage.setItem('muninnVault', name);
+        await this.loadVaults();
+        this.newVaultModal.loading = false;
+        this.newVaultModal.show = false;
+        this.addNotification('success', '仓库“' + name + '”已创建');
+      } catch (err) {
+        this.newVaultModal.error = err.message;
+        this.newVaultModal.loading = false;
+      }
     },
 
     // ── Cluster ────────────────────────────────────────────────────────────
@@ -2298,7 +1948,7 @@ document.addEventListener('alpine:init', () => {
         }
         this.clusterEnableProgress = ['正在初始化 TLS...', '正在生成加入令牌...', '正在启动心跳...'];
         await this._loadClusterInfo();
-        this.clusterEnableProgress = [...this.clusterEnableProgress, '集群已激活 \u2713'];
+        this.clusterEnableProgress = [...this.clusterEnableProgress, '集群已激活 ✓'];
       } catch (e) {
         console.error(e)
         this.clusterEnableError = e.message;
@@ -2341,7 +1991,7 @@ document.addEventListener('alpine:init', () => {
           const err = await resp.json().catch(() => ({ error: {message:'添加节点失败' }}));
           throw new Error(err.error.message || '添加节点失败');
         }
-        this.addNodeProgress = ['正在注册对等节点...', '等待加入握手...', '节点已添加 \u2713'];
+        this.addNodeProgress = ['正在注册对等节点...', '等待加入握手...', '节点已添加 ✓'];
         await new Promise(r => setTimeout(r, 1200));
         this.showAddNodeModal = false;
         this.addNodeForm = { addr: '', token: '' };
@@ -2392,7 +2042,7 @@ document.addEventListener('alpine:init', () => {
           const err = await resp.json().message(() => ({ error: {message:'故障切换失败' }}));
           throw new Error(err.error.message || '故障切换失败');
         }
-        this.failoverProgress = ['正在发送切换请求...', '已选出新 Cortex...', '切换已确认...', '完成 \u2713'];
+        this.failoverProgress = ['正在发送切换请求...', '已选出新 Cortex...', '切换已确认...', '完成 ✓'];
         await new Promise(r => setTimeout(r, 1500));
         this.showFailoverModal = false;
         this.failoverProgress = [];
@@ -2520,9 +2170,9 @@ document.addEventListener('alpine:init', () => {
       if (!this.clusterHealth) return '集群状态未知';
       const s = this.clusterHealth.status;
       const n = this.clusterNodes.length;
-      if (s === 'ok') return '集群健康 \u2014 ' + n + ' 个节点';
-      if (s === 'degraded') return '集群降级 \u2014 请检查复制延迟';
-      return '集群不可用 \u2014 无法形成法定人数';
+      if (s === 'ok') return '集群健康 — ' + n + ' 个节点';
+      if (s === 'degraded') return '集群降级 — 请检查复制延迟';
+      return '集群不可用 — 无法形成法定人数';
     },
 
     ccsScore() {
@@ -2553,478 +2203,6 @@ document.addEventListener('alpine:init', () => {
 
     removeNotification(id) {
       this.notifications = this.notifications.filter(n => n.id !== id);
-    },
-
-    // ── Plugin config save ───────────────────────────────────────────────────
-    async savePluginConfig(section) {
-      const c = this.pluginCfg;
-      const errorKey = section + 'Error';
-      c[errorKey] = '';
-
-      // Build payload from current pluginCfg state.
-      const payload = {
-        embed_provider: c.embedProvider === 'none' ? '' : c.embedProvider,
-        embed_url: c.embedProvider === 'ollama' ? `ollama://localhost:11434/${c.embedOllamaModel}` : (c.embedProvider === 'openai' && c.embedUrl ? c.embedUrl : ''),
-        embed_api_key: (c.embedProvider === 'openai' || c.embedProvider === 'voyage') ? c.embedApiKey : '',
-        enrich_provider: c.enrichProvider === 'none' ? '' : c.enrichProvider,
-        enrich_url: c.enrichProvider === 'ollama'
-          ? `ollama://localhost:11434/${c.enrichOllamaModel}`
-          : c.enrichProvider === 'openai' ? `openai://${c.enrichModel}`
-          : c.enrichProvider === 'anthropic' ? `anthropic://${c.enrichModel}`
-          : c.enrichProvider === 'google' ? `google://${c.enrichModel}`
-          : '',
-        enrich_api_key: (c.enrichProvider === 'openai' || c.enrichProvider === 'anthropic' || c.enrichProvider === 'google') ? c.enrichApiKey : '',
-      };
-
-      try {
-        await this.apiCall('/api/admin/plugin-config', { method: 'PUT', body: JSON.stringify(payload) });
-        this.addNotification('success', section === 'embed'
-          ? '嵌入提供商已保存——重启 MuninnDB 后生效。'
-          : '增强提供商已保存——重启 MuninnDB 后生效。');
-        if (section === 'embed') c.embedShowForm = false;
-        if (section === 'enrich') c.enrichShowForm = false;
-      } catch (e) {
-        c[errorKey] = e?.message || '保存失败';
-        setTimeout(() => { c[errorKey] = ''; }, 5000);
-      }
-    },
-
-    async reembedVault() {
-      if (!confirm(`要重新嵌入仓库“${this.vault}”吗？\n\n这会清除所有嵌入，并让 RetroactiveProcessor 使用当前模型重新嵌入每条记忆。\n\n迁移期间仓库仍可查询（召回质量会下降）。`)) return;
-      try {
-        const data = await this.apiCall('/api/admin/vaults/' + encodeURIComponent(this.vault) + '/reembed', { method: 'POST' });
-        this.addNotification('success', `重新嵌入已开始（任务 ${data.job_id}）。可在嵌入状态中查看进度。`);
-        // Refresh embed status to show progress.
-        this.loadEmbedStatus();
-      } catch (e) {
-        this.addNotification('error', '重新嵌入失败：' + (e?.message || '未知错误'));
-      }
-    },
-
-    // ── Vault actions ──────────────────────────────────────────────────────
-    openVaultAction(action) {
-      this.vaultActionModal = {
-        show: true,
-        action,
-        vault: this.vault,
-        confirmText: '',
-        memCount: this.stats?.engramCount || 0,
-      };
-    },
-
-    async confirmVaultAction() {
-      const { action, vault } = this.vaultActionModal;
-      this.vaultActionModal.show = false;
-      const method = action === 'delete' ? 'DELETE' : 'POST';
-      const path = action === 'delete'
-        ? '/api/admin/vaults/' + encodeURIComponent(vault)
-        : '/api/admin/vaults/' + encodeURIComponent(vault) + '/clear';
-      const headers = { 'Content-Type': 'application/json' };
-      if (vault === 'default') {
-        headers['X-Allow-Default'] = 'true';
-      }
-      try {
-        const r = await fetch(path, { method, headers });
-        if (r.ok) {
-          if (action === 'delete') {
-            await this.loadVaults();
-            if (this.vault === vault) {
-              this.vault = this.vaults?.[0] || '';
-              localStorage.setItem('muninnVault', this.vault);
-            }
-            this.addNotification('success', '仓库已删除');
-          } else {
-            this.addNotification('success', '记忆已清除');
-          }
-        } else if (r.status === 401) {
-          this.addNotification('error', '未认证');
-        } else if (r.status === 409) {
-          this.addNotification('error', '受保护仓库——无法修改 default');
-        } else {
-          this.addNotification('error', '错误：' + r.status);
-        }
-      } catch (e) {
-        this.addNotification('error', '网络错误');
-      }
-    },
-
-    // ── Rename ─────────────────────────────────────────────────────────────
-    openVaultRename() {
-      const newName = prompt('请输入仓库“' + this.vault + '”的新名称：');
-      if (!newName || newName === this.vault) return;
-      this.renameVault(newName);
-    },
-
-    async renameVault(newName, force) {
-      try {
-        const url = '/api/admin/vaults/' + encodeURIComponent(this.vault) + '/rename' + (force ? '?force=true' : '');
-        const r = await fetch(url, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ new_name: newName }),
-        });
-        if (r.status === 409) {
-          const data = await r.json().catch(() => null);
-          if (data && data.code === 'VAULT_NAME_COLLISION') {
-            const proceed = confirm(
-              '名为“' + data.conflict + '”的仓库已存在且名称相似。\n\n仍要创建“' + newName + '”吗？'
-            );
-            if (proceed) {
-              this.renameVault(newName, true);
-            }
-            return;
-          }
-        }
-        if (!r.ok) {
-          const err = await r.json().catch(() => null);
-          const msg = err && err.error && err.error.message ? err.error.message : 'HTTP ' + r.status;
-          this.addNotification('error', '重命名失败：' + msg);
-          return;
-        }
-        this.vault = newName;
-        this.loadVaults();
-        this.addNotification('success', '仓库已重命名为“' + newName + '”');
-      } catch (e) {
-        this.addNotification('error', '重命名失败：' + e.message);
-      }
-    },
-
-    // ── Clone / Merge ───────────────────────────────────────────────────────
-    openVaultClone() {
-      if (this.activeJob && this.activeJob.status === 'running') {
-        this.addNotification('warning', '克隆或合并任务仍在进行中。');
-        return;
-      }
-      this.cloneModal = { show: true, source: this.vault, newName: '' };
-      this.clearActiveJob();
-    },
-
-    openVaultMerge() {
-      if (this.activeJob && this.activeJob.status === 'running') {
-        this.addNotification('warning', '克隆或合并任务仍在进行中。');
-        return;
-      }
-      this.mergeModal = { show: true, source: this.vault, target: '', deleteSource: false };
-      this.clearActiveJob();
-    },
-
-    async startClone() {
-      if (!this.cloneModal.newName) return;
-      const r = await fetch(
-        '/api/admin/vaults/' + encodeURIComponent(this.cloneModal.source) + '/clone',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ new_name: this.cloneModal.newName }),
-        }
-      );
-      if (!r.ok) {
-        this.addNotification('error', '克隆失败：' + r.status);
-        return;
-      }
-      const { job_id } = await r.json();
-      this.startJobPolling(job_id, this.cloneModal.source, () => {
-        this.loadVaults();
-        this.cloneModal.show = false;
-        this.addNotification('success', '仓库克隆成功');
-      });
-    },
-
-    async startMerge() {
-      if (!this.mergeModal.target) return;
-      const r = await fetch(
-        '/api/admin/vaults/' + encodeURIComponent(this.mergeModal.source) + '/merge-into',
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ target: this.mergeModal.target, delete_source: this.mergeModal.deleteSource }),
-        }
-      );
-      if (!r.ok) {
-        this.addNotification('error', '合并失败：' + r.status);
-        return;
-      }
-      const { job_id } = await r.json();
-      this.startJobPolling(job_id, this.mergeModal.source, () => {
-        this.loadVaults();
-        this.mergeModal.show = false;
-        this.addNotification('success', '仓库合并成功');
-      });
-    },
-
-    startJobPolling(jobId, vaultName, onComplete) {
-      this.clearActiveJob();
-      this.activeJob = { status: 'running', pct: 0, phase: 'copying', copy_current: 0, copy_total: 0 };
-      this.jobPollInterval = setInterval(async () => {
-        try {
-          const s = await fetch(
-            '/api/admin/vaults/' + encodeURIComponent(vaultName) + '/job-status?job_id=' + jobId
-          );
-          if (!s.ok) return;
-          const snap = await s.json();
-          this.activeJob = snap;
-          if (snap.status !== 'running') {
-            this.clearActiveJob();
-            if (snap.status === 'done') {
-              onComplete();
-            } else {
-               this.addNotification('error', '任务失败：' + (snap.error || '未知错误'));
-            }
-          }
-        } catch (e) {
-          // network hiccup — keep polling
-        }
-      }, 1000);
-    },
-
-    clearActiveJob() {
-      if (this.jobPollInterval) {
-        clearInterval(this.jobPollInterval);
-        this.jobPollInterval = null;
-      }
-      this.activeJob = null;
-    },
-
-    // ── Vault export ───────────────────────────────────────────────────────
-    async exportVault() {
-      this.vaultExporting = true;
-      try {
-        const res = await fetch('/api/admin/vaults/' + encodeURIComponent(this.vault) + '/export');
-        if (!res.ok) {
-          const text = await res.text().catch(() => res.statusText);
-          throw new Error(res.status + ': ' + text);
-        }
-        const blob = await res.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = this.vault + '.muninn';
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        URL.revokeObjectURL(url);
-        this.addNotification('success', '仓库已导出：' + this.vault + '.muninn');
-      } catch (e) {
-        this.addNotification('error', '导出失败：' + (e?.message || '未知错误'));
-      } finally {
-        this.vaultExporting = false;
-      }
-    },
-
-    // ── Vault import ───────────────────────────────────────────────────────
-    openImportModal() {
-      this.importModal = { show: true, vaultName: '', file: null, resetMeta: false };
-    },
-
-    async startImport() {
-      if (!this.importModal.vaultName || !this.importModal.file) return;
-      const params = new URLSearchParams({
-        vault: this.importModal.vaultName,
-        reset_metadata: this.importModal.resetMeta ? 'true' : 'false',
-      });
-      try {
-        const res = await fetch('/api/admin/vaults/import?' + params.toString(), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/octet-stream' },
-          body: this.importModal.file,
-        });
-        if (!res.ok) {
-          const text = await res.text().catch(() => res.statusText);
-          throw new Error(res.status + ': ' + text);
-        }
-        const data = await res.json();
-        const jobId = data.job_id;
-        this.startJobPolling(jobId, this.importModal.vaultName, () => {
-          this.loadVaults();
-          this.importModal.show = false;
-          this.addNotification('success', '仓库导入成功');
-        });
-      } catch (e) {
-        this.addNotification('error', '导入失败：' + (e?.message || '未知错误'));
-      }
-    },
-
-    // ── FTS reindex ────────────────────────────────────────────────────────
-    async reindexFTS() {
-      if (!confirm('要为仓库“' + this.vault + '”重建全文搜索索引吗？\n\n这会为所有记忆重建 FTS 索引。重建期间仓库仍可查询。')) return;
-      this.reindexing = true;
-      try {
-        const res = await fetch(
-          '/api/admin/vaults/' + encodeURIComponent(this.vault) + '/reindex-fts',
-          { method: 'POST' }
-        );
-        if (!res.ok) {
-          const text = await res.text().catch(() => res.statusText);
-          throw new Error(res.status + ': ' + text);
-        }
-        const data = await res.json();
-        this.addNotification('success', 'FTS 重建索引完成——已重建 ' + (data.engrams_reindexed || 0) + ' 条记忆');
-      } catch (e) {
-        this.addNotification('error', '重建索引失败：' + (e?.message || '未知错误'));
-      } finally {
-        this.reindexing = false;
-      }
-    },
-
-    // ── Lifecycle state ────────────────────────────────────────────────────
-    async updateLifecycleState(id, state) {
-      try {
-        const res = await this.apiCall(
-          '/api/engrams/' + encodeURIComponent(id) + '/state?vault=' + encodeURIComponent(this.vault),
-          { method: 'PUT', body: JSON.stringify({ state }) }
-        );
-        if (this.selectedMemory && this.selectedMemory.id === id) {
-          this.selectedMemory = { ...this.selectedMemory, state };
-        }
-        this.addNotification('success', '生命周期状态已更新为 ' + state);
-      } catch (e) {
-        this.addNotification('error', '状态更新失败：' + (e?.message || '未知错误'));
-      }
-    },
-
-    async probeOllama() {
-      if (this.pluginCfg.ollamaChecking) return;
-      this.pluginCfg.ollamaChecking = true;
-      try {
-        const r = await fetch('http://localhost:11434/api/tags', { signal: AbortSignal.timeout(3000) });
-        if (r.ok) {
-          const data = await r.json();
-          const models = (data.models || []).map(m => m.name);
-          this.pluginCfg.ollamaModels = models;
-          this.pluginCfg.ollamaEmbedModels = models.filter(m => m.toLowerCase().includes('embed'));
-          this.pluginCfg.ollamaDetected = true;
-          if (models.length) {
-            const embedList = this.pluginCfg.ollamaEmbedModels.length
-              ? this.pluginCfg.ollamaEmbedModels : models;
-            if (!embedList.includes(this.pluginCfg.embedOllamaModel)) {
-              this.pluginCfg.embedOllamaModel = embedList[0];
-            }
-            const llmList = models.filter(m => !m.toLowerCase().includes('embed'));
-            const enrichList = llmList.length ? llmList : models;
-            if (!enrichList.includes(this.pluginCfg.enrichOllamaModel)) {
-              this.pluginCfg.enrichOllamaModel = enrichList[0];
-            }
-          }
-        } else {
-          this.pluginCfg.ollamaDetected = false;
-        }
-      } catch {
-        this.pluginCfg.ollamaDetected = false;
-      }
-      this.pluginCfg.ollamaChecking = false;
-    },
-
-    // ── Explain Score ──────────────────────────────────────────────────────
-    async explainScore(engramId) {
-      if (!this.searchQuery.trim()) return;
-      this.explainModal = { show: true, data: null, loading: true };
-      try {
-        const data = await this.apiCall('/api/explain?vault=' + encodeURIComponent(this.vault), {
-          method: 'POST',
-          body: JSON.stringify({
-            engram_id: engramId,
-            query: [this.searchQuery.trim()],
-          }),
-        });
-        this.explainModal = { show: true, data, loading: false };
-      } catch (err) {
-        this.explainModal = { show: false, data: null, loading: false };
-        this.addNotification('error', '解释失败：' + err.message);
-      }
-    },
-
-    closeExplainModal() {
-      this.explainModal = { show: false, data: null, loading: false };
-    },
-
-    // ── Multi-select / Consolidate ─────────────────────────────────────────
-    toggleMultiSelect() {
-      this.multiSelectMode = !this.multiSelectMode;
-      if (!this.multiSelectMode) {
-        this.selectedMemoryIds = [];
-      }
-    },
-
-    toggleMemorySelection(id) {
-      const idx = this.selectedMemoryIds.indexOf(id);
-      if (idx === -1) {
-        this.selectedMemoryIds.push(id);
-      } else {
-        this.selectedMemoryIds.splice(idx, 1);
-      }
-    },
-
-    openConsolidate() {
-      if (this.selectedMemoryIds.length < 2) {
-        this.addNotification('error', '请至少选择 2 条记忆进行整合');
-        return;
-      }
-      // Pre-fill with combined content from selected memories
-      const selected = this.memories.filter(m => this.selectedMemoryIds.includes(m.id));
-      const combined = selected.map(m => (m.concept ? '[' + m.concept + ']\n' : '') + m.content).join('\n\n---\n\n');
-      this.consolidateModal = { show: true, mergedContent: combined };
-    },
-
-    async submitConsolidate() {
-      if (!this.consolidateModal.mergedContent.trim()) {
-        this.addNotification('error', '合并内容不能为空');
-        return;
-      }
-      try {
-        const data = await this.apiCall('/api/consolidate?vault=' + encodeURIComponent(this.vault), {
-          method: 'POST',
-          body: JSON.stringify({
-            ids: this.selectedMemoryIds,
-            merged_content: this.consolidateModal.mergedContent.trim(),
-          }),
-        });
-        this.consolidateModal = { show: false, mergedContent: '' };
-        this.selectedMemoryIds = [];
-        this.multiSelectMode = false;
-        this.addNotification('success', '记忆已整合（新 ID：' + data.id.slice(0, 8) + '…）');
-        await this.loadMemories();
-      } catch (err) {
-        this.addNotification('error', '整合失败：' + err.message);
-      }
-    },
-
-    // ── Decide ─────────────────────────────────────────────────────────────
-    openDecideModal() {
-      const evidenceIds = this.selectedMemoryIds.length > 0
-        ? this.selectedMemoryIds.join('\n')
-        : '';
-      this.decideModal = { show: true, decision: '', rationale: '', alternatives: '', evidenceIds };
-    },
-
-    async submitDecide() {
-      if (!this.decideModal.decision.trim()) {
-        this.addNotification('error', '必须填写决策内容');
-        return;
-      }
-      const alternatives = this.decideModal.alternatives
-        .split('\n')
-        .map(s => s.trim())
-        .filter(Boolean);
-      const evidenceIds = this.decideModal.evidenceIds
-        .split('\n')
-        .map(s => s.trim())
-        .filter(Boolean);
-      try {
-        const data = await this.apiCall('/api/decide?vault=' + encodeURIComponent(this.vault), {
-          method: 'POST',
-          body: JSON.stringify({
-            decision: this.decideModal.decision.trim(),
-            rationale: this.decideModal.rationale.trim(),
-            alternatives,
-            evidence_ids: evidenceIds,
-          }),
-        });
-        this.decideModal = { show: false, decision: '', rationale: '', alternatives: '', evidenceIds: '' };
-        this.addNotification('success', '决策已记录（ID：' + data.id.slice(0, 8) + '…）');
-        await this.loadMemories();
-      } catch (err) {
-        this.addNotification('error', '记录决策失败：' + err.message);
-      }
     },
   }));
 });

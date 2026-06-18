@@ -1,0 +1,43 @@
+package mcp
+
+func AllToolDefinitions() []ToolDefinition {
+	base := map[string]any{"type": "object", "properties": map[string]any{}}
+	return []ToolDefinition{
+		{Name: "muninn_remember", Description: "Store a new piece of information (engram) in long-term memory.", InputSchema: base},
+		{Name: "muninn_remember_batch", Description: "Store multiple memories at once.", InputSchema: base},
+		{Name: "muninn_recall", Description: "Search long-term memory using semantic context.", InputSchema: base},
+		{Name: "muninn_read", Description: "Fetch a single memory by its ID.", InputSchema: base},
+		{Name: "muninn_forget", Description: "Soft-delete a memory.", InputSchema: base},
+		{Name: "muninn_link", Description: "Create or strengthen an association between two memories.", InputSchema: base},
+		{Name: "muninn_contradictions", Description: "Check for known contradictions in this vault.", InputSchema: base},
+		{Name: "muninn_status", Description: "Get health and capacity statistics for the vault.", InputSchema: base},
+		{Name: "muninn_evolve", Description: "Update a memory with new information.", InputSchema: base},
+		{Name: "muninn_consolidate", Description: "Merge multiple related memories into one.", InputSchema: base},
+		{Name: "muninn_session", Description: "Get a summary of recent memory activity since a timestamp.", InputSchema: base},
+		{Name: "muninn_decide", Description: "Record a decision with rationale and supporting evidence.", InputSchema: base},
+		{Name: "muninn_restore", Description: "Recover a soft-deleted memory within recovery window.", InputSchema: base},
+		{Name: "muninn_traverse", Description: "Explore the memory graph by following associations.", InputSchema: base},
+		{Name: "muninn_explain", Description: "Show score breakdown for a specific memory.", InputSchema: base},
+		{Name: "muninn_state", Description: "Transition a memory lifecycle state.", InputSchema: base},
+		{Name: "muninn_list_deleted", Description: "List recoverable soft-deleted memories.", InputSchema: base},
+		{Name: "muninn_retry_enrich", Description: "Re-queue a memory for enrichment processing.", InputSchema: base},
+		{Name: "muninn_guide", Description: "Get instructions on how to use MuninnDB effectively.", InputSchema: base},
+		{Name: "muninn_where_left_off", Description: "Surface what was being worked on in last session.", InputSchema: base},
+		{Name: "muninn_find_by_entity", Description: "Return all memories that mention a named entity.", InputSchema: base},
+		{Name: "muninn_entity_state", Description: "Set lifecycle state of a named entity.", InputSchema: base},
+		{Name: "muninn_entity_state_batch", Description: "Set lifecycle state for multiple entities.", InputSchema: base},
+		{Name: "muninn_remember_tree", Description: "Store a nested hierarchy as linked engrams.", InputSchema: base},
+		{Name: "muninn_recall_tree", Description: "Retrieve the complete ordered hierarchy from root.", InputSchema: base},
+		{Name: "muninn_entity_clusters", Description: "Return entity pairs that frequently co-occur.", InputSchema: base},
+		{Name: "muninn_export_graph", Description: "Export entity relationship graph for a vault.", InputSchema: base},
+		{Name: "muninn_add_child", Description: "Add a single child node to an existing parent.", InputSchema: base},
+		{Name: "muninn_similar_entities", Description: "Find likely duplicate entity names by similarity.", InputSchema: base},
+		{Name: "muninn_merge_entity", Description: "Merge one entity into another canonical entity.", InputSchema: base},
+		{Name: "muninn_replay_enrichment", Description: "Re-run enrichment pipeline for missing stages.", InputSchema: base},
+		{Name: "muninn_provenance", Description: "Return ordered audit trail for an engram.", InputSchema: base},
+		{Name: "muninn_entity_timeline", Description: "Return chronological timeline for an entity.", InputSchema: base},
+		{Name: "muninn_feedback", Description: "Record explicit feedback on an engram.", InputSchema: base},
+		{Name: "muninn_entity", Description: "Return aggregate view for a named entity.", InputSchema: base},
+		{Name: "muninn_entities", Description: "List entities in a vault.", InputSchema: base},
+	}
+}
